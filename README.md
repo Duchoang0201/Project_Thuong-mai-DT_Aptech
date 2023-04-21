@@ -34,4 +34,8 @@ Sử dụng git:
     
     git pull
     
-    git merge main
+     then ---> 
+        git branch
+        git checkout 'Branch-name'
+        git pull
+        git merge main
