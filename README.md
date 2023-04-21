@@ -29,3 +29,7 @@ Sử dụng git:
     git push --set-upstream origin 'Branch-name'
 
 . Merge and pull code from 'Main'
+
+    git branch
+
+    git merge main
