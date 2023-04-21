@@ -31,5 +31,7 @@ Sử dụng git:
 . Merge and pull code from 'Main'
 
     git branch
-
+    
+    git pull
+    
     git merge main
