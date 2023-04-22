@@ -899,6 +899,7 @@ const ProductsCRUD = () => {
       </Modal>
       {/* List and function Product */}
       <Table
+        tableLayout="auto"
         className="container"
         rowKey="id"
         columns={columns}
