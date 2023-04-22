@@ -3,18 +3,16 @@ import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 
+interface isLogin {
+  email: string;
+  password: string;
+}
 export const useAuthStore = create(
   devtools(
     persist(
       (set, get) => ({
         auth: null,
-        login: async ({
-          email,
-          password,
-        }: {
-          email: string;
-          password: string;
-        }) => {
+        login: async ({ email, password }: isLogin) => {
           try {
             const response = await axios.post(
               "http://localhost:9000/employees/login",
