@@ -19,7 +19,7 @@ Sử dụng git: (necessary)
 
 . Switch branch:
 
-    git check 'Branch-name'
+    git checkout 'Branch-name'
 
 . push code from individual branch
 
