@@ -2,6 +2,7 @@ import {
   ClearOutlined,
   DeleteOutlined,
   EditOutlined,
+  PlusCircleOutlined,
   SearchOutlined,
 } from "@ant-design/icons";
 import {
@@ -15,11 +16,39 @@ import {
   Select,
   Space,
   Table,
+  Typography,
 } from "antd";
 import Search from "antd/es/input/Search";
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 
+interface Product {
+  _id: string;
+  id: string;
+  name: string;
+  price: number;
+  description: string;
+  category: {
+    _id: string;
+    name: string;
+    description: string;
+    id: number;
+  };
+  image: string;
+  discount: number;
+  stock: number;
+  categoryId: string;
+  supplierId: string;
+  supplier: {
+    _id: string;
+    id: number;
+    name: string;
+    email: string;
+    phoneNumber: string;
+    address: string;
+  };
+  total: number;
+}
 const ProductsCRUD = () => {
   const API_URL = "http://localhost:9000/products";
   const [categories, setCategories] = useState<Array<any>>([]);
@@ -31,21 +60,48 @@ const ProductsCRUD = () => {
   const [productsFilter, setProductsFilter] = useState(API_URL);
 
   const [open, setOpen] = useState(false);
+  const [openCreate, setOpenCreate] = useState(false);
+  const [deleteItem, setDeleteItem] = useState<Product>();
+
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [updateId, setUpdateId] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const [updateForm] = Form.useForm();
+  const [createForm] = Form.useForm();
   const [inforPrice] = Form.useForm();
   const [inforDiscount] = Form.useForm();
   const [inforStock] = Form.useForm();
 
-  const handleDelete = (recordId: any) => {
+  //Handle Create a Data
+  const handleCreate = (record: any) => {
+    // console.log(record);
+
     axios
-      .delete(API_URL + "/" + recordId)
+      .post(API_URL, record)
+      .then((res) => {
+        console.log(res);
+        setRefresh((f) => f + 1);
+        setOpenCreate(false);
+        createForm.resetFields();
+        message.success("Create a product successFully!!", 1.5);
+      })
+      .catch((err) => {
+        console.log(err.response.data.message);
+        // err.response.data.errors.map((item: any, index: any) => {
+        //   message.error(`${item}`, 5);
+        // });
+      });
+  };
+
+  //handle Delete Data
+  const handleDelete = (record: any) => {
+    axios
+      .delete(API_URL + "/" + record._id)
       .then((res) => {
         setRefresh((f) => f + 1);
+        setOpenDeleteConfirm(false);
         setProductsFilter((f) => f + 1);
-
-        message.success("Delete a product successFully!!", 1.5);
+        message.success("Delete a product successFully!!", 3);
       })
       .catch((err) => {
         console.log(err);
@@ -58,7 +114,7 @@ const ProductsCRUD = () => {
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
         setProductsFilter((f) => f + 1);
-        message.success(`Update product ${updateId} successFully!!`, 1.5);
+        message.success(`Update product ${record.name} successFully!!`, 3);
         setOpen(false);
       })
       .catch((err) => {
@@ -166,14 +222,14 @@ const ProductsCRUD = () => {
   //CALL API PRODUCT FILLTER
   const URL_FILTER = `http://localhost:9000/products?${
     productName && `&productName=${productName}`
-  }${supplierId && `&supplierId = ${supplierId}`}${
-    categoryId && `&categoryId = ${categoryId}`
-  }${fromPrice && `&fromPrice = ${fromPrice}`}${
+  }${supplierId && `&supplierId=${supplierId}`}${
+    categoryId && `&categoryId=${categoryId}`
+  }${fromPrice && `&fromPrice=${fromPrice}`}${
     toPrice && `&toPrice=${toPrice}`
-  }${fromDiscount && `&fromDiscount = ${fromDiscount}`}${
-    toDiscount && `&toDiscount = ${toDiscount}`
-  }${fromStock && `&fromStock = ${fromStock}`}${
-    toStock && `&toStock = ${toStock}`
+  }${fromDiscount && `&fromDiscount=${fromDiscount}`}${
+    toDiscount && `&toDiscount=${toDiscount}`
+  }${fromStock && `&fromStock=${fromStock}`}${
+    toStock && `&toStock=${toStock}`
   }${skip ? `&skip=${skip}` : ""}&limit=${10}`;
   console.log("««««« URL_FILTER »»»»»", URL_FILTER);
   useEffect(() => {
@@ -621,7 +677,10 @@ const ProductsCRUD = () => {
           <Button
             danger
             icon={<DeleteOutlined />}
-            onClick={() => handleDelete(record._id)}
+            onClick={() => {
+              setDeleteItem(record);
+              setOpenDeleteConfirm(true);
+            }}
           >
             Delete
           </Button>
@@ -630,29 +689,40 @@ const ProductsCRUD = () => {
       filterDropdown: () => {
         return (
           <>
-            <div className="d-flex flex-row justify-content-between">
-              <span style={{ paddingTop: "5px" }}>Clear All </span>
+            <Space direction="vertical">
               <Button
+                style={{ width: "150px" }}
                 onClick={() => {
                   setSupplierId("");
                   setProductName("");
                   setCategoryId("");
                   //Price
-                  setFromPrice("");
-                  setToPrice("");
+                  // setFromPrice("");
+                  // setToPrice("");
                   inforPrice.resetFields();
                   //Discount
-                  setFromDiscount("");
-                  setToDiscount("");
+                  // setFromDiscount("");
+                  // setToDiscount("");
                   inforDiscount.resetFields();
                   //Stock
-                  setFromStock("");
-                  setToStock("");
+                  // setFromStock("");
+                  // setToStock("");
                   inforStock.resetFields();
                 }}
                 icon={<ClearOutlined />}
-              />
-            </div>
+              >
+                Clear filter
+              </Button>
+              <Button
+                style={{ width: "150px" }}
+                onClick={() => {
+                  setOpenCreate(true);
+                }}
+                icon={<PlusCircleOutlined />}
+              >
+                Add product
+              </Button>
+            </Space>
             {/* <div>
               <InputNumber
                 min={1}
@@ -667,9 +737,167 @@ const ProductsCRUD = () => {
       },
     },
   ];
-
+  const { Text } = Typography;
   return (
     <>
+      {/* Modal Create A product */}
+      <Modal
+        title={`Create Product `}
+        open={openCreate}
+        onCancel={() => {
+          setOpenCreate(false);
+        }}
+        onOk={() => {
+          createForm.submit();
+          setRefresh((f) => f + 1);
+        }}
+        okText="Submit"
+      >
+        <Form
+          className="container px-5"
+          form={createForm}
+          name="createForm"
+          onFinish={handleCreate}
+        >
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="Category"
+            name="categoryId"
+            rules={[
+              {
+                required: true,
+                message: "Please enter Category Name",
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a person"
+              optionFilterProp="children"
+              onSearch={onSearchCategory}
+              filterOption={(input: any, option: any) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={categories.map((item: any, index: any) => {
+                return {
+                  label: `${item.name}`,
+                  value: item._id,
+                };
+              })}
+            />
+          </Form.Item>{" "}
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="Suppliers"
+            name="supplierId"
+            rules={[
+              {
+                required: true,
+                message: "Please enter Category Name",
+              },
+            ]}
+          >
+            <Select
+              showSearch
+              placeholder="Select a person"
+              optionFilterProp="children"
+              onSearch={onSearchCategory}
+              filterOption={(input: any, option: any) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={suppliers.map((item: any, index: any) => {
+                return {
+                  label: `${item.name}`,
+                  value: item._id,
+                };
+              })}
+            />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="Name"
+            name="name"
+            rules={[
+              {
+                required: true,
+                message: "Please enter Product Name",
+              },
+            ]}
+          >
+            <Input />
+          </Form.Item>{" "}
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            name="price"
+            label="Price"
+            rules={[{ required: true, message: "Please enter Price" }]}
+          >
+            <InputNumber min={1} />
+          </Form.Item>{" "}
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            name="discount"
+            label="Discount"
+            rules={[
+              {
+                required: true,
+                message: "Please enter Discount",
+              },
+            ]}
+          >
+            <InputNumber min={1} max={75} />
+          </Form.Item>{" "}
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            name="stock"
+            label="Stock"
+            rules={[{ required: true, message: "Please enter Stock" }]}
+          >
+            <InputNumber min={1} />
+          </Form.Item>{" "}
+        </Form>
+      </Modal>
+      {/* List and function Product */}
       <Table
         className="container"
         rowKey="id"
@@ -684,8 +912,22 @@ const ProductsCRUD = () => {
         {" "}
       </Table>
 
+      {/* Modal confirm Delte */}
       <Modal
-        title={`Update Product `}
+        open={openDeleteConfirm}
+        onOk={() => handleDelete(deleteItem)}
+        okText="Delete"
+        okType="danger"
+        onCancel={() => setOpenDeleteConfirm(false)}
+      >
+        <h5>Are you sure to delete?</h5>
+        <strong>Product : </strong>
+        <Text type="danger">{deleteItem?.name}</Text>
+      </Modal>
+
+      {/* Modal Update */}
+      <Modal
+        title={`Update Product:  `}
         open={open}
         onCancel={() => {
           setOpen(false);
@@ -702,6 +944,12 @@ const ProductsCRUD = () => {
           onFinish={handleUpdate}
         >
           <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
             hasFeedback
             label="Category"
             name="categoryId"
@@ -716,8 +964,6 @@ const ProductsCRUD = () => {
               showSearch
               placeholder="Select a person"
               optionFilterProp="children"
-              // onChange={onChangeCategory}
-              // onSearch={onSearchCategory}
               filterOption={(input: any, option: any) =>
                 (option?.label ?? "")
                   .toLowerCase()
@@ -732,6 +978,12 @@ const ProductsCRUD = () => {
             />
           </Form.Item>{" "}
           <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
             hasFeedback
             label="Suppliers"
             name="supplierId"
@@ -746,8 +998,6 @@ const ProductsCRUD = () => {
               showSearch
               placeholder="Select a person"
               optionFilterProp="children"
-              // onChange={onChangeSupplier}
-              // onSearch={onSearchCategory}
               filterOption={(input: any, option: any) =>
                 (option?.label ?? "")
                   .toLowerCase()
@@ -762,6 +1012,12 @@ const ProductsCRUD = () => {
             />
           </Form.Item>
           <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
             hasFeedback
             label="Name"
             name="name"
@@ -775,6 +1031,12 @@ const ProductsCRUD = () => {
             <Input />
           </Form.Item>{" "}
           <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
             hasFeedback
             name="price"
             label="Price"
@@ -783,6 +1045,12 @@ const ProductsCRUD = () => {
             <InputNumber min={1} />
           </Form.Item>{" "}
           <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
             hasFeedback
             name="discount"
             label="Discount"
@@ -796,6 +1064,12 @@ const ProductsCRUD = () => {
             <InputNumber min={1} max={75} />
           </Form.Item>{" "}
           <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
             hasFeedback
             name="stock"
             label="Stock"
@@ -805,6 +1079,8 @@ const ProductsCRUD = () => {
           </Form.Item>{" "}
         </Form>
       </Modal>
+
+      {/* Pagination */}
       <Pagination
         className="container text-end"
         onChange={(e) => slideCurrent(e)}

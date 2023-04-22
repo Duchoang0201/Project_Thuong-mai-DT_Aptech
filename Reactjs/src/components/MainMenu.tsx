@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import {
   ExportOutlined,
   HomeOutlined,
@@ -7,14 +7,11 @@ import {
   UserOutlined,
   UsergroupAddOutlined,
 } from "@ant-design/icons";
-import type { MenuProps } from "antd";
 import { Menu } from "antd";
 import { useNavigate } from "react-router-dom";
+import { useAuthStore } from "../hooks/useAuthStore";
 
-type Props = {
-  setIsLogin: (value: boolean) => void; //setIsLogin(true)
-};
-const items: MenuProps["items"] = [
+const items = [
   {
     label: "Home",
     key: "home",
@@ -27,23 +24,23 @@ const items: MenuProps["items"] = [
     icon: <SettingOutlined />,
     children: [
       {
-        key: "/categories",
+        key: "management/categories",
         label: "Categories",
       },
       {
-        key: "/suppliers",
+        key: "management/suppliers",
         label: "Suppliers",
       },
       {
-        key: "/customers",
+        key: "management/customers",
         label: "Customers",
       },
       {
-        key: "/employees",
+        key: "management/employees",
         label: "Employees",
       },
       {
-        key: "/products",
+        key: "management/products",
         label: "Products",
       },
     ],
@@ -72,39 +69,37 @@ const items: MenuProps["items"] = [
         key: "/logout",
         label: "Logout",
         icon: <ExportOutlined />,
+        render: () => {},
       },
     ],
   },
 ];
 
-const Navigation = (props: Props) => {
-  const { setIsLogin } = props;
+const MainMenu = () => {
   const navigate = useNavigate();
+  const { logout } = useAuthStore((state: any) => state);
+
+  //   const [current, setCurrent] = useState("category");
   const onMenuClick = (value: any) => {
-    console.log(value.key);
     if (value.key === "/logout") {
-      setIsLogin(true);
+      logout();
+      navigate("/");
     } else {
-      navigate(value.key);
+      navigate("/" + value.key);
     }
 
-    setCurrent(value.key);
+    // setCurrent(value.key);
   };
-  const [current, setCurrent] = useState("category");
-
-  // const onClick: MenuProps["onClick"] = (e) => {
-  //   console.log("click ", e);
-  //   setCurrent(e.key);
-  // };
 
   return (
-    <Menu
-      onClick={onMenuClick}
-      selectedKeys={[current]}
-      mode="horizontal"
-      items={items}
-    />
+    // <Menu
+    //   onClick={onMenuClick}
+    //   selectedKeys={[current]}
+    //   mode="horizontal"
+    //   items={items}
+    // />
+    <Menu theme="dark" items={items} onClick={(e) => onMenuClick(e)} />
   );
 };
 
-export default Navigation;
+export default MainMenu;

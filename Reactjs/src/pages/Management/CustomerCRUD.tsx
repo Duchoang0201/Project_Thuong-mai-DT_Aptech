@@ -2,7 +2,7 @@ import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
 import {
   Button,
   DatePicker,
-  DatePickerProps,
+  // DatePickerProps,
   Form,
   Input,
   message,
@@ -42,9 +42,9 @@ const CustomerCRUD = () => {
       });
   }, [refresh]);
 
-  const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-    console.log(date, dateString);
-  };
+  // const onChange: DatePickerProps["onChange"] = (date, dateString) => {
+  //   console.log(date, dateString);
+  // };
 
   //Create a Data
   const handleCreate = (record: any) => {
