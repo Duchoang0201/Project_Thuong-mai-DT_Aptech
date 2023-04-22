@@ -44,79 +44,62 @@ Sử dụng git: (necessary)
     git rm file1.txt
     git commit -m "remove file1.txt"
 
-    MORE:
+. General
 
+    Initialize Git: git init
 
-    General
+    Get everything ready to commit: git add .
 
-Initialize Git: git init
+    Get custom file ready to commit: git add index.html
 
-Get everything ready to commit: git add .
+    Commit changes: git commit -m "Message"
 
-Get custom file ready to commit: git add index.html
+    Commit changes with title and description: git commit -m "Title" -m "Description..."
 
-Commit changes: git commit -m "Message"
+    Add and commit in one step: git commit -am "Message"
 
-Commit changes with title and description: git commit -m "Title" -m "Description..."
+    Remove files from Git: git rm index.html
 
-Add and commit in one step: git commit -am "Message"
+    Update all changes: git add -u
 
-Remove files from Git: git rm index.html
+    Remove file but do not track anymore: git rm --cached index.html
 
-Update all changes: git add -u
+    Move or rename files: git mv index.html dir/index_new.html
 
-Remove file but do not track anymore: git rm --cached index.html
+    Undo modifications (restore files from latest commited version): git checkout -- index.html
 
-Move or rename files: git mv index.html dir/index_new.html
+    Restore file from a custom commit (in current branch): git checkout 6eb715d -- index.html
 
-Undo modifications (restore files from latest commited version): git checkout -- index.html
+. Update & Delete
 
-Restore file from a custom commit (in current branch): git checkout 6eb715d -- index.html
+    Test-Delete untracked files: git clean -n
 
-    Reset
+    Delete untracked files (not staging): git clean -f
 
-Go back to commit: git revert 073791e7dd71b90daa853b2c5acc2c925f02dbc6
+    Unstage (undo adds): git reset HEAD index.html
 
-Soft reset (move HEAD only; neither staging nor working dir is changed): git reset --soft 073791e7dd71b90daa853b2c5acc2c925f02dbc6
+    Update most recent commit (also update the commit message): git commit --amend -m "New Message"
 
-Undo latest commit: git reset --soft HEAD~
+. Merge
 
-Mixed reset (move HEAD and change staging to match repo; does not affect working dir): git reset --mixed 073791e7dd71b90daa853b2c5acc2c925f02dbc6
+    True merge (fast forward): git merge branchname
 
-Hard reset (move HEAD and change staging dir and working dir to match repo): git reset --hard 073791e7dd71b90daa853b2c5acc2c925f02dbc6
+    Merge to master (only if fast forward): git merge --ff-only branchname
 
-Hard reset of a single file (@ is short for HEAD): git checkout @ -- index.html
+    Merge to master (force a new commit): git merge --no-ff branchname
 
-    Update & Delete
+    Stop merge (in case of conflicts): git merge --abort
 
-Test-Delete untracked files: git clean -n
+    Stop merge (in case of conflicts): git reset --merge // prior to v1.7.4
 
-Delete untracked files (not staging): git clean -f
+    Undo local merge that hasn't been pushed yet: git reset --hard origin/master
 
-Unstage (undo adds): git reset HEAD index.html
+    Merge only one specific commit: git cherry-pick 073791e7
 
-Update most recent commit (also update the commit message): git commit --amend -m "New Message"
+    Rebase: git checkout branchname » git rebase master or: git merge master branchname (The rebase moves all of the commits in master onto the tip of branchname.)
 
-     Merge
+    Cancel rebase: git rebase --abort
 
-True merge (fast forward): git merge branchname
+    Squash multiple commits into one: git rebase -i HEAD~3 (source)
 
-Merge to master (only if fast forward): git merge --ff-only branchname
-
-Merge to master (force a new commit): git merge --no-ff branchname
-
-Stop merge (in case of conflicts): git merge --abort
-
-Stop merge (in case of conflicts): git reset --merge // prior to v1.7.4
-
-Undo local merge that hasn't been pushed yet: git reset --hard origin/master
-
-Merge only one specific commit: git cherry-pick 073791e7
-
-Rebase: git checkout branchname » git rebase master or: git merge master branchname (The rebase moves all of the commits in master onto the tip of branchname.)
-
-Cancel rebase: git rebase --abort
-
-Squash multiple commits into one: git rebase -i HEAD~3 (source)
-
-Squash-merge a feature branch (as one commit): git merge --squash branchname (commit afterwards)
+    Squash-merge a feature branch (as one commit): git merge --squash branchname (commit afterwards)
