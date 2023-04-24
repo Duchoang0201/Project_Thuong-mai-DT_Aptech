@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Column } from "@ant-design/plots";
 import { Bar } from "@ant-design/plots";
+import { Col, Row } from "antd";
 
 const HomePage = () => {
   const [data1, setData1] = useState([]);
@@ -90,14 +91,26 @@ const HomePage = () => {
   };
   return (
     <>
-      <h1>Employee's total sales</h1>
-      <Column {...config1} />
-
-      <h1>Number of goods in each category</h1>
-      <Bar {...config2} />
-
-      <h1>Number of goods in each supplier</h1>
-      <Bar {...config3} />
+      <Row>
+        <Col span={24}>
+          <h4> Best employee's total sales</h4>
+          <Column {...config1} />
+        </Col>
+      </Row>
+      <Row>
+        <Col span={24}>
+          {" "}
+          <h4>Number of goods in each category</h4>
+          <Bar {...config2} />
+        </Col>
+      </Row>
+      <Row>
+        <Col span={24}>
+          {" "}
+          <h4>Number of goods in each supplier</h4>
+          <Bar {...config3} />
+        </Col>
+      </Row>
     </>
   );
 };

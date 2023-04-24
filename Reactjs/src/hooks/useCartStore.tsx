@@ -7,7 +7,6 @@ interface isLogin {
   email: string;
   password: string;
 }
-
 export const useAuthStore = create(
   devtools(
     persist(

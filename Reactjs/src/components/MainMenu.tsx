@@ -1,7 +1,8 @@
 import React from "react";
-import {
+import Icon, {
   ExportOutlined,
   HomeOutlined,
+  MoreOutlined,
   PlusOutlined,
   SettingOutlined,
   UserOutlined,
@@ -13,9 +14,15 @@ import { useAuthStore } from "../hooks/useAuthStore";
 
 const items = [
   {
-    label: "Home",
-    key: "home",
+    label: "Dashboard",
+    key: "darhboard",
     icon: <HomeOutlined />,
+    children: [
+      {
+        key: "darhboard/home",
+        label: "Home",
+      },
+    ],
   },
 
   {
@@ -35,41 +42,29 @@ const items = [
         key: "management/customers",
         label: "Customers",
       },
-      {
-        key: "management/employees",
-        label: "Employees",
-      },
+
       {
         key: "management/products",
         label: "Products",
       },
     ],
   },
-  {
-    label: "Products",
-    key: "productCreate",
-    icon: <PlusOutlined />,
-  },
-  {
-    label: "Orders",
-    key: "orders",
-    icon: <HomeOutlined />,
-  },
+
   {
     label: "Account",
-    key: "/infomation",
+    key: "/account",
     icon: <UsergroupAddOutlined />,
     children: [
       {
-        key: "/infomation",
-        label: "Infomation",
+        key: "account/information",
+        label: "Information",
         icon: <UserOutlined />,
       },
       {
-        key: "/logout",
+        key: "account/logout",
         label: "Logout",
         icon: <ExportOutlined />,
-        render: () => {},
+        // render: () => {},
       },
     ],
   },
@@ -81,7 +76,8 @@ const MainMenu = () => {
 
   //   const [current, setCurrent] = useState("category");
   const onMenuClick = (value: any) => {
-    if (value.key === "/logout") {
+    console.log(value);
+    if (value.key === "account/logout") {
       logout();
       navigate("/");
     } else {
@@ -98,7 +94,13 @@ const MainMenu = () => {
     //   mode="horizontal"
     //   items={items}
     // />
-    <Menu theme="dark" items={items} onClick={(e) => onMenuClick(e)} />
+    <Menu
+      theme="dark"
+      mode="inline"
+      defaultSelectedKeys={["home"]}
+      items={items}
+      onClick={(e) => onMenuClick(e)}
+    />
   );
 };
 
