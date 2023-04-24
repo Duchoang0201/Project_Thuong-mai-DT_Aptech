@@ -9,16 +9,16 @@ import {
   Divider,
   Form,
   Input,
+  Popconfirm,
   Row,
   Typography,
+  message,
 } from "antd";
-import Meta from "antd/es/card/Meta";
 import {
   EditFilled,
   HomeOutlined,
   MailOutlined,
   PhoneOutlined,
-  SearchOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import axios from "axios";
@@ -30,21 +30,16 @@ const { Text } = Typography;
 //Component
 
 const Information = (props: Props) => {
+  const [refresh, setRefresh] = useState(0);
   const [user, setUser] = useState<any>();
   const tabListNoTitle = [
-    // {
-    //   key: "article",
-    //   tab: "article",
-    // },
-    // {
-    //   key: "app",
-    //   tab: "General",
-    // },
     {
       key: "setting",
-      tab: "Setting",
+      tab: "Profile setting",
     },
   ];
+  const [selectItem, setSelectItem] = useState("0");
+  const [updateData, setUpdateData] = useState<any>();
   const onChange = (key: string | string[]) => {
     console.log(key);
   };
@@ -56,127 +51,165 @@ const Information = (props: Props) => {
     axios
       .get(E_URL)
       .then((res) => {
-        setUser(res.data.results);
+        setUser(res.data.results[0]);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [E_URL, refresh]);
   const [updateForm] = Form.useForm();
 
   const handleUpdate = (record: any) => {
-    console.log(record);
+    const confirmData = { [selectItem]: updateData[selectItem] };
+    console.log("««««« confirmData »»»»»", confirmData);
+    updateForm.resetFields();
+    axios
+      .patch(`http://localhost:9000/employees/${auth.payload._id}`, confirmData)
+      .then((res) => {
+        console.log(res);
+        setRefresh((f) => f + 1);
+        message.success("Update a data successFully!!", 1.5);
+      })
+      .catch((err) => console.log(err));
   };
   const contentListNoTitle: Record<string, React.ReactNode> = {
-    article: <p>article content</p>,
-    app: <p>app content</p>,
     setting: (
       <Form
         className="container px-5"
         form={updateForm}
         name="updateForm"
-        onFinish={handleUpdate}
+        onFinish={setUpdateData}
       >
         <div>
-          <Collapse onChange={onChange}>
+          <Collapse accordion onChange={onChange}>
             <Panel header="First Name" key="1">
               <Form.Item name="firstName" noStyle>
                 <Input
                   style={{ width: 160 }}
-                  placeholder="Please input First Name"
+                  placeholder={`(${user?.firstName})`}
                 />
               </Form.Item>
-              <Button
-                style={{ width: "30px", right: "-4px" }}
-                type="primary"
-                htmlType="submit"
-                icon={<EditFilled />}
-              />
+              <Popconfirm
+                title="Edit profile"
+                description="Are you sure to edit this Fisrt Name?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={handleUpdate}
+              >
+                <Button
+                  style={{ width: "30px", right: "-4px" }}
+                  type="primary"
+                  htmlType="submit"
+                  icon={<EditFilled />}
+                  onClick={() => {
+                    setSelectItem("firstName");
+                  }}
+                />
+              </Popconfirm>
             </Panel>
             <Panel header="Last Name" key="2">
               <Form.Item name="lastName" noStyle>
                 <Input
                   style={{ width: 160 }}
-                  placeholder="Please input First Name"
+                  placeholder={`(${user?.lastName})`}
                 />
               </Form.Item>
-              <Button
-                style={{ width: "30px", right: "-4px" }}
-                type="primary"
-                htmlType="submit"
-                icon={<EditFilled />}
-              />
+              <Popconfirm
+                title="Edit profile"
+                description="Are you sure to edit this Last Name?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={handleUpdate}
+              >
+                <Button
+                  style={{ width: "30px", right: "-4px" }}
+                  type="primary"
+                  htmlType="submit"
+                  icon={<EditFilled />}
+                  onClick={() => {
+                    setSelectItem("lastName");
+                  }}
+                />
+              </Popconfirm>
             </Panel>
             <Panel header="Address" key="3">
               <Form.Item name="address" noStyle>
                 <Input
                   style={{ width: 160 }}
-                  placeholder="Please input Address"
+                  placeholder={`(${user?.address})`}
                 />
               </Form.Item>
-              <Button
-                style={{ width: "30px", right: "-4px" }}
-                type="primary"
-                htmlType="submit"
-                icon={<EditFilled />}
-              />
+              <Popconfirm
+                title="Edit profile"
+                description="Are you sure to edit this Address?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={handleUpdate}
+              >
+                <Button
+                  style={{ width: "30px", right: "-4px" }}
+                  type="primary"
+                  htmlType="submit"
+                  icon={<EditFilled />}
+                  onClick={() => {
+                    setSelectItem("address");
+                  }}
+                />
+              </Popconfirm>
             </Panel>
             <Panel header="Phone Number" key="4">
               <Form.Item name="phoneNumber" noStyle>
                 <Input
                   style={{ width: 160 }}
-                  placeholder="Please input Phone Number"
+                  placeholder={`(${user?.phoneNumber})`}
                 />
               </Form.Item>
-              <Button
-                style={{ width: "30px", right: "-4px" }}
-                type="primary"
-                htmlType="submit"
-                icon={<EditFilled />}
-              />
+              <Popconfirm
+                title="Edit profile"
+                description="Are you sure to edit this Phone Number?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={handleUpdate}
+              >
+                <Button
+                  style={{ width: "30px", right: "-4px" }}
+                  type="primary"
+                  htmlType="submit"
+                  icon={<EditFilled />}
+                  onClick={() => {
+                    setSelectItem("phoneNumber");
+                  }}
+                />
+              </Popconfirm>
             </Panel>
             <Panel header="User Name (Email)" key="5">
               <Form.Item name="email" noStyle>
                 <Input
                   style={{ width: 160 }}
-                  placeholder="Please input Email"
+                  placeholder={`(${user?.email})`}
                 />
               </Form.Item>
-              <Button
-                style={{ width: "30px", right: "-4px" }}
-                type="primary"
-                htmlType="submit"
-                icon={<EditFilled />}
-              />
-            </Panel>
-            <Panel header="Account Password" key="6">
-              <Form.Item name="password" noStyle>
-                <Input
-                  style={{ width: 160 }}
-                  placeholder="Please input Password"
+              <Popconfirm
+                title="Edit profile"
+                description="Are you sure to edit this User Name (Email)?"
+                okText="Yes"
+                cancelText="No"
+                onConfirm={handleUpdate}
+              >
+                <Button
+                  style={{ width: "30px", right: "-4px" }}
+                  type="primary"
+                  htmlType="submit"
+                  icon={<EditFilled />}
+                  onClick={() => {
+                    setSelectItem("email");
+                  }}
                 />
-              </Form.Item>
-              <Button
-                style={{ width: "30px", right: "-4px" }}
-                type="primary"
-                htmlType="submit"
-                icon={<EditFilled />}
-              />
+              </Popconfirm>
             </Panel>
           </Collapse>
         </div>
       </Form>
     ),
   };
-  updateForm.setFieldsValue(auth.payload);
-
-  //Function change Tab
-  const [activeTabKey, setActiveTabKey] = useState<string>("setting");
-  // const onTabChange = (key: string) => {
-  //   if (key === "setting") {
-  //     setActiveTabKey(key);
-  //   } else {
-  //     setActiveTabKey(key);
-  //   }
-  // };
 
   return (
     <>
@@ -185,14 +218,14 @@ const Information = (props: Props) => {
           <Card style={{ width: 300, marginTop: 16 }} loading={true}></Card>
         ) : (
           <Row>
-            <Col span={18} push={5}>
+            <Col span={18} push={6}>
               <Card
                 style={{ width: "100%" }}
                 tabList={tabListNoTitle}
-                activeTabKey={activeTabKey}
+                activeTabKey={"setting"}
                 // onTabChange={onTabChange}
               >
-                {contentListNoTitle[activeTabKey]}
+                {contentListNoTitle["setting"]}
               </Card>
             </Col>
             <Col span={5} pull={18}>
@@ -200,22 +233,21 @@ const Information = (props: Props) => {
                 <div className="text-center">
                   <Avatar size={64} icon={<UserOutlined />} />
                   <p className="py-2">
-                    {auth?.payload.firstName} {auth?.payload.lastName}
+                    {user.firstName} {user.lastName}
                   </p>
                 </div>
                 <div className="text-left">
                   {" "}
                   <p>
-                    <MailOutlined />{" "}
-                    <Text className="px-2">{auth?.payload.email}</Text>
+                    <MailOutlined /> <Text className="px-2">{user.email}</Text>
                   </p>
                   <p>
                     <PhoneOutlined />{" "}
-                    <Text className="px-2">{auth?.payload.phoneNumber}</Text>
+                    <Text className="px-2">{user.phoneNumber}</Text>
                   </p>
                   <p>
                     <HomeOutlined />{" "}
-                    <Text className="px-2">{auth?.payload.address}</Text>
+                    <Text className="px-2">{user.address}</Text>
                   </p>
                 </div>
 

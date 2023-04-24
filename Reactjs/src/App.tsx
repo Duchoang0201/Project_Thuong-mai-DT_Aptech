@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./hooks/useAuthStore";
-import { Layout, Button, theme, Menu, Breadcrumb } from "antd";
+import { Layout, Button, theme } from "antd";
 
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
+import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import numeral from "numeral";
 import "numeral/locales/vi";
 
@@ -19,7 +13,6 @@ import MainMenu from "./components/MainMenu";
 import HomePage from "./pages/HomePage";
 import CategoryCRUD from "./pages/Management/categoryCRUD";
 import ProductsCRUD from "./pages/Management/ProductsCRUD";
-import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 import CustomerCRUD from "./pages/Management/CustomerCRUD";
 import SupperliersCRUD from "./pages/Management/SupperliersCRUD";
 import Information from "./pages/Information";

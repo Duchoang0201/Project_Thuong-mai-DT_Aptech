@@ -17,7 +17,6 @@ import {
   Select,
   Space,
   Table,
-  Typography,
 } from "antd";
 import Search from "antd/es/input/Search";
 import axios from "axios";
@@ -64,7 +63,6 @@ const ProductsCRUD = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [deleteItem, setDeleteItem] = useState<Product>();
 
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   const [updateId, setUpdateId] = useState(0);
   const [refresh, setRefresh] = useState(0);
   const [updateForm] = Form.useForm();
@@ -74,7 +72,6 @@ const ProductsCRUD = () => {
   const [inforStock] = Form.useForm();
 
   //Text of Tyography:
-  const { Text } = Typography;
   //Handle Create a Data
   const handleCreate = (record: any) => {
     // console.log(record);
@@ -102,7 +99,6 @@ const ProductsCRUD = () => {
       .delete(API_URL + "/" + record._id)
       .then((res) => {
         setRefresh((f) => f + 1);
-        setOpenDeleteConfirm(false);
         setProductsFilter((f) => f + 1);
         message.success("Delete a product successFully!!", 3);
       })
@@ -698,7 +694,6 @@ const ProductsCRUD = () => {
           <Popconfirm
             okText="Delete"
             okType="danger"
-            onCancel={() => setOpenDeleteConfirm(false)}
             onConfirm={() => handleDelete(deleteItem)}
             title={"Are you sure to delete this product?"}
           >
@@ -707,7 +702,6 @@ const ProductsCRUD = () => {
               icon={<DeleteOutlined />}
               onClick={() => {
                 setDeleteItem(record);
-                setOpenDeleteConfirm(true);
               }}
             ></Button>
           </Popconfirm>
