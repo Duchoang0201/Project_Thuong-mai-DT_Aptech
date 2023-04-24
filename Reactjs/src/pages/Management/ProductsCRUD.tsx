@@ -13,6 +13,7 @@ import {
   message,
   Modal,
   Pagination,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -72,6 +73,8 @@ const ProductsCRUD = () => {
   const [inforDiscount] = Form.useForm();
   const [inforStock] = Form.useForm();
 
+  //Text of Tyography:
+  const { Text } = Typography;
   //Handle Create a Data
   const handleCreate = (record: any) => {
     // console.log(record);
@@ -173,7 +176,25 @@ const ProductsCRUD = () => {
     //   setProductsFilter((f) => f + 1);
     // }
   }, []);
+  // Clear all Filter
 
+  const handleClearFillter = () => {
+    setSupplierId("");
+    setProductName("");
+    setCategoryId("");
+    //Price
+    setFromPrice("");
+    setToPrice("");
+    inforPrice.resetFields();
+    //Discount
+    setFromDiscount("");
+    setToDiscount("");
+    inforDiscount.resetFields();
+    //Stock
+    setFromStock("");
+    setToStock("");
+    inforStock.resetFields();
+  };
   //SEARCH DEPEN ON NAME
   const [productName, setProductName] = useState("");
 
@@ -292,7 +313,7 @@ const ProductsCRUD = () => {
     axios
       .get("http://localhost:9000/suppliers")
       .then((res) => {
-        setSuppliers(res.data);
+        setSuppliers(res.data.results);
       })
       .catch((err) => console.log(err));
   }, [refresh]);
@@ -506,8 +527,8 @@ const ProductsCRUD = () => {
                       style={{ width: "30px", right: "-8px" }}
                       type="primary"
                       onClick={() => {
-                        setFromPrice("");
-                        setToPrice("");
+                        // setFromPrice("");
+                        // setToPrice("");
                         inforPrice.resetFields();
                       }}
                       icon={<ClearOutlined />}
@@ -674,16 +695,22 @@ const ProductsCRUD = () => {
           >
             Edit
           </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => {
-              setDeleteItem(record);
-              setOpenDeleteConfirm(true);
-            }}
+          <Popconfirm
+            okText="Delete"
+            okType="danger"
+            onCancel={() => setOpenDeleteConfirm(false)}
+            onConfirm={() => handleDelete(deleteItem)}
+            title={"Are you sure to delete this product?"}
           >
-            Delete
-          </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                setDeleteItem(record);
+                setOpenDeleteConfirm(true);
+              }}
+            ></Button>
+          </Popconfirm>
         </Space>
       ),
       filterDropdown: () => {
@@ -692,23 +719,7 @@ const ProductsCRUD = () => {
             <Space direction="vertical">
               <Button
                 style={{ width: "150px" }}
-                onClick={() => {
-                  setSupplierId("");
-                  setProductName("");
-                  setCategoryId("");
-                  //Price
-                  // setFromPrice("");
-                  // setToPrice("");
-                  inforPrice.resetFields();
-                  //Discount
-                  // setFromDiscount("");
-                  // setToDiscount("");
-                  inforDiscount.resetFields();
-                  //Stock
-                  // setFromStock("");
-                  // setToStock("");
-                  inforStock.resetFields();
-                }}
+                onClick={handleClearFillter}
                 icon={<ClearOutlined />}
               >
                 Clear filter
@@ -723,21 +734,11 @@ const ProductsCRUD = () => {
                 Add product
               </Button>
             </Space>
-            {/* <div>
-              <InputNumber
-                min={1}
-                max={10}
-                defaultValue={3}
-                onChange={(e: any) => setLimit(e)}
-              />
-              <Button style={{ paddingTop: "3px" }} icon={<SearchOutlined />} />
-            </div> */}
           </>
         );
       },
     },
   ];
-  const { Text } = Typography;
   return (
     <>
       {/* Modal Create A product */}
@@ -914,7 +915,7 @@ const ProductsCRUD = () => {
       </Table>
 
       {/* Modal confirm Delte */}
-      <Modal
+      {/* <Modal
         open={openDeleteConfirm}
         onOk={() => handleDelete(deleteItem)}
         okText="Delete"
@@ -924,7 +925,7 @@ const ProductsCRUD = () => {
         <h5>Are you sure to delete?</h5>
         <strong>Product : </strong>
         <Text type="danger">{deleteItem?.name}</Text>
-      </Modal>
+      </Modal> */}
 
       {/* Modal Update */}
       <Modal

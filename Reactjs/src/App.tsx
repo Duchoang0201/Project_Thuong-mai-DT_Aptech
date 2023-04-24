@@ -1,9 +1,16 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./hooks/useAuthStore";
-import { Layout } from "antd";
+import { Layout, Button, theme, Menu, Breadcrumb } from "antd";
 
+import {
+  MenuFoldOutlined,
+  MenuUnfoldOutlined,
+  UploadOutlined,
+  UserOutlined,
+  VideoCameraOutlined,
+} from "@ant-design/icons";
 import numeral from "numeral";
 import "numeral/locales/vi";
 
@@ -14,7 +21,8 @@ import CategoryCRUD from "./pages/Management/categoryCRUD";
 import ProductsCRUD from "./pages/Management/ProductsCRUD";
 import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 import CustomerCRUD from "./pages/Management/CustomerCRUD";
-import SupperliersCRUD from "./pages/SupperliersCRUD";
+import SupperliersCRUD from "./pages/Management/SupperliersCRUD";
+import Information from "./pages/Information";
 
 numeral.locale("vi");
 
@@ -23,7 +31,13 @@ const { Header, Sider, Content } = Layout;
 const App: React.FC = () => {
   const { auth } = useAuthStore((state: any) => state);
 
-  console.log(auth);
+  //Function reresh to clear local storage
+
+  const [collapsed, setCollapsed] = useState(false);
+  const {
+    token: { colorBgContainer },
+  } = theme.useToken();
+
   return (
     <>
       <div>
@@ -40,16 +54,63 @@ const App: React.FC = () => {
 
           {auth && (
             <Layout>
-              <Sider theme="dark" style={{ minHeight: "100vh" }}>
+              <Sider
+                trigger={null}
+                collapsible
+                collapsed={collapsed}
+                theme="dark"
+                style={{
+                  overflow: "auto",
+                  height: "100vh",
+                  position: "fixed",
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                }}
+              >
+                <div
+                  style={{
+                    height: 32,
+                    margin: 16,
+                    background: "rgba(255, 255, 255, 0.2)",
+                  }}
+                />
                 <MainMenu />
               </Sider>
-              <Layout>
-                <Header style={{ backgroundColor: "rgba(0,21,41)" }}>
-                  <div
-                    style={{ display: "flex", justifyContent: "space-between" }}
-                  >
-                    <h1 style={{ color: "white" }}> ONLINE SHOP </h1>
-                    <div style={{ display: "flex", color: "white" }}>
+              <Layout
+                className="site-layout"
+                style={{ marginLeft: collapsed ? 80 : 200 }}
+              >
+                <Header
+                  style={{
+                    padding: 0,
+                    background: colorBgContainer,
+                  }}
+                >
+                  <div className="d-flex flex-row justify-content-between">
+                    <div className="LEFT">
+                      {" "}
+                      <Button
+                        type="text"
+                        icon={
+                          collapsed ? (
+                            <MenuUnfoldOutlined />
+                          ) : (
+                            <MenuFoldOutlined />
+                          )
+                        }
+                        onClick={() => setCollapsed(!collapsed)}
+                        style={{
+                          fontSize: "16px",
+                          width: 64,
+                          height: 64,
+                        }}
+                      />
+                    </div>
+                    <div className="MID d-flex flex-row justify-content-between">
+                      <h1 style={{ color: "black" }}> ONLINE SHOP </h1>
+                    </div>
+                    <div className="RIGHT " style={{ width: "110px" }}>
                       <strong>
                         {auth?.payload?.firstName} {auth?.payload?.lastName}
                       </strong>
@@ -57,11 +118,11 @@ const App: React.FC = () => {
                   </div>
                 </Header>
 
-                <Content style={{ padding: 24 }}>
+                <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
                   {/* Register routes */}
                   <Routes>
                     <Route path="/" element={<HomePage />} />
-                    <Route path="/home" element={<HomePage />} />
+                    <Route path="darhboard/home" element={<HomePage />} />
 
                     {/* MANAGEMENT */}
                     <Route
@@ -72,18 +133,22 @@ const App: React.FC = () => {
                       path="/management/suppliers"
                       element={<SupperliersCRUD />}
                     />
-                    <Route
+                    {/* <Route
                       path="/management/employees"
                       element={<EmployeesCRUD />}
-                    />
+                    /> */}
                     <Route
-                      path="/management/Categories"
+                      path="/management/categories"
                       element={<CategoryCRUD />}
                     />
 
                     <Route
                       path="/management/customers"
                       element={<CustomerCRUD />}
+                    />
+                    <Route
+                      path="/account/information"
+                      element={<Information />}
                     />
 
                     {/* SALES */}

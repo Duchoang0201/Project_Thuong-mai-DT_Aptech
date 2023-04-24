@@ -16,7 +16,7 @@ const { validateSchema, getProductsSchema } = require("../validation/product");
 // Methods: POST / PATCH / GET / DELETE / PUT
 /* GET home page. */
 
-// Get all on nultiple conditions
+// Get all on Multiple conditions
 router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
   try {
     const {
