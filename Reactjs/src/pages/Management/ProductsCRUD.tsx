@@ -13,6 +13,7 @@ import {
   message,
   Modal,
   Pagination,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -694,16 +695,22 @@ const ProductsCRUD = () => {
           >
             Edit
           </Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => {
-              setDeleteItem(record);
-              setOpenDeleteConfirm(true);
-            }}
+          <Popconfirm
+            okText="Delete"
+            okType="danger"
+            onCancel={() => setOpenDeleteConfirm(false)}
+            onConfirm={() => handleDelete(deleteItem)}
+            title={"Are you sure to delete this product?"}
           >
-            Delete
-          </Button>
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                setDeleteItem(record);
+                setOpenDeleteConfirm(true);
+              }}
+            ></Button>
+          </Popconfirm>
         </Space>
       ),
       filterDropdown: () => {
@@ -908,7 +915,7 @@ const ProductsCRUD = () => {
       </Table>
 
       {/* Modal confirm Delte */}
-      <Modal
+      {/* <Modal
         open={openDeleteConfirm}
         onOk={() => handleDelete(deleteItem)}
         okText="Delete"
@@ -918,7 +925,7 @@ const ProductsCRUD = () => {
         <h5>Are you sure to delete?</h5>
         <strong>Product : </strong>
         <Text type="danger">{deleteItem?.name}</Text>
-      </Modal>
+      </Modal> */}
 
       {/* Modal Update */}
       <Modal
