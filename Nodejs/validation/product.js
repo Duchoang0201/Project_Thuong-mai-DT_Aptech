@@ -31,16 +31,44 @@ const getProductsSchema = yup.object({
     productName: yup.string(),
     fromPrice: yup
       .string()
-      .matches(/^\d+$/, "fromPirce is not valid")
+      .matches(/^\d+$/, "fromPirce is not valid Number")
       .min(0)
       .max(1000),
-    toPrice: yup.string(),
-    fromDiscount: yup.string(),
-    toDiscount: yup.string(),
-    fromStock: yup.string(),
-    toStock: yup.string(),
-    skip: yup.string(),
-    limit: yup.string(),
+    toPrice: yup
+      .string()
+      .matches(/^\d+$/, "toPrice is not valid Number")
+      .min(0)
+      .max(1000),
+    fromDiscount: yup
+      .string()
+      .matches(/^\d+$/, "fromDiscount is not valid Number")
+      .min(0)
+      .max(1000),
+    toDiscount: yup
+      .string()
+      .matches(/^\d+$/, "toDiscount is not valid Number")
+      .min(0)
+      .max(1000),
+    fromStock: yup
+      .string()
+      .matches(/^\d+$/, "fromStock is not valid Number")
+      .min(0)
+      .max(1000),
+    toStock: yup
+      .string()
+      .matches(/^\d+$/, "toStock is not valid Number")
+      .min(0)
+      .max(1000),
+    skip: yup
+      .string()
+      .matches(/^\d+$/, "skip is not valid Number")
+      .min(0)
+      .max(1000),
+    limit: yup
+      .string()
+      .matches(/^\d+$/, "limit is not valid Number")
+      .min(0)
+      .max(1000),
   }),
 });
 

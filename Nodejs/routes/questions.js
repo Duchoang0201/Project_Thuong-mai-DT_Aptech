@@ -473,6 +473,46 @@ router.get("/18", async (req, res, next) => {
 });
 
 router.get("/19", async (req, res, next) => {
+  try {
+    const aggregate = [
+      {
+        $lookup: {
+          from: "products",
+          let: { id: "$_id" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$$id", "$supplierId"] },
+              },
+            },
+          ],
+          as: "products",
+        },
+      },
+      {
+        $addFields: { numberOfProducts: { $sum: "$products.stock" } },
+      },
+    ];
+    Supplier.aggregate(aggregate)
+
+      .project({
+        _id: 1,
+        name: 1,
+        description: 1,
+        numberOfProducts: 1,
+      })
+      .then((result) => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.status(400).send({ message: err.message });
+      });
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+router.get("/19a", async (req, res, next) => {
   await Supplier.aggregate()
     .lookup({
       from: "products",

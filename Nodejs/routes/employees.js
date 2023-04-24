@@ -5,7 +5,11 @@ const router = express.Router();
 const { Employee } = require("../models");
 const yup = require("yup");
 
-const { validateSchema, loginSchema } = require("../validation/employee");
+const {
+  validateSchema,
+  loginSchema,
+  getEmployeeChema,
+} = require("../validation/employee");
 const encodeToken = require("../helpers/jwtHelper");
 
 const ObjectId = require("mongodb").ObjectId;
@@ -17,15 +21,33 @@ const ObjectId = require("mongodb").ObjectId;
 // Methods: POST / PATCH / GET / DELETE / PUT
 
 // GET ALL DATA
-router.get("/", async (req, res, next) => {
+// router.get("/", async (req, res, next) => {
+//   try {
+//     let data = await Employee.find();
+//     res.status(200).json(data);
+//   } catch (error) {
+//     res.status(500).json({ error: error });
+//   }
+// });
+router.get("/", validateSchema(getEmployeeChema), async (req, res, next) => {
   try {
-    let data = await Employee.find();
-    res.status(200).json(data);
+    const { employeeId } = req.query;
+
+    console.log("««««« employeeId »»»»»", employeeId);
+    const query = {
+      $expr: {
+        $and: [employeeId && { $eq: ["$_id", employeeId] }].filter(Boolean),
+      },
+    };
+    console.log(query);
+    let results = await Employee.find(query);
+
+    let amountResults = await Employee.countDocuments(query);
+    res.json({ results: results, amountResults: amountResults });
   } catch (error) {
-    res.status(500).json({ error: error });
+    res.status(500).json({ ok: false, error });
   }
 });
-
 //GET A DATA
 // router.get("/:id", async (req, res, next) => {
 //   const validationSchema = yup.object().shape({
@@ -199,7 +221,7 @@ router.post(
     } catch (err) {
       res.status(401).json({
         statusCode: 401,
-        message: "Unauthorized",
+        message: "Login Unsuccessful",
       });
     }
   }

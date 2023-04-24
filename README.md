@@ -103,3 +103,27 @@ Sử dụng git: (necessary)
     Squash multiple commits into one: git rebase -i HEAD~3 (source)
 
     Squash-merge a feature branch (as one commit): git merge --squash branchname (commit afterwards)
+
+Cart :
+
+\_id: cart
+
+customer :
+\_id: 6418ee71695619ee88123bef
+firstName: "Nathan "
+lastName: "Fay DVM"
+
+cartDetail:[
+{productId:
+quantity:
+CreateD:
+}
+,
+{
+productId:
+quantity:
+},{
+productId:
+quantity:
+}
+]

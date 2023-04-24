@@ -4,50 +4,63 @@ const yup = require("yup");
 const { Supplier } = require("../models");
 const { findById } = require("../models/Category");
 const ObjectId = require("mongodb").ObjectId;
+const {
+  validateSchema,
+  getSuppliersSchema,
+} = require("../validation/supplier");
+
 //Get all Data
-router.get("/", async (req, res, next) => {
-  try {
-    let found = await Supplier.find();
-    res.json(found);
-  } catch (error) {
-    res.status(400).json({ error: error });
-  }
-});
+// router.get("/", async (req, res, next) => {
+//   try {
+//     let found = await Supplier.find();
+//     res.json(found);
+//   } catch (error) {
+//     res.status(400).json({ error: error });
+//   }
+// });
 
 //Get a Data
-router.get("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
+// Get all on Multiple conditions
+router.get("/", validateSchema(getSuppliersSchema), async (req, res, next) => {
+  try {
+    const { name, email, phoneNumber, address, skip, limit } = req.query;
 
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Supplier.findById(itemId);
-      if (found) {
-        return res.status(200).json({ oke: true, result: found });
-      }
-      return res.status(500).json({ oke: true, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
+    const query = {
+      $expr: {
+        $and: [
+          name && {
+            $regexMatch: { input: "$name", regex: name, options: "i" },
+          },
+          email && {
+            $regexMatch: { input: "$email", regex: email, options: "i" },
+          },
+          phoneNumber && {
+            $regexMatch: {
+              input: "$phoneNumber",
+              regex: phoneNumber,
+              options: "i",
+            },
+          },
+          address && {
+            $regexMatch: {
+              input: "$address",
+              regex: address,
+              options: "i",
+            },
+          },
+        ].filter(Boolean),
+      },
+    };
+    let results = await Supplier.find(query)
+      // .lean({ virtuals: true })
+      .skip(skip)
+      .limit(limit);
+
+    let amountResults = await Supplier.countDocuments(query);
+    res.json({ results: results, amountResults: amountResults });
+  } catch (error) {
+    res.status(500).json({ ok: false, error });
+  }
 });
 
 router.post("/", async (req, res, next) => {
@@ -115,7 +128,7 @@ router.delete("/:id", async (req, res, next) => {
     })
     .catch((err) => {
       return res.status(400).json({
-        type: name,
+        type: err.name,
         errors: err.errors,
         message: err.message,
         provider: "yup",
