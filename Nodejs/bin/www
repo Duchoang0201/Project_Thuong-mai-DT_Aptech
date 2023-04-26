@@ -8,6 +8,7 @@ var app = require("../app");
 var debug = require("debug")("backend-express:server");
 var http = require("http");
 const socketIO = require("socket.io");
+const { Employee, Message } = require("../models/Message");
 
 /**
  * Get port from environment and store in Express.
@@ -21,19 +22,25 @@ app.set("port", port);
  */
 
 var server = http.createServer(app);
-const io = socketIO(server);
+// const io = socketIO(server, {
+//   cors: {
+//     origin: "http://localhost:8888",
+//     methods: ["GET", "POST"],
+//   },
+// });
 
+const io = require("socket.io")(8888, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
+});
+
+// io.listen(3000);
+
+// Socket Connect
 io.on("connection", (socket) => {
   console.log("A client connected.");
-
-  socket.on("on-chat", (data) => {
-    console.log(`Received message: ${data.message}`);
-    io.emit("user-chat", data);
-  });
-
-  // socket.on('disconnect', () => {
-  //   console.log('A client disconnected.');
-  // });
 });
 
 /**

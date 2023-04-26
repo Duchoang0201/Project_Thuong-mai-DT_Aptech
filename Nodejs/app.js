@@ -20,6 +20,8 @@ const categoriesRouter = require("./routes/categories");
 const ordersRouter = require("./routes/orders");
 const questionsRouter = require("./routes/questions");
 const uploadRouter = require("./routes/upload");
+const conversationsRouter = require("./routes/conversation");
+const messagesRouter = require("./routes/messages");
 // Routes for writting in file
 
 //test mongoDB
@@ -86,6 +88,8 @@ app.use("/action", actionRouter);
 app.use("/categories", categoriesRouter);
 app.use("/orders", ordersRouter);
 app.use("/questions", questionsRouter);
+app.use("/conversations", conversationsRouter);
+app.use("/messages", messagesRouter);
 
 app.use("/upload", uploadRouter);
 

@@ -2,7 +2,6 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
-
 interface isLogin {
   email: string;
   password: string;

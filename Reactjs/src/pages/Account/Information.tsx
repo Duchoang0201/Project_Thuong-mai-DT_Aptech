@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useAuthStore } from "../hooks/useAuthStore";
+import { useAuthStore } from "../../hooks/useAuthStore";
 import {
   Avatar,
   Button,
@@ -32,12 +32,7 @@ const { Text } = Typography;
 const Information = (props: Props) => {
   const [refresh, setRefresh] = useState(0);
   const [user, setUser] = useState<any>();
-  const tabListNoTitle = [
-    {
-      key: "setting",
-      tab: "Profile setting",
-    },
-  ];
+
   const [selectItem, setSelectItem] = useState("0");
   const [updateData, setUpdateData] = useState<any>();
   const onChange = (key: string | string[]) => {
@@ -70,14 +65,17 @@ const Information = (props: Props) => {
       })
       .catch((err) => console.log(err));
   };
+
+  //TAB PROFILE SETTING
+  const tabListNoTitle = [
+    {
+      key: "setting",
+      tab: "Profile setting",
+    },
+  ];
   const contentListNoTitle: Record<string, React.ReactNode> = {
     setting: (
-      <Form
-        className="container px-5"
-        form={updateForm}
-        name="updateForm"
-        onFinish={setUpdateData}
-      >
+      <Form form={updateForm} name="updateForm" onFinish={setUpdateData}>
         <div>
           <Collapse accordion onChange={onChange}>
             <Panel header="First Name" key="1">
@@ -223,7 +221,6 @@ const Information = (props: Props) => {
                 style={{ width: "100%" }}
                 tabList={tabListNoTitle}
                 activeTabKey={"setting"}
-                // onTabChange={onTabChange}
               >
                 {contentListNoTitle["setting"]}
               </Card>
