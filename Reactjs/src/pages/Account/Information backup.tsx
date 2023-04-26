@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { useAuthStore } from "../hooks/useAuthStore";
+import { useAuthStore } from "../../hooks/useAuthStore";
 import { Avatar, Card, Col, Collapse, Divider, Row, Typography } from "antd";
-import Meta from "antd/es/card/Meta";
 import {
   HomeOutlined,
   MailOutlined,

@@ -29,21 +29,26 @@ const ObjectId = require("mongodb").ObjectId;
 //     res.status(500).json({ error: error });
 //   }
 // });
-router.get("/", validateSchema(getEmployeeChema), async (req, res, next) => {
+
+router.get("/", async (req, res, next) => {
   try {
     const { employeeId } = req.query;
 
-    console.log("««««« employeeId »»»»»", employeeId);
-    const query = {
-      $expr: {
-        $and: [employeeId && { $eq: ["$_id", employeeId] }].filter(Boolean),
-      },
-    };
-    console.log(query);
-    let results = await Employee.find(query);
+    const conditionFind = {};
 
-    let amountResults = await Employee.countDocuments(query);
-    res.json({ results: results, amountResults: amountResults });
+    if (employeeId) {
+      conditionFind._id = employeeId;
+    }
+
+    // const query = {
+    //   $expr: {
+    //     $and: [employeeId && { $eq: ["$_id", employeeId] }].filter(Boolean),
+    //   },
+    // };
+    // const query = { _id: { $in: employeeId } };
+    let results = await Employee.find(conditionFind);
+
+    res.json({ results: results });
   } catch (error) {
     res.status(500).json({ ok: false, error });
   }

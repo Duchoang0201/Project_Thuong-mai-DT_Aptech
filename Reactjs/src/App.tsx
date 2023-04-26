@@ -1,16 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./hooks/useAuthStore";
-import { Layout, Button, theme, Menu, Breadcrumb } from "antd";
+import { Layout, Button, theme, message } from "antd";
 
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  UploadOutlined,
-  UserOutlined,
-  VideoCameraOutlined,
-} from "@ant-design/icons";
+import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import numeral from "numeral";
 import "numeral/locales/vi";
 
@@ -19,11 +13,12 @@ import MainMenu from "./components/MainMenu";
 import HomePage from "./pages/HomePage";
 import CategoryCRUD from "./pages/Management/categoryCRUD";
 import ProductsCRUD from "./pages/Management/ProductsCRUD";
-import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 import CustomerCRUD from "./pages/Management/CustomerCRUD";
 import SupperliersCRUD from "./pages/Management/SupperliersCRUD";
-import Information from "./pages/Information";
+import Information from "./pages/Account/Information";
 
+import MessageBox from "./pages/MessageBox/MessageBox";
+import Messages from "./pages/Account/Messages";
 numeral.locale("vi");
 
 const { Header, Sider, Content } = Layout;
@@ -31,6 +26,10 @@ const { Header, Sider, Content } = Layout;
 const App: React.FC = () => {
   const { auth } = useAuthStore((state: any) => state);
 
+  // const [socket, setSocket] = useState<any>(null);
+  // useEffect(() => {
+  //   setSocket(io("http://localhost:8888"));
+  // }, []);
   //Function reresh to clear local storage
 
   const [collapsed, setCollapsed] = useState(false);
@@ -112,7 +111,7 @@ const App: React.FC = () => {
                     </div>
                     <div className="RIGHT " style={{ width: "110px" }}>
                       <strong>
-                        {auth?.payload?.firstName} {auth?.payload?.lastName}
+                        {/* {user?.firstName} {user?.lastName} */}
                       </strong>
                     </div>
                   </div>
@@ -120,6 +119,7 @@ const App: React.FC = () => {
 
                 <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
                   {/* Register routes */}
+
                   <Routes>
                     <Route path="/" element={<HomePage />} />
                     <Route path="darhboard/home" element={<HomePage />} />
@@ -150,6 +150,7 @@ const App: React.FC = () => {
                       path="/account/information"
                       element={<Information />}
                     />
+                    <Route path="/account/message" element={<Messages />} />
 
                     {/* SALES */}
                     {/* <Route path='/sales/products/discount' element={<DiscountPage />} />
@@ -162,6 +163,7 @@ const App: React.FC = () => {
                     {/* NO MATCH ROUTE */}
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
+                  <MessageBox />
                 </Content>
               </Layout>
             </Layout>

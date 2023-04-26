@@ -1,5 +1,6 @@
 import React from "react";
 import Icon, {
+  CommentOutlined,
   ExportOutlined,
   HomeOutlined,
   MoreOutlined,
@@ -59,6 +60,11 @@ const items = [
         key: "account/information",
         label: "Information",
         icon: <UserOutlined />,
+      },
+      {
+        key: "account/message",
+        label: "Message",
+        icon: <CommentOutlined />,
       },
       {
         key: "account/logout",
