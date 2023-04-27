@@ -150,7 +150,10 @@ const App: React.FC = () => {
                       path="/account/information"
                       element={<Information />}
                     />
-                    <Route path="/account/message" element={<Messages />} />
+                    <Route
+                      path="/account/message"
+                      element={<Messages collapsed={collapsed} />}
+                    />
 
                     {/* SALES */}
                     {/* <Route path='/sales/products/discount' element={<DiscountPage />} />
