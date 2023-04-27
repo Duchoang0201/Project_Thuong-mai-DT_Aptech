@@ -9,6 +9,7 @@ import {
   Row,
   Select,
   Space,
+  Watermark,
   message,
 } from "antd";
 import React, { useEffect, useRef, useState } from "react";
@@ -30,17 +31,14 @@ interface Conversation {
   updatedAt: string;
   __v: number;
 }
-const Messages: React.FC = () => {
-  const [socket, setSocket] = useState<any>(null);
-  useEffect(() => {
-    setSocket(io("http://localhost:8888"));
-  }, []);
 
+const Messages: React.FC<any> = ({ collapsed }) => {
   const [createForm] = Form.useForm();
   const [createConversationForm] = Form.useForm();
 
   //Get conversation
   const [conversations, setConversations] = useState<any>([]);
+  console.log("««««« conversations »»»»»", conversations);
   //Create a conversation:
   const [openCreateConver, setOpenCreateConver] = useState(false);
   const [newCoversations, setNewConversations] = useState<any>();
@@ -51,6 +49,8 @@ const Messages: React.FC = () => {
   const [users, getUsers] = useState<any>([]);
   //Get Meessage
   const [messages, setMessages] = useState<any[any]>([]);
+  const [arrivalMessage, setArrivalMessage] = useState<any>([]);
+  console.log("««««« arrivalMessage »»»»»", arrivalMessage);
   //loading
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -59,6 +59,36 @@ const Messages: React.FC = () => {
   //active tab key
   const [activeTabKey1, setActiveTabKey1] = useState<any>();
 
+  // Setting socket.io
+
+  const socket = useRef<any>();
+  useEffect(() => {
+    socket.current = io("http://localhost:8888");
+    socket.current.on("getMessage", (data: any) => {
+      console.log("««««« data »»»»»", data);
+      if (data == null) {
+        setRefresh((f) => f + 1);
+      } else {
+        setArrivalMessage({
+          sender: data.senderId,
+          text: data.text,
+          createdAt: Date.now(),
+        });
+      }
+    });
+  }, []);
+
+  // Get message live socket.io
+  useEffect(() => {
+    arrivalMessage &&
+      conversationCurrent?.members.includes(arrivalMessage.senderId);
+    setMessages((prev: any) => [...prev, arrivalMessage]);
+  }, [arrivalMessage, conversations]);
+
+  //Add user for socket.io
+  useEffect(() => {
+    socket.current.emit("addUser", auth.payload._id);
+  }, [auth]);
   //GEt all Users
   useEffect(() => {
     const getAllUsers = async () => {
@@ -137,26 +167,38 @@ const Messages: React.FC = () => {
     conversations: Conversation[],
     memberId1: string,
     memberId2: string
-  ): string | null {
+  ): any {
     const conversation = conversations.find(
       (conv) =>
         conv.members.includes(memberId1) && conv.members.includes(memberId2)
     );
-    return conversation ? conversation._id : null;
+    return conversation ? conversation : null;
   }
 
-  const conversationId = getConversationIdByMembers(
+  const conversationCurrent = getConversationIdByMembers(
     conversations,
     memberId1,
     memberId2
   );
 
+  console.log("««««« conversationCurrent »»»»»", conversationCurrent);
+  //Function send message
   const handleSendMessages = async (e: any) => {
     const messageSend = {
       sender: auth.payload._id,
       text: e.text,
-      conversationId: conversationId,
+      conversationId: conversationCurrent._id,
     };
+
+    const receiverId = conversationCurrent.members.find(
+      (member: any) => member !== auth.payload._id
+    );
+
+    socket.current.emit("sendMessage", {
+      senderId: `${auth.payload._id}`,
+      receiverId: receiverId,
+      text: e.text,
+    });
     try {
       const res = await axios.post(
         "http://localhost:9000/messages",
@@ -175,13 +217,13 @@ const Messages: React.FC = () => {
     const getMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:9000/messages/${conversationId}`
+          `http://localhost:9000/messages/${conversationCurrent._id}`
         );
         setMessages(res.data);
       } catch (error) {}
     };
     getMessages();
-  }, [activeTabKey1, conversationId, refresh]);
+  }, [activeTabKey1, conversationCurrent, refresh]);
   //For scroll when scroll down menu user
   const onScroll = (e: React.UIEvent<HTMLElement, UIEvent>) => {
     if (e.currentTarget.scrollHeight - e.currentTarget.scrollTop === 400) {
@@ -209,7 +251,7 @@ const Messages: React.FC = () => {
         ) : (
           <Row>
             <Col span={18} push={6}>
-              {activeTabKey1 && (
+              {activeTabKey1 ? (
                 <Card
                   type="inner"
                   title={`${activeTabKey1?.firstName} ${activeTabKey1?.lastName}`}
@@ -224,18 +266,17 @@ const Messages: React.FC = () => {
                     {messages.map((item: any) => (
                       <>
                         {item?.employee?._id === auth.payload._id ? (
-                          <div
-                            key={item?.employee?._id}
-                            className="text-end  py-3 px-3 "
-                          >
+                          <div key={item?._id} className="text-end  py-3 px-3 ">
                             <h6 className="Name text-body-secondary ">
                               <UserOutlined /> Me
                             </h6>{" "}
                             <h5
                               className=" bg-light-subtle border rounded-2 text-break w-25 px-2 py-2"
-                              style={{ marginLeft: "720px" }}
+                              style={{
+                                marginLeft: collapsed ? "800px" : "730px",
+                              }}
                             >
-                              {item.text}
+                              {item?.text}
                             </h5>{" "}
                             <div className="messageBottom ">
                               {format(item.createdAt)}
@@ -288,6 +329,10 @@ const Messages: React.FC = () => {
                     </Space.Compact>
                   </Form>
                 </Card>
+              ) : (
+                <Watermark content="Click to user to start conversation">
+                  <div style={{ height: 500 }} />
+                </Watermark>
               )}
             </Col>
             <Col span={5} pull={18}>
@@ -359,7 +404,7 @@ const Messages: React.FC = () => {
                   data={dataUserMenu}
                   height={400}
                   itemHeight={47}
-                  itemKey="email"
+                  itemKey="_id"
                   onScroll={onScroll}
                 >
                   {(item: any) => (
