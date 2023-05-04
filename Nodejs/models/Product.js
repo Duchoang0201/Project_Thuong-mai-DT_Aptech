@@ -17,6 +17,7 @@ const productSchema = Schema(
       ref: "Supplier",
       required: true,
     },
+    imageUrl: { type: String },
   },
 
   {

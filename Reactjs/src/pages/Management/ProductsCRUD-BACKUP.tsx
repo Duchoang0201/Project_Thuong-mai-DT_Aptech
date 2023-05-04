@@ -481,11 +481,16 @@ const ProductsCRUD = () => {
           <Upload
             showUploadList={false}
             name="file"
-            action={`http://localhost:9000/upload/products/${record._id}/image`}
+            action={
+              "http://localhost:9000/upload/products/" + record._id + "/image"
+            }
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
+              if (info.file.status !== "uploading") {
+                console.log("status", info.file);
+              }
+
               if (info.file.status === "done") {
-                console.log("««««« infor.file »»»»»", info.file);
                 setRefresh((f) => f + 1);
                 message.success(`${info.file.name} file uploaded successfully`);
               } else if (info.file.status === "error") {
@@ -557,7 +562,7 @@ const ProductsCRUD = () => {
         setCategories(res.data);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [refresh]);
 
   //CALL API SUPPLIER
   useEffect(() => {
@@ -567,10 +572,10 @@ const ProductsCRUD = () => {
         setSuppliers(res.data.results);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [refresh]);
 
   //CALL API PRODUCT FILLTER
-  let URL_FILTER = `http://localhost:9000/products?${
+  const URL_FILTER = `http://localhost:9000/products?${
     productName && `&productName=${productName}`
   }${supplierId && `&supplierId=${supplierId}`}${
     categoryId && `&categoryId=${categoryId}`
@@ -587,7 +592,7 @@ const ProductsCRUD = () => {
     axios
       .get(URL_FILTER)
       .then((res) => {
-        console.log("««««« res..data »»»»»", res.data.results[6]);
+        console.log("««««« res..data »»»»»", res.data);
         setProductsTEST(res.data.results);
         setPages(res.data.amountResults);
       })

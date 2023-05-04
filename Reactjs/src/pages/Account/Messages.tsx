@@ -74,6 +74,7 @@ const Messages: React.FC<any> = ({ collapsed }) => {
           text: data.text,
           createdAt: Date.now(),
         });
+        //or setRefresh((f) => f + 1);
       }
     });
   }, []);
@@ -266,26 +267,28 @@ const Messages: React.FC<any> = ({ collapsed }) => {
                     {messages.map((item: any) => (
                       <>
                         {item?.employee?._id === auth.payload._id ? (
-                          <div key={item?._id} className="text-end  py-3 px-3 ">
-                            <h6 className="Name text-body-secondary ">
-                              <UserOutlined /> Me
-                            </h6>{" "}
-                            <h5
-                              className=" bg-light-subtle border rounded-2 text-break w-25 px-2 py-2"
-                              style={{
-                                marginLeft: collapsed ? "800px" : "730px",
-                              }}
-                            >
-                              {item?.text}
-                            </h5>{" "}
-                            <div className="messageBottom ">
-                              {format(item.createdAt)}
+                          <div className="d-flex flex-row-reverse">
+                            <div key={item?._id} className=" w-25">
+                              <h6 className="Name text-body-secondary ">
+                                <UserOutlined /> Me
+                              </h6>{" "}
+                              <h5
+                                className=" bg-light-subtle border rounded-2 text-break px-2 py-2 "
+                                // style={{
+                                //   marginLeft: collapsed ? "800px" : "730px",
+                                // }}
+                              >
+                                {item?.text}
+                              </h5>{" "}
+                              <div className=" text-end ">
+                                {format(item.createdAt)}
+                              </div>
                             </div>
                           </div>
                         ) : (
                           <div
                             key={item?.employee?._id}
-                            className="py-3 "
+                            className="py-3  "
                             style={{ width: "auto" }}
                           >
                             <h6 className="Name text-primary ">
