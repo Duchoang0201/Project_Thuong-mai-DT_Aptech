@@ -41,7 +41,6 @@ const Messages: React.FC<any> = ({ collapsed }) => {
   console.log("««««« conversations »»»»»", conversations);
   //Create a conversation:
   const [openCreateConver, setOpenCreateConver] = useState(false);
-  const [newCoversations, setNewConversations] = useState<any>();
   //Data
   const [dataUserMenu, setDataUserMenu] = useState<any[]>([]);
 
@@ -127,7 +126,7 @@ const Messages: React.FC<any> = ({ collapsed }) => {
         receiverId: `${e.userId}`,
       };
       try {
-        const res = await axios.post(
+        await axios.post(
           `http://localhost:9000/conversations`,
           conversationCreate
         );

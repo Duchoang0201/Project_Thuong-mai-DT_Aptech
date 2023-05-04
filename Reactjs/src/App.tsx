@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./hooks/useAuthStore";
-import { Layout, Button, theme, message } from "antd";
+import { Layout, Button, theme } from "antd";
 
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import numeral from "numeral";
@@ -17,7 +17,6 @@ import CustomerCRUD from "./pages/Management/CustomerCRUD";
 import SupperliersCRUD from "./pages/Management/SupperliersCRUD";
 import Information from "./pages/Account/Information";
 
-import MessageBox from "./pages/MessageBox/MessageBox";
 import Messages from "./pages/Account/Messages";
 numeral.locale("vi");
 
@@ -166,7 +165,6 @@ const App: React.FC = () => {
                     {/* NO MATCH ROUTE */}
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
-                  <MessageBox />
                 </Content>
               </Layout>
             </Layout>
