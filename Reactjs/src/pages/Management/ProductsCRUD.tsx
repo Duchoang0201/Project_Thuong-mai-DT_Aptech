@@ -53,7 +53,6 @@ interface Product {
 }
 const ProductsCRUD = () => {
   const [refresh, setRefresh] = useState(0);
-  console.log("««««« refresh »»»»»", refresh);
   const API_URL = "http://localhost:9000/products";
   const [categories, setCategories] = useState<Array<any>>([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -61,6 +60,8 @@ const ProductsCRUD = () => {
   //For FILLTER
   // const [products, setProducts] = useState<Array<any>>([]);
   const [productsTEST, setProductsTEST] = useState<Array<any>>([]);
+
+  console.log("««««« productsTest »»»»»", productsTEST);
   // const [productsFilter, setProductsFilter] = useState(API_URL);
 
   const [open, setOpen] = useState(false);
@@ -101,6 +102,19 @@ const ProductsCRUD = () => {
   // const [limit, setLimit] = useState(10);
   const [skip, setSkip] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
+
+  //CALL API PRODUCT FILLTER
+  let URL_FILTER = `http://localhost:9000/products?${
+    productName && `&productName=${productName}`
+  }${supplierId && `&supplierId=${supplierId}`}${
+    categoryId && `&categoryId=${categoryId}`
+  }${fromPrice && `&fromPrice=${fromPrice}`}${
+    toPrice && `&toPrice=${toPrice}`
+  }${fromDiscount && `&fromDiscount=${fromDiscount}`}${
+    toDiscount && `&toDiscount=${toDiscount}`
+  }${fromStock && `&fromStock=${fromStock}`}${
+    toStock && `&toStock=${toStock}`
+  }${skip ? `&skip=${skip}` : ""}&limit=${10}`;
 
   //Columns of TABLE ANT_DESIGN
   const columns = [
@@ -478,34 +492,6 @@ const ProductsCRUD = () => {
       key: "function",
       render: (text: string, record: any) => (
         <Space>
-          <Upload
-            showUploadList={false}
-            name="file"
-            action={`http://localhost:9000/upload/products/${record._id}/image`}
-            headers={{ authorization: "authorization-text" }}
-            onChange={(info) => {
-              if (info.file.status === "done") {
-                console.log("««««« infor.file »»»»»", info.file);
-                setRefresh((f) => f + 1);
-                message.success(`${info.file.name} file uploaded successfully`);
-              } else if (info.file.status === "error") {
-                message.error(`${info.file.name} file upload failed.`);
-              }
-            }}
-          >
-            <Button icon={<UploadOutlined />} />
-          </Upload>
-
-          <Button
-            type="dashed"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setOpen(true);
-              setUpdateId(record._id);
-              updateForm.setFieldsValue(record);
-            }}
-          />
-
           <Popconfirm
             okText="Delete"
             okType="danger"
@@ -520,6 +506,39 @@ const ProductsCRUD = () => {
               }}
             ></Button>
           </Popconfirm>
+          <Button
+            type="dashed"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setOpen(true);
+              setUpdateId(record._id);
+              updateForm.setFieldsValue(record);
+            }}
+          />
+          <Upload
+            showUploadList={false}
+            name="file"
+            action={`http://localhost:9000/upload/products/${record._id}/image`}
+            headers={{ authorization: "authorization-text" }}
+            onChange={(info) => {
+              if (info.file.status !== "uploading") {
+                console.log(info.file);
+              }
+
+              if (info.file.status === "done") {
+                message.success(`${info.file.name} file uploaded successfully`);
+
+                setTimeout(() => {
+                  console.log("««««« run »»»»»");
+                  setRefresh(refresh + 1);
+                }, 1000);
+              } else if (info.file.status === "error") {
+                message.error(`${info.file.name} file upload failed.`);
+              }
+            }}
+          >
+            <Button icon={<UploadOutlined />} />
+          </Upload>
         </Space>
       ),
       filterDropdown: () => {
@@ -569,25 +588,11 @@ const ProductsCRUD = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  //CALL API PRODUCT FILLTER
-  let URL_FILTER = `http://localhost:9000/products?${
-    productName && `&productName=${productName}`
-  }${supplierId && `&supplierId=${supplierId}`}${
-    categoryId && `&categoryId=${categoryId}`
-  }${fromPrice && `&fromPrice=${fromPrice}`}${
-    toPrice && `&toPrice=${toPrice}`
-  }${fromDiscount && `&fromDiscount=${fromDiscount}`}${
-    toDiscount && `&toDiscount=${toDiscount}`
-  }${fromStock && `&fromStock=${fromStock}`}${
-    toStock && `&toStock=${toStock}`
-  }${skip ? `&skip=${skip}` : ""}&limit=${10}`;
-
   // CALL API FILTER PRODUCT DEPEND ON QUERY
   useEffect(() => {
     axios
       .get(URL_FILTER)
       .then((res) => {
-        console.log("««««« res..data »»»»»", res.data.results[6]);
         setProductsTEST(res.data.results);
         setPages(res.data.amountResults);
       })
