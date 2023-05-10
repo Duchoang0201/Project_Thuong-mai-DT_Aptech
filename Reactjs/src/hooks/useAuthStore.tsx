@@ -10,31 +10,58 @@ interface isLogin {
 export const useAuthStore = create(
   devtools(
     persist(
-      (set, get) => ({
-        auth: null,
-        login: async ({ email, password }: isLogin) => {
-          try {
-            const response = await axios.post(
-              "http://localhost:9000/employees/login",
-              {
-                email: email,
-                password: password,
+      (set, get) => {
+        let loginData: any = null; // Variable to store the login data
+
+        return {
+          auth: null,
+          login: async ({ email, password }: isLogin) => {
+            try {
+              const response = await axios.post(
+                "http://localhost:9000/employees/login",
+                {
+                  email: email,
+                  password: password,
+                }
+              );
+              loginData = response.data; // Store the response data
+
+              set({ auth: response.data }, false, {
+                type: "auth/login-success",
+              });
+              if (loginData && loginData.payload && loginData.payload._id) {
+                axios.patch(
+                  `http://localhost:9000/employees/${loginData.payload._id}`,
+                  {
+                    LastActivity: new Date(),
+                  }
+                );
               }
-            );
-            set({ auth: response.data }, false, { type: "auth/login-success" });
-          } catch (err) {
-            set({ auth: null }, false, { type: "auth/login-error" });
-            throw new Error("Login failed");
-          }
-        },
-        logout: () => {
-          // AXIOS: Call 1 api login => user
-          return set({ auth: null }, false, { type: "auth/logout-success" });
-        },
-      }),
+            } catch (err) {
+              set({ auth: null }, false, { type: "auth/login-error" });
+              throw new Error("Login failed");
+            }
+          },
+          logout: async () => {
+            // Use the loginData in the logout function
+
+            if (loginData && loginData.payload && loginData.payload._id) {
+              axios.patch(
+                `http://localhost:9000/employees/${loginData.payload._id}`,
+                {
+                  LastActivity: new Date(),
+                }
+              );
+            }
+            localStorage.clear();
+
+            return set({ auth: null }, false, { type: "auth/logout-success" });
+          },
+        };
+      },
       {
-        name: "onlineshop-storage", // unique name
-        storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
+        name: "onlineshop-storage",
+        storage: createJSONStorage(() => localStorage),
       }
     )
   )

@@ -1,5 +1,7 @@
 import {
+  CheckCircleOutlined,
   ClearOutlined,
+  CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
@@ -8,6 +10,7 @@ import {
 } from "@ant-design/icons";
 import {
   Button,
+  Checkbox,
   Form,
   Input,
   InputNumber,
@@ -23,6 +26,7 @@ import {
 import Search from "antd/es/input/Search";
 import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
 interface Product {
   _id: string;
@@ -53,7 +57,8 @@ interface Product {
 }
 const ProductsCRUD = () => {
   const [refresh, setRefresh] = useState(0);
-  console.log("««««« refresh »»»»»", refresh);
+  const { auth } = useAuthStore((state: any) => state);
+
   const API_URL = "http://localhost:9000/products";
   const [categories, setCategories] = useState<Array<any>>([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -61,6 +66,8 @@ const ProductsCRUD = () => {
   //For FILLTER
   // const [products, setProducts] = useState<Array<any>>([]);
   const [productsTEST, setProductsTEST] = useState<Array<any>>([]);
+
+  console.log("««««« productsTest »»»»»", productsTEST);
   // const [productsFilter, setProductsFilter] = useState(API_URL);
 
   const [open, setOpen] = useState(false);
@@ -70,9 +77,6 @@ const ProductsCRUD = () => {
   const [updateId, setUpdateId] = useState(0);
   const [updateForm] = Form.useForm();
   const [createForm] = Form.useForm();
-
-  //Search on CategoryID
-  const [categoryId, setCategoryId] = useState("");
 
   //Search on SupplierID
   const [supplierId, setSupplierId] = useState("");
@@ -102,27 +106,124 @@ const ProductsCRUD = () => {
   const [skip, setSkip] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
 
+  //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
+
+  const [isDelete, setIsDelete] = useState("");
+  const [isActive, setIsActive] = useState("");
+  const onSearchIsDelete = useCallback((value: any) => {
+    if (value === "active") {
+      setIsActive("true");
+      setIsDelete("");
+    }
+    if (value === "unActive") {
+      setIsActive("false");
+      setIsDelete("");
+    }
+    if (value === "Deleted") {
+      setIsDelete("true");
+      setIsActive("");
+    }
+    if (value !== "active" && value !== "unActive" && value !== "Deleted") {
+      setIsActive("");
+      setIsDelete("");
+    }
+  }, []);
+
   //Columns of TABLE ANT_DESIGN
   const columns = [
-    //Id
+    //No
     {
-      title: "No",
+      title: () => {
+        return (
+          <div>
+            {isActive || isDelete ? (
+              <div className="text-danger">No</div>
+            ) : (
+              <div className="secondary">No</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "id",
       key: "id",
       render: (text: string, record: any, index: number) => {
         return (
           <div>
-            {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+            <Space>
+              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {record.active === true && !record.isDeleted && (
+                <span style={{ fontSize: "16px", color: "#08c" }}>
+                  <CheckCircleOutlined /> Active
+                </span>
+              )}
+              {record.active === false && !record.isDeleted && (
+                <span className="text-danger">
+                  <CloseCircleOutlined
+                    style={{ fontSize: "16px", color: "#dc3545" }}
+                  />{" "}
+                  Unactive
+                </span>
+              )}
+
+              {record.isDeleted === true && (
+                <span className="text-danger">
+                  <CloseCircleOutlined
+                    style={{ fontSize: "16px", color: "#dc3545" }}
+                  />{" "}
+                  Deleted
+                </span>
+              )}
+            </Space>
           </div>
         );
       },
+      filterDropdown: () => {
+        return (
+          <>
+            <div>
+              <Select
+                allowClear
+                onClear={() => {
+                  setIsDelete("");
+                }}
+                style={{ width: "125px" }}
+                placeholder="Select a supplier"
+                optionFilterProp="children"
+                showSearch
+                onChange={onSearchIsDelete}
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "active",
+                    label: "Active",
+                  },
+                  {
+                    value: "unActive",
+                    label: "Unactive",
+                  },
+                  {
+                    value: "Deleted",
+                    label: "Deleted",
+                  },
+                ]}
+              />
+            </div>
+          </>
+        );
+      },
+      width: "10%",
     },
     //IMAGE
     {
+      width: "10%",
+
       title: "Picture",
       key: "imageUrl",
       dataIndex: "imageUrl",
-      width: "1%",
       render: (text: any, record: any, index: any) => {
         return (
           <div>
@@ -139,6 +240,8 @@ const ProductsCRUD = () => {
     },
     //Category
     {
+      width: "10%",
+
       title: () => {
         return (
           <div>
@@ -180,6 +283,8 @@ const ProductsCRUD = () => {
     },
     //Supplier
     {
+      width: "10%",
+
       title: () => {
         return (
           <div>
@@ -199,7 +304,6 @@ const ProductsCRUD = () => {
             <div>
               <Select
                 allowClear
-                // autoClearSearchValue={!supplierId ? true : false}
                 onClear={() => {
                   setSupplierId("");
                 }}
@@ -220,16 +324,6 @@ const ProductsCRUD = () => {
                   };
                 })}
               />
-              {/* {supplierId && (
-                  <span style={{ width: "20%" }}>
-                    <Button
-                      onClick={() => {
-                        setSupplierId("");
-                      }}
-                      icon={<ClearOutlined />}
-                    />
-                  </span>
-                )} */}
             </div>
           </>
         );
@@ -237,12 +331,12 @@ const ProductsCRUD = () => {
       render: (text: string, record: any) => {
         return <span>{record.supplier?.name}</span>;
       },
-      width: "20%",
       height: "auto",
     },
     //Name
     {
-      width: "50%",
+      width: "10%",
+
       title: () => {
         return (
           <div>
@@ -271,6 +365,8 @@ const ProductsCRUD = () => {
     },
     //Price
     {
+      width: "10%",
+
       title: () => {
         return (
           <div>
@@ -337,75 +433,9 @@ const ProductsCRUD = () => {
       },
     },
 
-    //Discount
-    {
-      title: () => {
-        return (
-          <div>
-            {fromDiscount || toDiscount ? (
-              <div className="text-danger">Discount</div>
-            ) : (
-              <div className="secondary">Discount</div>
-            )}
-          </div>
-        );
-      },
-      dataIndex: "discount",
-      key: "discount",
-      filterDropdown: () => {
-        return (
-          <Form
-            form={inforDiscount}
-            name="inforDiscount"
-            onFinish={submitSearchDiscount}
-            style={{
-              padding: "5px",
-              width: fromDiscount || toDiscount ? "350px" : "300px",
-              height: "50px",
-            }}
-          >
-            <Space>
-              <Form.Item hasFeedback label="from" name="fromDiscount">
-                <InputNumber placeholder="Enter From" min={1} />
-              </Form.Item>
-              <Form.Item hasFeedback label="to" name="toDiscount">
-                <InputNumber placeholder="Enter To" min={1} />
-              </Form.Item>
-              <span style={{ width: "20%" }}>
-                <Form.Item>
-                  <Button
-                    style={{ width: "30px", right: "-10px" }}
-                    type="primary"
-                    htmlType="submit"
-                    icon={<SearchOutlined />}
-                  />
-                </Form.Item>
-              </span>
-              <span>
-                {fromDiscount || toDiscount ? (
-                  <Form.Item>
-                    <Button
-                      style={{ width: "30px", right: "-8px" }}
-                      type="primary"
-                      onClick={() => {
-                        setFromDiscount("");
-                        setToDiscount("");
-                        inforDiscount.resetFields();
-                      }}
-                      icon={<ClearOutlined />}
-                    />
-                  </Form.Item>
-                ) : (
-                  ""
-                )}
-              </span>
-            </Space>
-          </Form>
-        );
-      },
-    },
     //Stock
     {
+      width: "10%",
       title: () => {
         return (
           <div>
@@ -471,41 +501,88 @@ const ProductsCRUD = () => {
         );
       },
     },
+    //Discount
+    {
+      width: "10%",
+
+      title: () => {
+        return (
+          <div>
+            {fromDiscount || toDiscount ? (
+              <div className="text-danger">Discount</div>
+            ) : (
+              <div className="secondary">Discount</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "discount",
+      key: "discount",
+      filterDropdown: () => {
+        return (
+          <Form
+            form={inforDiscount}
+            name="inforDiscount"
+            onFinish={submitSearchDiscount}
+            style={{
+              padding: "5px",
+              width: fromDiscount || toDiscount ? "350px" : "300px",
+              height: "50px",
+            }}
+          >
+            <Space>
+              <Form.Item hasFeedback label="from" name="fromDiscount">
+                <InputNumber placeholder="Enter From" min={1} />
+              </Form.Item>
+              <Form.Item hasFeedback label="to" name="toDiscount">
+                <InputNumber placeholder="Enter To" min={1} />
+              </Form.Item>
+              <span style={{ width: "20%" }}>
+                <Form.Item>
+                  <Button
+                    style={{ width: "30px", right: "-10px" }}
+                    type="primary"
+                    htmlType="submit"
+                    icon={<SearchOutlined />}
+                  />
+                </Form.Item>
+              </span>
+              <span>
+                {fromDiscount || toDiscount ? (
+                  <Form.Item>
+                    <Button
+                      style={{ width: "30px", right: "-8px" }}
+                      type="primary"
+                      onClick={() => {
+                        setFromDiscount("");
+                        setToDiscount("");
+                        inforDiscount.resetFields();
+                      }}
+                      icon={<ClearOutlined />}
+                    />
+                  </Form.Item>
+                ) : (
+                  ""
+                )}
+              </span>
+            </Space>
+          </Form>
+        );
+      },
+    },
+    //Note
+
+    { title: "Note", dataIndex: "note", key: "note", width: "10%" },
+
     //Function
     {
+      width: "10%",
+
       title: "Function",
       dataIndex: "function",
       key: "function",
       render: (text: string, record: any) => (
         <Space>
-          <Upload
-            showUploadList={false}
-            name="file"
-            action={`http://localhost:9000/upload/products/${record._id}/image`}
-            headers={{ authorization: "authorization-text" }}
-            onChange={(info) => {
-              if (info.file.status === "done") {
-                console.log("««««« infor.file »»»»»", info.file);
-                setRefresh((f) => f + 1);
-                message.success(`${info.file.name} file uploaded successfully`);
-              } else if (info.file.status === "error") {
-                message.error(`${info.file.name} file upload failed.`);
-              }
-            }}
-          >
-            <Button icon={<UploadOutlined />} />
-          </Upload>
-
-          <Button
-            type="dashed"
-            icon={<EditOutlined />}
-            onClick={() => {
-              setOpen(true);
-              setUpdateId(record._id);
-              updateForm.setFieldsValue(record);
-            }}
-          />
-
           <Popconfirm
             okText="Delete"
             okType="danger"
@@ -520,6 +597,39 @@ const ProductsCRUD = () => {
               }}
             ></Button>
           </Popconfirm>
+          <Button
+            type="dashed"
+            icon={<EditOutlined />}
+            onClick={() => {
+              setOpen(true);
+              setUpdateId(record._id);
+              updateForm.setFieldsValue(record);
+            }}
+          />
+          <Upload
+            showUploadList={false}
+            name="file"
+            action={`http://localhost:9000/upload/products/${record._id}/image`}
+            headers={{ authorization: "authorization-text" }}
+            onChange={(info) => {
+              if (info.file.status !== "uploading") {
+                console.log(info.file);
+              }
+
+              if (info.file.status === "done") {
+                message.success(`${info.file.name} file uploaded successfully`);
+
+                setTimeout(() => {
+                  console.log("««««« run »»»»»");
+                  setRefresh(refresh + 1);
+                }, 1000);
+              } else if (info.file.status === "error") {
+                message.error(`${info.file.name} file upload failed.`);
+              }
+            }}
+          >
+            <Button icon={<UploadOutlined />} />
+          </Upload>
         </Space>
       ),
       filterDropdown: () => {
@@ -540,7 +650,7 @@ const ProductsCRUD = () => {
                 }}
                 icon={<PlusCircleOutlined />}
               >
-                Add product
+                Add Product
               </Button>
             </Space>
           </>
@@ -554,7 +664,7 @@ const ProductsCRUD = () => {
     axios
       .get("http://localhost:9000/categories")
       .then((res) => {
-        setCategories(res.data);
+        setCategories(res.data.results);
       })
       .catch((err) => console.log(err));
   }, []);
@@ -569,33 +679,14 @@ const ProductsCRUD = () => {
       .catch((err) => console.log(err));
   }, []);
 
-  //CALL API PRODUCT FILLTER
-  let URL_FILTER = `http://localhost:9000/products?${
-    productName && `&productName=${productName}`
-  }${supplierId && `&supplierId=${supplierId}`}${
-    categoryId && `&categoryId=${categoryId}`
-  }${fromPrice && `&fromPrice=${fromPrice}`}${
-    toPrice && `&toPrice=${toPrice}`
-  }${fromDiscount && `&fromDiscount=${fromDiscount}`}${
-    toDiscount && `&toDiscount=${toDiscount}`
-  }${fromStock && `&fromStock=${fromStock}`}${
-    toStock && `&toStock=${toStock}`
-  }${skip ? `&skip=${skip}` : ""}&limit=${10}`;
-
-  // CALL API FILTER PRODUCT DEPEND ON QUERY
-  useEffect(() => {
-    axios
-      .get(URL_FILTER)
-      .then((res) => {
-        console.log("««««« res..data »»»»»", res.data.results[6]);
-        setProductsTEST(res.data.results);
-        setPages(res.data.amountResults);
-      })
-      .catch((err) => console.log(err));
-  }, [refresh, URL_FILTER]);
-
   //Handle Create a Data
   const handleCreate = (record: any) => {
+    record.createdBy = auth.payload;
+    record.createdDate = new Date().toISOString();
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    record.isDeleted = false;
     axios
       .post(API_URL, record)
       .then((res) => {
@@ -625,6 +716,14 @@ const ProductsCRUD = () => {
 
   //Update a data
   const handleUpdate = (record: any) => {
+    record.updatedBy = auth.payload;
+    record.updatedDate = new Date().toISOString();
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    if (record.isDeleted === undefined) {
+      record.isDeleted = false;
+    }
     axios
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
@@ -640,6 +739,8 @@ const ProductsCRUD = () => {
   // UPLOAD
 
   //Search DEPEN ON CATEGORY
+  //Search on CategoryID
+  const [categoryId, setCategoryId] = useState("");
 
   const onSearchCategory = useCallback((value: any) => {
     if (value) {
@@ -658,25 +759,7 @@ const ProductsCRUD = () => {
       setSupplierId("");
     }
   }, []);
-  // Clear all Filter
 
-  const handleClearFillter = () => {
-    setSupplierId("");
-    setProductName("");
-    setCategoryId("");
-    //Price
-    setFromPrice("");
-    setToPrice("");
-    inforPrice.resetFields();
-    //Discount
-    setFromDiscount("");
-    setToDiscount("");
-    inforDiscount.resetFields();
-    //Stock
-    setFromStock("");
-    setToStock("");
-    inforStock.resetFields();
-  };
   //SEARCH DEPEN ON NAME
 
   const onSearchProductName = (record: any) => {
@@ -712,6 +795,54 @@ const ProductsCRUD = () => {
     setSkip(value * 10 - 10);
     setCurrentPage(value);
   };
+  // Clear all Filter
+
+  const handleClearFillter = () => {
+    setSupplierId("");
+    setProductName("");
+    setCategoryId("");
+    //Price
+    setFromPrice("");
+    setToPrice("");
+    inforPrice.resetFields();
+    //Discount
+    setFromDiscount("");
+    setToDiscount("");
+    inforDiscount.resetFields();
+    //Stock
+    setFromStock("");
+    setToStock("");
+    inforStock.resetFields();
+  };
+  //CALL API PRODUCT FILLTER
+  const queryParams = [
+    productName && `productName=${productName}`,
+    supplierId && `supplierId=${supplierId}`,
+    categoryId && `categoryId=${categoryId}`,
+    fromPrice && `fromPrice=${fromPrice}`,
+    toPrice && `toPrice=${toPrice}`,
+    fromDiscount && `fromDiscount=${fromDiscount}`,
+    toDiscount && `toDiscount=${toDiscount}`,
+    fromStock && `fromStock=${fromStock}`,
+    toStock && `toStock=${toStock}`,
+    skip && `skip=${skip}`,
+    isActive && `active=${isActive}`,
+    isDelete && `isDeleted=${isDelete}`,
+  ]
+    .filter(Boolean)
+    .join("&");
+
+  let URL_FILTER = `http://localhost:9000/products?${queryParams}&limit=10`;
+  // CALL API FILTER PRODUCT DEPEND ON QUERY
+  useEffect(() => {
+    axios
+      .get(URL_FILTER)
+      .then((res) => {
+        setProductsTEST(res.data.results);
+        setPages(res.data.amountResults);
+      })
+      .catch((err) => console.log(err));
+  }, [refresh, URL_FILTER]);
 
   return (
     <>
@@ -870,16 +1001,65 @@ const ProductsCRUD = () => {
           >
             <InputNumber min={1} />
           </Form.Item>{" "}
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="active"
+            name="active"
+            valuePropName="checked"
+          >
+            <Checkbox />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="sortOder"
+            name="sortOder"
+          >
+            <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="Note"
+            name="note"
+          >
+            <Input />
+          </Form.Item>
         </Form>
       </Modal>
       {/* List and function Product */}
       <Table
         tableLayout="auto"
-        className="container"
         rowKey="id"
         columns={columns}
         dataSource={productsTEST}
         pagination={false}
+        scroll={{ x: 1000, y: 600 }}
+        rowClassName={(record) => {
+          if (record.active === false && record.isDeleted === false) {
+            return "bg-dark-subtle";
+          } else if (record.isDeleted) {
+            return "text-danger bg-success-subtle";
+          } else {
+            return "";
+          }
+        }}
         // dataSource={filterOn ? suppliersFilter : products}
       >
         {" "}
@@ -1037,6 +1217,60 @@ const ProductsCRUD = () => {
           >
             <InputNumber min={1} />
           </Form.Item>{" "}
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="active"
+            name="active"
+            valuePropName="checked"
+          >
+            <Checkbox />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="sortOder"
+            name="sortOder"
+          >
+            <InputNumber min={1} />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="isDeleted"
+            name="isDeleted"
+            valuePropName="checked"
+          >
+            <Checkbox />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            hasFeedback
+            label="Note"
+            name="note"
+          >
+            <Input />
+          </Form.Item>
         </Form>
       </Modal>
 

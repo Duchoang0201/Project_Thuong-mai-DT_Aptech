@@ -1,10 +1,9 @@
 import React from "react";
-import Icon, {
+import {
   CommentOutlined,
   ExportOutlined,
   HomeOutlined,
-  MoreOutlined,
-  PlusOutlined,
+  OrderedListOutlined,
   SettingOutlined,
   UserOutlined,
   UsergroupAddOutlined,
@@ -47,6 +46,21 @@ const items = [
       {
         key: "management/products",
         label: "Products",
+      },
+    ],
+  },
+  {
+    label: "Order",
+    key: "order",
+    icon: <OrderedListOutlined />,
+    children: [
+      {
+        key: "order/orders",
+        label: "Orders",
+      },
+      {
+        key: "order/status",
+        label: "OrderStatus",
       },
     ],
   },

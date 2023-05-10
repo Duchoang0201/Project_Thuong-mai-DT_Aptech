@@ -39,6 +39,7 @@ const employeeSchema = new Schema(
     password: { type: String, required: true },
     address: { type: String, required: true },
     birthday: { type: Date },
+    LastActivity: { type: Date },
   },
   {
     versionKey: false,

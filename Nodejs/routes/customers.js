@@ -16,51 +16,104 @@ const { Customer } = require("../models");
 /* GET home page. */
 
 // GET ALL DATA
+// router.get("/", async (req, res, next) => {
+//   try {
+//     const data = await Customer.find();
+//     res.status(200).json(data);
+//   } catch (error) {
+//     res.status(500).json({ error: error });
+//   }
+// });
+
+//Get a Data
+// Get all on Multiple conditions
 router.get("/", async (req, res, next) => {
   try {
-    const data = await Customer.find();
-    res.status(200).json(data);
+    const {
+      Locked,
+      email,
+      firstName,
+      lastName,
+      phoneNumber,
+      birthdayFrom,
+      birthdayTo,
+      address,
+      skip,
+      limit,
+    } = req.query;
+
+    let fromDate = null;
+    if (birthdayFrom) {
+      fromDate = new Date(birthdayFrom);
+      fromDate.setHours(0, 0, 0, 0);
+      if (isNaN(fromDate.getTime())) {
+        throw new Error("Invalid date format for birthdayFrom");
+      }
+    }
+
+    let toDate = null;
+    if (birthdayTo) {
+      const tempToDate = new Date(birthdayTo);
+      toDate = new Date(tempToDate.setDate(tempToDate.getDate() + 1));
+      toDate.setHours(0, 0, 0, 0);
+      if (isNaN(toDate.getTime())) {
+        throw new Error("Invalid date format for birthdayTo");
+      }
+    }
+
+    const query = {
+      $expr: {
+        $and: [
+          Locked && { $eq: ["$Locked", Locked] },
+          email && {
+            $regexMatch: { input: "$email", regex: email, options: "i" },
+          },
+          firstName && {
+            $regexMatch: {
+              input: "$firstName",
+              regex: firstName,
+              options: "i",
+            },
+          },
+          lastName && {
+            $regexMatch: {
+              input: "$lastName",
+              regex: lastName,
+              options: "i",
+            },
+          },
+          fromDate && { $gte: ["$birthday", fromDate] },
+          toDate && { $lte: ["$birthday", toDate] },
+          address && {
+            $regexMatch: {
+              input: "$address",
+              regex: address,
+              options: "i",
+            },
+          },
+          phoneNumber && {
+            $regexMatch: {
+              input: "$phoneNumber",
+              regex: phoneNumber,
+              options: "i",
+            },
+          },
+        ].filter(Boolean),
+      },
+    };
+
+    let results = await Customer.find(query)
+      .sort({ Locked: 1 })
+      .skip(skip)
+      .limit(limit);
+
+    let amountResults = await Customer.countDocuments(query);
+    res.json({ results: results, amountResults: amountResults });
   } catch (error) {
-    res.status(500).json({ error: error });
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 
-//GET A DATA
-router.get("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
-
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const id = req.params.id;
-      const found = await Customer.findById(id);
-
-      if (found) {
-        return res.status(200).send({ oke: true, result: found });
-      }
-      return res.status(500).send({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
 // CREATE DATA
 router.post("/", function (req, res, next) {
   const validationSchema = yup.object({

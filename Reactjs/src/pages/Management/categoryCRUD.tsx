@@ -1,202 +1,717 @@
-import React, { useEffect, useState } from "react";
-import "./App.css";
-import { Button, Form, Input, message, Modal, Space, Table } from "antd";
+import {
+  CheckCircleOutlined,
+  ClearOutlined,
+  CloseCircleOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusCircleOutlined,
+} from "@ant-design/icons";
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  InputNumber,
+  message,
+  Modal,
+  Pagination,
+  Popconfirm,
+  Select,
+  Space,
+  Table,
+} from "antd";
+import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
-
-interface DataType {
-  id: number;
-  name: string;
-  description: string;
-}
+import React, { useCallback, useEffect, useState } from "react";
+import Search from "antd/es/input/Search";
+import { useAuthStore } from "../../hooks/useAuthStore";
+// Date Picker
 
 function CategoryCRUD() {
-  const API_URL = "http://localhost:9000/categories";
-  const [categories, setCategories] = useState<Array<DataType>>([]);
-  const [refresh, setrefresh] = useState(0);
+  const { auth } = useAuthStore((state: any) => state);
+  const [refresh, setRefresh] = useState(0);
+
+  // Date Picker Setting
+
+  // API OF
+  let API_URL = "http://localhost:9000/categories";
+
+  // MODAL:
+  // Modal open Create:
+  const [openCreate, setOpenCreate] = useState(false);
+
+  // Modal open Update:
+  const [open, setOpen] = useState(false);
+
+  //Model open Confirm Delete
+  // const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  //Delete Item
+  const [deleteItem, setDeleteItem] = useState<any>();
+
+  //For fillter:
+
+  //Data fillter
+  const [categoryTEST, setCategoryTEST] = useState<any>([]);
+
+  // Change fillter (f=> f+1)
+
+  const [updateId, setUpdateId] = useState(0);
+
+  //Create, Update Form setting
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
-  const [open, setOpen] = useState(false);
-  const [updateId, setUpdateId] = useState(0);
-  useEffect(() => {
-    axios
-      .get(API_URL)
-      .then((res: any) => {
-        setCategories(res.data);
-      })
-      .catch((error) => {
-        console.log("Error:", error);
-        alert("Something went wrong!");
-      });
-  }, [refresh]);
 
-  // Create new Item
-  const handleSumbit = (data: any) => {
-    console.log(data);
+  //Check Active
+  //Text of Tyography:
+
+  //Create data
+  const handleCreate = (record: any) => {
+    record.createdBy = auth.payload;
+    record.createdDate = new Date().toISOString();
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    record.isDeleted = false;
+
     axios
-      .post(API_URL, data)
-      .then((res) => {
-        console.log(res);
-        message.success("Thêm mới danh mục thành công", 1.5);
-        setrefresh((f) => f + 1);
-        createForm.resetFields();
-      })
-      .catch((err) => console.log(err));
-  };
-  // Patch Item
-  const handleUpdate = (record: any) => {
-    console.log(updateId, record);
-    // axios
-    //   .patch(API_URL + "/" + updateId, record)
-    //   .then((res) => {
-    //     console.log(res);
-    //     message.success("Sửa danh mục thành công", 1.5);
-    //     setrefresh((f) => f + 1);
-    //     updateForm.resetFields();
-    //     setOpen(false);
-    //   })
-    //   .catch((err) => console.log(err));
-  };
-  //Delte Item
-  const handleDelete = (data: any) => {
-    console.log(data);
-    axios
-      .delete(API_URL + "/" + data)
+      .post(API_URL, record)
       .then((res) => {
         console.log(res.data);
-        message.success("Xóa danh mục thành công", 1.5);
-        setrefresh((f) => f + 1);
+        setRefresh((f) => f + 1);
+        setOpenCreate(false);
+
+        message.success(" Add new Category sucessfully!", 1.5);
+        createForm.resetFields();
       })
-      .catch((err) => console.log(err));
+      .catch((err) => {
+        console.log(err);
+        message.error(err.response.data.message);
+      });
+  };
+  //Delete a Data
+  const handleDelete = (record: any) => {
+    // axios
+    //   .patch(API_URL + "/" + record._id, { isDeleted: true })
+    //   .then((res) => {
+    //     console.log(res);
+    //     setOpen(false);
+    //     setOpenCreate(false);
+    //     setRefresh((f) => f + 1);
+    //     message.success("Deleted sucessfully!!", 1.5);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
+
+    axios
+      .delete(API_URL + "/" + record._id)
+      .then((res) => {
+        message.success(" Delete item sucessfully!!", 1.5);
+        setRefresh((f) => f + 1);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+  //Update a Data
+  const handleUpdate = (record: any) => {
+    record.updatedBy = auth.payload;
+    record.updatedDate = new Date().toISOString();
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    if (record.isDeleted === undefined) {
+      record.isDeleted = false;
+    }
+    console.log("««««« record »»»»»", record);
+    axios
+      .patch(API_URL + "/" + updateId, record)
+      .then((res) => {
+        console.log(res);
+        setOpen(false);
+        setOpenCreate(false);
+        setRefresh((f) => f + 1);
+        message.success("Updated sucessfully!!", 1.5);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
-  //Patch Item
+  //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
 
+  const [isDelete, setIsDelete] = useState("");
+  const [isActive, setIsActive] = useState("");
+  const onSearchIsDelete = useCallback((value: any) => {
+    console.log("««««« value »»»»»", value);
+    if (value === "active") {
+      setIsActive("true");
+      setIsDelete("");
+    }
+    if (value === "unActive") {
+      setIsActive("false");
+      setIsDelete("");
+    }
+    if (value === "Deleted") {
+      setIsDelete("true");
+      setIsActive("");
+    }
+    if (value !== "active" && value !== "unActive" && value !== "Deleted") {
+      setIsActive("");
+      setIsDelete("");
+    }
+  }, []);
+
+  //SEARCH DEPEN ON NAME
+  const [categoriesName, setCategoriesName] = useState("");
+
+  const onSearchCategoriesName = useCallback((value: any) => {
+    if (value) {
+      setCategoriesName(value);
+    } else {
+      setCategoriesName("");
+    }
+  }, []);
+
+  //SEARCH DEPEN ON DESCRIPTION
+  const [categoryDescription, setCategoryDescription] = useState("");
+
+  const onSearchCategoryDescription = (record: any) => {
+    if (record) {
+      setCategoryDescription(record);
+    } else {
+      setCategoryDescription("");
+    }
+  };
+
+  //Search on Skip and Limit
+
+  const [pages, setPages] = useState();
+  const [skip, setSkip] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const slideCurrent = (value: any) => {
+    setSkip(value * 10 - 10);
+    setCurrentPage(value);
+  };
+  //GET DATA ON FILLTER
+  const URL_FILTER = `${API_URL}?${[
+    categoriesName && `&name=${categoriesName}`,
+    categoryDescription && `&description=${categoryDescription}`,
+    isActive && `&active=${isActive}`,
+    isDelete && `&isDeleted=${isDelete}`,
+    skip && `&skip=${skip}`,
+  ]
+    .filter(Boolean)
+    .join("")}&limit=10`;
+
+  console.log("««««« URL_FILTER »»»»»", URL_FILTER);
+  useEffect(() => {
+    axios
+      .get(URL_FILTER)
+      .then((res) => {
+        console.log("««««« res »»»»»", res);
+        setCategoryTEST(res.data.results);
+        setPages(res.data.amountResults);
+      })
+      .catch((err) => console.log(err));
+  }, [URL_FILTER, refresh]);
+
+  console.log(pages);
+  //Setting column
   const columns = [
     {
-      title: "Id",
+      title: () => {
+        return (
+          <div>
+            {isActive || isDelete ? (
+              <div className="text-danger">No</div>
+            ) : (
+              <div className="secondary">No</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "id",
       key: "id",
-      width: "1%",
-      render: (text: any, record: any, index: any) => (
-        <div key={index}> {index + 1}</div>
-      ),
+      render: (text: string, record: any, index: number) => {
+        return (
+          <div>
+            <Space>
+              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {record.active === true && !record.isDeleted && (
+                <span style={{ fontSize: "16px", color: "#08c" }}>
+                  <CheckCircleOutlined /> Active
+                </span>
+              )}
+              {record.active === false && !record.isDeleted && (
+                <span className="text-danger">
+                  <CloseCircleOutlined
+                    style={{ fontSize: "16px", color: "#dc3545" }}
+                  />{" "}
+                  Unactive
+                </span>
+              )}
+
+              {record.isDeleted === true && (
+                <span className="text-danger">
+                  <CloseCircleOutlined
+                    style={{ fontSize: "16px", color: "#dc3545" }}
+                  />{" "}
+                  Deleted
+                </span>
+              )}
+            </Space>
+          </div>
+        );
+      },
+      filterDropdown: () => {
+        return (
+          <>
+            <div>
+              <Select
+                allowClear
+                onClear={() => {
+                  setIsDelete("");
+                }}
+                style={{ width: "125px" }}
+                placeholder="Select a supplier"
+                optionFilterProp="children"
+                showSearch
+                onChange={onSearchIsDelete}
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "active",
+                    label: "Active",
+                  },
+                  {
+                    value: "unActive",
+                    label: "Unactive",
+                  },
+                  {
+                    value: "Deleted",
+                    label: "Deleted",
+                  },
+                ]}
+              />
+            </div>
+          </>
+        );
+      },
+      width: "11%",
     },
+    //Name
     {
-      title: "Name",
+      title: () => {
+        return (
+          <div>
+            {categoriesName ? (
+              <div className="text-danger">Name</div>
+            ) : (
+              <div className="secondary">Name</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "name",
       key: "name",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              placeholder="input search text"
+              onSearch={onSearchCategoriesName}
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
     },
+    //Desciption
     {
-      title: "Description",
+      title: () => {
+        return (
+          <div>
+            {categoryDescription ? (
+              <div className="text-danger">Description</div>
+            ) : (
+              <div className="secondary">Description</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "description",
-      key: "id",
+      key: "description",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              placeholder="input search text"
+              onSearch={onSearchCategoryDescription}
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
     },
+
+    //Note
+    {
+      title: "Note",
+      dataIndex: "note",
+      key: "note",
+      width: "10%",
+    },
+
+    //function
     {
       title: "Function",
       dataIndex: "function",
-      key: "id",
-      render: (text: string, record: any) => (
-        <div>
-          <Space>
-            <Button
-              icon={<EditOutlined />}
-              onClick={() => {
-                setOpen(true);
-                setUpdateId(record._id);
-                updateForm.setFieldsValue(record);
-              }}
-            />
+      key: "function",
+      render: (text: any, record: any) => (
+        <Space>
+          <Popconfirm
+            okText="Delete"
+            okType="danger"
+            onConfirm={() => handleDelete(deleteItem)}
+            title={"Are you sure to delete this product?"}
+          >
             <Button
               danger
               icon={<DeleteOutlined />}
-              onClick={() => handleDelete(record._id)}
-            />
-          </Space>
-        </div>
+              onClick={() => {
+                setDeleteItem(record);
+              }}
+            ></Button>
+          </Popconfirm>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => {
+              setOpen(true);
+              setUpdateId(record._id);
+              updateForm.setFieldsValue(record);
+            }}
+          ></Button>
+        </Space>
       ),
+      filterDropdown: () => {
+        return (
+          <>
+            <Space direction="vertical">
+              <Button
+                style={{ width: "150px" }}
+                onClick={() => {
+                  setCategoriesName("");
+                  setCategoryDescription("");
+                }}
+                icon={<ClearOutlined />}
+              >
+                Clear filter
+              </Button>
+              <Button
+                style={{ width: "150px" }}
+                onClick={() => {
+                  setOpenCreate(true);
+                }}
+                icon={<PlusCircleOutlined />}
+              >
+                Add Category
+              </Button>
+            </Space>
+          </>
+        );
+      },
     },
   ];
 
   return (
-    <div>
-      <div className="container d-flex flex-row justify-content-center">
-        <Form
-          form={createForm}
-          // labelCol={{ span: 8 }}
-          // wrapperCol={{ span: 16 }}
-          // style={{ maxWidth: 600 }}
-          // initialValues={{ remember: true }}
-          onFinish={handleSumbit}
-          // onFinishFailed={onFinishFailed}
-          autoComplete="off"
-        >
-          <Form.Item
-            hasFeedback
-            label="Username"
-            name="name"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
-            <Input />
-          </Form.Item>
+    <div className="container">
+      {/* Modal Create A Category */}
+      <Modal
+        title={`Create Category `}
+        open={openCreate}
+        onCancel={() => {
+          setOpenCreate(false);
+        }}
+        onOk={() => {
+          createForm.submit();
+        }}
+        okText="Submit"
+      >
+        <div className="container d-flex flex-row ">
+          <Form form={createForm} name="createForm" onFinish={handleCreate}>
+            <div className="row">
+              <FormItem
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="Name"
+                name="name"
+                rules={[{ required: true, message: "Please input Name!" }]}
+              >
+                <Input />
+              </FormItem>
+              <FormItem
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="description"
+                name="description"
+                rules={[
+                  { required: true, message: "Please input Description!" },
+                ]}
+              >
+                <Input />
+              </FormItem>
+              <FormItem
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="promotionPosition"
+                name="promotionPosition"
+              >
+                <Select
+                  mode="multiple"
+                  allowClear
+                  showSearch
+                  placeholder="Select promotion"
+                  optionFilterProp="children"
+                  filterOption={(input, option) =>
+                    (option?.label ?? "")
+                      .toLowerCase()
+                      .includes(input.toLowerCase())
+                  }
+                  options={[
+                    {
+                      value: "TOP-MONTH",
+                      label: "TOP-MONTH",
+                    },
+                    {
+                      value: "DEAL",
+                      label: "DEAL",
+                    },
+                  ]}
+                />
+              </FormItem>
+              <Form.Item
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="active"
+                name="active"
+                valuePropName="checked"
+              >
+                <Checkbox />
+              </Form.Item>
 
-          <Form.Item
-            hasFeedback
-            label="Description"
-            name="description"
-            rules={[
-              { required: true, message: "Please input your description!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
+              <Form.Item
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="sortOder"
+                name="sortOder"
+              >
+                <InputNumber min={1} />
+              </Form.Item>
+              <Form.Item
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="Note"
+                name="note"
+              >
+                <Input />
+              </Form.Item>
+            </div>
+          </Form>
+        </div>
+      </Modal>
 
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
-        </Form>
-      </div>
+      {/* List and function  */}
 
-      <div className="container">
-        <Table
-          rowKey="id"
-          dataSource={categories}
-          columns={columns}
-          pagination={false}
-        ></Table>
-      </div>
+      <Table
+        rowKey="_id"
+        columns={columns}
+        dataSource={categoryTEST}
+        pagination={false}
+        scroll={{ x: "max-content", y: 630 }}
+        rowClassName={(record) => {
+          if (record.active === false && record.isDeleted === false) {
+            return "bg-dark-subtle";
+          } else if (record.isDeleted) {
+            return "text-danger bg-success-subtle";
+          } else {
+            return "";
+          }
+        }}
+      />
 
+      {/* Model Update */}
       <Modal
         open={open}
-        title="Update cateroty"
+        title="Update Category"
         onCancel={() => setOpen(false)}
         onOk={() => {
           updateForm.submit();
         }}
       >
-        <Form form={updateForm} onFinish={handleUpdate} autoComplete="off">
-          <Form.Item
-            hasFeedback
-            label="Username"
-            name="name"
-            rules={[{ required: true, message: "Please input your username!" }]}
-          >
-            <Input />
-          </Form.Item>
-
-          <Form.Item
-            hasFeedback
-            label="Description"
-            name="description"
-            rules={[
-              { required: true, message: "Please input your description!" },
-            ]}
-          >
-            <Input />
-          </Form.Item>
+        <Form form={updateForm} name="updateForm" onFinish={handleUpdate}>
+          <div className="row">
+            <FormItem
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Name"
+              name="name"
+              rules={[{ required: true, message: "Please input Name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Description"
+              name="description"
+              rules={[{ required: true, message: "Please input Description!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="promotionPosition"
+              name="promotionPosition"
+            >
+              <Select
+                mode="multiple"
+                allowClear
+                showSearch
+                placeholder="Select promotion"
+                optionFilterProp="children"
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "TOP-MONTH",
+                    label: "TOP-MONTH",
+                  },
+                  {
+                    value: "DEAL",
+                    label: "DEAL",
+                  },
+                ]}
+              />
+            </FormItem>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="active"
+              name="active"
+              valuePropName="checked"
+            >
+              <Checkbox />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="isDeleted"
+              name="isDeleted"
+              valuePropName="checked"
+            >
+              <Checkbox />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="sortOrder"
+              name="sortOrder"
+            >
+              <InputNumber min={1} />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Note"
+              name="note"
+            >
+              <Input />
+            </Form.Item>
+          </div>
         </Form>
       </Modal>
+      <Pagination
+        className="container text-end"
+        onChange={(e) => slideCurrent(e)}
+        defaultCurrent={1}
+        total={pages}
+      />
     </div>
   );
 }

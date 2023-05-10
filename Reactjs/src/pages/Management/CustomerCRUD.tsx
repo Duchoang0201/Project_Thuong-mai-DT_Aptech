@@ -1,242 +1,760 @@
-import { DeleteOutlined, EditOutlined } from "@ant-design/icons";
+import {
+  CheckCircleOutlined,
+  ClearOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusCircleOutlined,
+  UploadOutlined,
+} from "@ant-design/icons";
 import {
   Button,
+  Checkbox,
   DatePicker,
-  // DatePickerProps,
   Form,
   Input,
   message,
   Modal,
+  Pagination,
+  Popconfirm,
+  Select,
   Space,
+  Switch,
   Table,
+  Typography,
+  Upload,
 } from "antd";
-// import FormItemLabel from "antd/es/form/FormItemLabel";
+import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
+import Search from "antd/es/input/Search";
+import { useAuthStore } from "../../hooks/useAuthStore";
 
-interface ICustomers {
-  fisrtName: string;
-  lastName: string;
-  phoneNumber: string;
-  address: string;
-  email: string;
-  birthday: string;
-}
-const CustomerCRUD = () => {
-  const API_URL = "http://localhost:9000/customers";
-  const [customers, setCustomer] = useState<Array<ICustomers>>([]);
+// Date Picker
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+
+function CustomerCRUD() {
+  const { auth } = useAuthStore((state: any) => state);
+
   const [refresh, setRefresh] = useState(0);
+
+  // Date Picker Setting
+
+  const { RangePicker } = DatePicker;
+  dayjs.extend(customParseFormat);
+
+  const dateFormat = "DD/MM/YYYY";
+
+  // API OF COLLECTIOn
+  let API_URL = "http://localhost:9000/customers";
+
+  // MODAL:
+  // Modal open Create:
+  const [openCreate, setOpenCreate] = useState(false);
+
+  // Modal open Update:
   const [open, setOpen] = useState(false);
+
+  //Model open Confirm Delete
+  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
+  //Delete Item
+  const [deleteItem, setDeleteItem] = useState<any>();
+
+  //For fillter:
+
+  //Data fillter
+  const [customersTEST, setCustomersTEST] = useState<any>([]);
+
+  // Change fillter (f=> f+1)
+
   const [updateId, setUpdateId] = useState(0);
-  const [updateForm] = Form.useForm();
+
+  //Create, Update Form setting
   const [createForm] = Form.useForm();
-  //Get DATA
-  useEffect(() => {
+  const [updateForm] = Form.useForm();
+
+  //Text of Tyography:
+
+  //Create data
+  const handleCreate = (record: any) => {
+    record.createdBy = auth.payload;
+    record.createdDate = new Date().toISOString();
+    if (record.Locked === undefined) {
+      record.Locked = false;
+    }
     axios
-      .get(API_URL)
+      .post(API_URL, record)
       .then((res) => {
-        setCustomer(res.data);
+        console.log(res.data);
+        setRefresh((f) => f + 1);
+        setOpenCreate(false);
+
+        message.success(" Add new Customer sucessfully!", 1.5);
+        createForm.resetFields();
+      })
+      .catch((err) => {
+        console.log(err);
+        message.error(err.response.data.message);
+      });
+  };
+  //Delete a Data
+  const handleDelete = (record: any) => {
+    axios
+      .delete(API_URL + "/" + record._id)
+      .then((res) => {
+        message.success(" Delete item sucessfully!!", 1.5);
+        setOpenDeleteConfirm(false);
+        setRefresh((f) => f + 1);
       })
       .catch((err) => {
         console.log(err);
       });
-  }, [refresh]);
-
-  // const onChange: DatePickerProps["onChange"] = (date, dateString) => {
-  //   console.log(date, dateString);
-  // };
-
-  //Create a Data
-  const handleCreate = (record: any) => {
-    const newData = {
-      ...record,
-      birthday: `${record.birthday.$y}-${record.birthday.$M + 1}-${
-        record.birthday.$D
-      } `,
-    };
-    console.log(record);
-    axios
-      .post(API_URL, newData)
-      .then((res) => {
-        message.success("Create new data sucessfully!!", 1.5);
-        setRefresh((f) => f + 1);
-      })
-      .catch((res) => {
-        message.success("Create new data unsucessfully!!", 1.5);
-      });
   };
-  //Delete a data
-  const handleDelte = (recordID: any) => {
+  //Update a Data
+  const handleUpdate = (record: any) => {
+    record.updatedBy = auth.payload;
+    record.updatedDate = new Date().toISOString();
+
     axios
-      .delete(API_URL + "/" + recordID)
+      .patch(API_URL + "/" + updateId, record)
       .then((res) => {
         console.log(res);
-        setRefresh((f) => f + 1);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
-  //Update a data
-  const handleUpdate = (data: any) => {
-    axios
-      .patch(API_URL + "/" + updateId, data)
-      .then((res) => {
-        setRefresh((f) => f + 1);
         setOpen(false);
+        setOpenCreate(false);
+        setRefresh((f) => f + 1);
         message.success("Updated sucessfully!!", 1.5);
       })
       .catch((err) => {
         console.log(err);
       });
   };
-  //Format colums
+
+  //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
+
+  const [isLocked, setIsLocked] = useState("");
+  const onSearchIsLocked = useCallback((value: any) => {
+    console.log("««««« value »»»»»", value);
+    if (value) {
+      setIsLocked(value);
+    } else {
+      setIsLocked("");
+    }
+  }, []);
+
+  //SEARCH DEPEN ON NAME
+  const [customerEmail, setCustomerEmail] = useState("");
+
+  const onSearchCustomerEmail = useCallback((value: any) => {
+    console.log(value);
+    if (value) {
+      setCustomerEmail(value);
+    } else {
+      setCustomerEmail("");
+    }
+  }, []);
+
+  //SEARCH DEPEN ON NAME
+  const [customerFirstName, setCustomerFirstName] = useState("");
+
+  const onSearchCustomerFirstName = useCallback((value: any) => {
+    console.log(value);
+    if (value) {
+      setCustomerFirstName(value);
+    } else {
+      setCustomerFirstName("");
+    }
+  }, []);
+
+  //SEARCH DEPEN ON LastName
+  const [customerLastName, setCustomerLastName] = useState("");
+
+  const onSearchCustomerLastName = (record: any) => {
+    if (record) {
+      setCustomerLastName(record);
+    } else {
+      setCustomerLastName("");
+    }
+  };
+
+  //SEARCH DEPEN ON PhoneNumber
+  const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
+
+  const onSearchCustomerPhoneNumber = (record: any) => {
+    if (record) {
+      setCustomerPhoneNumber(record);
+    } else {
+      setCustomerPhoneNumber("");
+    }
+  };
+
+  //SEARCH DEPEN ON Address
+  const [customerAddress, setCustomerAddress] = useState("");
+
+  const onSearchCustomerAddress = (record: any) => {
+    if (record) {
+      setCustomerAddress(record);
+    } else {
+      setCustomerAddress("");
+    }
+  };
+  //SEARCH DEPEN ON Birthday
+  const [customerBirthdayFrom, setCustomerBirthdayFrom] = useState("");
+  const [customerBirthdayTo, setCustomerBirthdayTo] = useState("");
+
+  const onSearchCustomerBirthday = (record: any) => {
+    const formattedRecord = record.map((date: any) =>
+      dayjs(date).format("YYYY/MM/DD")
+    );
+    console.log("««««« formattedRecord »»»»»", formattedRecord);
+    if (formattedRecord) {
+      setCustomerBirthdayFrom(formattedRecord[0]);
+      setCustomerBirthdayTo(formattedRecord[1]);
+    } else {
+      setCustomerBirthdayFrom("");
+      setCustomerBirthdayTo("");
+    }
+  };
+
+  //Search on Skip and Limit
+
+  const [pages, setPages] = useState();
+  const [skip, setSkip] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const slideCurrent = (value: any) => {
+    setSkip(value * 10 - 10);
+    setCurrentPage(value);
+  };
+  //GET DATA ON FILLTER
+  const URL_FILTER = `${API_URL}?${[
+    customerFirstName && `&firstName=${customerFirstName}`,
+    customerLastName && `&lastName=${customerLastName}`,
+    customerEmail && `&email=${customerEmail}`,
+    customerPhoneNumber && `&phoneNumber=${customerPhoneNumber}`,
+    customerAddress && `&address=${customerAddress}`,
+    customerBirthdayFrom && `&birthdayFrom=${customerBirthdayFrom}`,
+    customerBirthdayTo && `&birthdayTo=${customerBirthdayTo}`,
+    isLocked && `&Locked=${isLocked}`,
+    skip && `&skip=${skip}`,
+  ]
+    .filter(Boolean)
+    .join("")}&limit=10`;
+
+  useEffect(() => {
+    axios
+      .get(URL_FILTER)
+      .then((res) => {
+        setCustomersTEST(res.data.results);
+        setPages(res.data.amountResults);
+      })
+      .catch((err) => console.log(err));
+  }, [URL_FILTER, refresh]);
+
+  //Setting column
   const columns = [
+    //NO
     {
-      title: "Id",
+      title: () => {
+        return (
+          <div>
+            {isLocked ? (
+              <div className="text-danger">No</div>
+            ) : (
+              <div className="secondary">No</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "id",
       key: "id",
+      render: (text: string, record: any, index: number) => {
+        return (
+          <div>
+            <Space>
+              {" "}
+              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {record.Locked === false && (
+                <span style={{ fontSize: "16px", color: "#08c" }}>
+                  <CheckCircleOutlined /> Active
+                </span>
+              )}
+              {record.Locked === true && (
+                <span style={{ fontSize: "16px", color: "#dc3545" }}>
+                  <CheckCircleOutlined /> Locked
+                </span>
+              )}
+            </Space>
+          </div>
+        );
+      },
+      filterDropdown: () => {
+        return (
+          <>
+            <div>
+              <Select
+                allowClear
+                onClear={() => {
+                  setIsLocked("");
+                }}
+                style={{ width: "125px" }}
+                placeholder="Select a supplier"
+                optionFilterProp="children"
+                showSearch
+                onChange={onSearchIsLocked}
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "false",
+                    label: "Active",
+                  },
+
+                  {
+                    value: "true",
+                    label: "Deleted",
+                  },
+                ]}
+              />
+            </div>
+          </>
+        );
+      },
     },
+    //IMAGE
     {
-      title: "First name",
-      dataIndex: "firstName",
-      key: "firstName",
+      width: "10%",
+
+      title: "Picture",
+      key: "imageUrl",
+      dataIndex: "imageUrl",
+      render: (text: any, record: any, index: any) => {
+        return (
+          <div>
+            {record.imageUrl && (
+              <img
+                src={"http://localhost:9000" + record.imageUrl}
+                style={{ height: 60 }}
+                alt="record.imageUrl"
+              />
+            )}
+          </div>
+        );
+      },
     },
+    //Email
     {
-      title: "Last name",
-      dataIndex: "lastName",
-      key: "lastName",
-    },
-    {
-      title: "Phone number",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
-    },
-    {
-      title: "Address",
-      dataIndex: "address",
-      key: "address",
-    },
-    {
-      title: "Email",
+      title: () => {
+        return (
+          <div>
+            {customerEmail ? (
+              <div className="text-danger">Email</div>
+            ) : (
+              <div className="secondary">Email</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "email",
       key: "email",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              onSearch={onSearchCustomerEmail}
+              placeholder="input search text"
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
     },
+    //First Name
     {
-      title: "Birthday",
+      title: () => {
+        return (
+          <div>
+            {customerFirstName ? (
+              <div className="text-danger">First name</div>
+            ) : (
+              <div className="secondary">First name</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "firstName",
+      key: "firstName",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              placeholder="input search text"
+              onSearch={onSearchCustomerFirstName}
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
+    },
+    //Last Name
+    {
+      title: () => {
+        return (
+          <div>
+            {customerLastName ? (
+              <div className="text-danger">Last name</div>
+            ) : (
+              <div className="secondary">Last name</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "lastName",
+      key: "lastName",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              onSearch={onSearchCustomerLastName}
+              placeholder="input search text"
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
+    },
+    //Phone number
+    {
+      title: () => {
+        return (
+          <div>
+            {customerPhoneNumber ? (
+              <div className="text-danger">Phone Number</div>
+            ) : (
+              <div className="secondary">Phone Number</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "phoneNumber",
+      key: "phoneNumber",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              onSearch={onSearchCustomerPhoneNumber}
+              allowClear
+              placeholder="input search text"
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
+    },
+    //Address
+    {
+      title: () => {
+        return (
+          <div>
+            {customerAddress ? (
+              <div className="text-danger">Address</div>
+            ) : (
+              <div className="secondary">Address</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "address",
+      key: "address",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              onSearch={onSearchCustomerAddress}
+              placeholder="input search text"
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
+    },
+    //Birthday
+    {
+      title: () => {
+        return (
+          <div>
+            {customerBirthdayFrom || customerBirthdayTo ? (
+              <div className="text-danger">Birthday</div>
+            ) : (
+              <div className="secondary">Birthday</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "birthday",
       key: "birthday",
+      render: (birthday: any) => {
+        const formattedBirthday = dayjs(birthday).format("DD/MM/YYYY");
+        return <span>{formattedBirthday}</span>;
+      },
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <RangePicker
+              onCalendarChange={() => {
+                setCustomerBirthdayFrom("");
+                setCustomerBirthdayTo("");
+              }}
+              allowClear
+              defaultValue={[
+                dayjs("2000/01/01", dateFormat),
+                dayjs("2023/01/01", dateFormat),
+              ]}
+              format={dateFormat}
+              onChange={onSearchCustomerBirthday}
+            />
+          </div>
+        );
+      },
     },
+    //Note
+
+    { title: "Note", dataIndex: "note", key: "note", width: "10%" },
+
+    //function
     {
       title: "Function",
       dataIndex: "function",
-      key: "id",
+      key: "function",
       render: (text: any, record: any) => (
         <Space>
           <Button
             icon={<EditOutlined />}
             onClick={() => {
               setOpen(true);
-              console.log(record);
-              setUpdateId(record.id);
+              setUpdateId(record._id);
               updateForm.setFieldsValue(record);
             }}
           ></Button>
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => handleDelte(record.id)}
-          ></Button>
+          <Popconfirm
+            okText="Delete"
+            okType="danger"
+            onConfirm={() => handleDelete(deleteItem)}
+            title={"Are you sure to delete this product?"}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                setDeleteItem(record);
+              }}
+            ></Button>
+          </Popconfirm>
+          <Upload
+            showUploadList={false}
+            name="file"
+            action={`http://localhost:9000/upload/customers/${record._id}/image`}
+            headers={{ authorization: "authorization-text" }}
+            onChange={(info) => {
+              if (info.file.status !== "uploading") {
+                console.log(info.file);
+              }
+
+              if (info.file.status === "done") {
+                message.success(`${info.file.name} file uploaded successfully`);
+
+                setTimeout(() => {
+                  console.log("««««« run »»»»»");
+                  setRefresh(refresh + 1);
+                }, 1000);
+              } else if (info.file.status === "error") {
+                message.error(`${info.file.name} file upload failed.`);
+              }
+            }}
+          >
+            <Button icon={<UploadOutlined />} />
+          </Upload>
         </Space>
       ),
+      filterDropdown: () => {
+        return (
+          <>
+            <Space direction="vertical">
+              <Button
+                style={{ width: "150px" }}
+                onClick={() => {
+                  setCustomerEmail("");
+                  setCustomerFirstName("");
+                  setCustomerLastName("");
+                  setCustomerPhoneNumber("");
+                  setCustomerAddress("");
+                  setCustomerBirthdayFrom("");
+                  setCustomerBirthdayTo("");
+                }}
+                icon={<ClearOutlined />}
+              >
+                Clear filter
+              </Button>
+              <Button
+                style={{ width: "150px" }}
+                onClick={() => {
+                  setOpenCreate(true);
+                }}
+                icon={<PlusCircleOutlined />}
+              >
+                Add Customer
+              </Button>
+            </Space>
+          </>
+        );
+      },
     },
   ];
+
   return (
-    <>
-      <Form
-        className="container"
-        form={createForm}
-        name="createForm"
-        onFinish={handleCreate}
+    <div>
+      {/* Modal Create A Customers */}
+      <Modal
+        title={`Create Customers `}
+        open={openCreate}
+        onCancel={() => {
+          setOpenCreate(false);
+        }}
+        onOk={() => {
+          createForm.submit();
+        }}
+        okText="Submit"
       >
-        <div className="row">
-          <Form.Item
-            label="Firstname"
-            name="firstname"
-            className="col-4"
-            hasFeedback
-            rules={[{ required: true, message: "Please input Firstname!" }]}
-          >
-            <Input />
-          </Form.Item>
+        <div className="container ">
+          <Form form={createForm} name="createForm" onFinish={handleCreate}>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Email"
+              name="email"
+              rules={[{ required: true, message: "Please input Email!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="First name"
+              name="firstName"
+              rules={[{ required: true, message: "Please input First name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Last name"
+              name="lastName"
+              rules={[{ required: true, message: "Please input Last name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Phone number"
+              name="phoneNumber"
+              rules={[
+                { required: true, message: "Please input Phone number!" },
+              ]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Address"
+              name="addresss"
+              rules={[{ required: true, message: "Please input Address!" }]}
+            >
+              <Input />
+            </FormItem>
 
-          <Form.Item
-            label="Lastname"
-            name="lastname"
-            className="col-4"
-            hasFeedback
-            rules={[{ required: true, message: "Please input Lastname!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Phonenumber"
-            name="phonenumber"
-            className="col-4"
-            hasFeedback
-          >
-            <Input />
-          </Form.Item>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Locked"
+              name="Locked"
+              valuePropName="checked"
+            >
+              <Switch />
+            </FormItem>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Note"
+              name="note"
+            >
+              <Input />
+            </Form.Item>
+          </Form>
         </div>
-        <div className="row">
-          <Form.Item
-            label="Address"
-            name="address"
-            className="col-4"
-            hasFeedback
-            rules={[{ required: true, message: "Please input Address!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Email"
-            name="email"
-            className="col-4"
-            hasFeedback
-            rules={[{ required: true, message: "Please input Email!" }]}
-          >
-            <Input />
-          </Form.Item>
-          <Form.Item
-            label="Birthday"
-            name="birthday"
-            className="col-4"
-            hasFeedback
-            rules={[{ required: true, message: "Please input Birthday!" }]}
-          >
-            {/* <Input /> */}
-            <DatePicker />
-          </Form.Item>
-        </div>
+      </Modal>
 
-        <Form.Item className="text-end">
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+      {/* List and function  */}
 
       <Table
-        className="container"
-        rowKey="id"
+        rowKey="_id"
         columns={columns}
-        dataSource={customers}
+        dataSource={customersTEST}
         pagination={false}
-      ></Table>
+        scroll={{ x: "max-content", y: 610 }}
+        rowClassName={(record) => {
+          return record.Locked === true ? "text-danger bg-success-subtle" : "";
+        }}
+      />
 
+      {/* Modal confirm Delte */}
+
+      {/* Model Update */}
       <Modal
-        title={`Update Customers ${updateId}`}
         open={open}
+        title="Update Customer"
         onCancel={() => setOpen(false)}
         onOk={() => {
           updateForm.submit();
@@ -244,69 +762,117 @@ const CustomerCRUD = () => {
       >
         <Form form={updateForm} name="updateForm" onFinish={handleUpdate}>
           <div className="row">
-            <Form.Item
-              label="Firstname"
-              name="firstname"
-              className="col-6"
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
               hasFeedback
-              rules={[{ required: true, message: "Please input Firstname!" }]}
-            >
-              <Input />
-            </Form.Item>
-
-            <Form.Item
-              label="Lastname"
-              name="lastname"
-              className="col-6"
-              hasFeedback
-              rules={[{ required: true, message: "Please input Lastname!" }]}
-            >
-              <Input />
-            </Form.Item>
-          </div>
-          <div className="row">
-            <Form.Item
-              label="Phonenumber"
-              name="phonenumber"
-              className="col-6"
-              hasFeedback
-            >
-              <Input />
-            </Form.Item>
-            <Form.Item
-              label="Address"
-              name="address"
-              className="col-6"
-              hasFeedback
-              rules={[{ required: true, message: "Please input Address!" }]}
-            >
-              <Input />
-            </Form.Item>
-          </div>
-          <div className="row">
-            <Form.Item
               label="Email"
               name="email"
-              className="col-6"
-              hasFeedback
               rules={[{ required: true, message: "Please input Email!" }]}
             >
               <Input />
-            </Form.Item>
-            <Form.Item
-              label="Birthday"
-              name="birthday"
-              className="col-6"
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
               hasFeedback
-              rules={[{ required: true, message: "Please input Birthday!" }]}
+              label="First name"
+              name="firstName"
+              rules={[{ required: true, message: "Please input First name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Last name"
+              name="lastName"
+              rules={[{ required: true, message: "Please input Last name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Phone number"
+              name="phoneNumber"
+              rules={[
+                { required: true, message: "Please input Phone number!" },
+              ]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Address"
+              name="address"
+              rules={[{ required: true, message: "Please input Address!" }]}
+            >
+              <Input />
+            </FormItem>
+
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Locked"
+              name="Locked"
+              valuePropName="checked"
+            >
+              <Switch />
+            </FormItem>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Note"
+              name="note"
             >
               <Input />
             </Form.Item>
           </div>
         </Form>
       </Modal>
-    </>
+      <Pagination
+        className="container text-end"
+        onChange={(e) => slideCurrent(e)}
+        defaultCurrent={1}
+        total={pages}
+      />
+    </div>
   );
-};
+}
 
 export default CustomerCRUD;

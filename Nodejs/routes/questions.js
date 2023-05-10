@@ -782,19 +782,38 @@ router.get("/24", function (req, res, next) {
       })
       .unwind("employee")
       .unwind("orderDetails")
+      .lookup({
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "orderDetails.product",
+      })
+      .unwind("orderDetails.product")
       .addFields({
         originalPrice: {
           $divide: [
             {
               $multiply: [
-                "$orderDetails.price",
-                { $subtract: [100, "$orderDetails.discount"] },
+                "$orderDetails.product.price",
+                {
+                  $subtract: [100, "$orderDetails.product.discount"],
+                },
               ],
             },
             100,
           ],
         },
       })
+      // .group({
+      //   _id: "$_id",
+      //   paymentType: { $first: "$paymentType" },
+      //   status: { $first: "$status" },
+      //   customerId: { $first: "$customerId" },
+      //   employeeId: { $first: "$employeeId" },
+      //   createdDate: { $first: "$createdDate" },
+      //   employee: { $first: "$employee" },
+      //   orderDetails: { $push: "$orderDetails" },
+      // })
       .group({
         _id: "$employee._id",
         firstName: { $first: "$employee.firstName" },

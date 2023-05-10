@@ -18,6 +18,17 @@ const productSchema = Schema(
       required: true,
     },
     imageUrl: { type: String },
+    active: { type: Boolean },
+    isDeleted: { type: Boolean },
+    createdDate: {
+      type: Date,
+    },
+    createdBy: { type: Object },
+    updatedDate: {
+      type: Date,
+    },
+    updatedBy: { type: Object },
+    note: { type: String },
   },
 
   {

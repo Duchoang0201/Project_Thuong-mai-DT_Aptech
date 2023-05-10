@@ -1,9 +1,16 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Column } from "@ant-design/plots";
 import { Bar } from "@ant-design/plots";
 import { Col, Row } from "antd";
+import { io } from "socket.io-client";
 
 const HomePage = () => {
+  const socket = useRef<any>();
+
+  useEffect(() => {
+    socket.current = io("http://localhost:8888");
+  }, []);
+
   const [data1, setData1] = useState([]);
   const [data2, setData2] = useState([]);
   const [data3, setData3] = useState([]);
@@ -90,7 +97,7 @@ const HomePage = () => {
     // },
   };
   return (
-    <>
+    <div style={{ overflowY: "auto", height: "auto", width: "auto" }}>
       <Row>
         <Col span={24}>
           <h4> Best employee's total sales</h4>
@@ -111,7 +118,7 @@ const HomePage = () => {
           <Bar {...config3} />
         </Col>
       </Row>
-    </>
+    </div>
   );
 };
 

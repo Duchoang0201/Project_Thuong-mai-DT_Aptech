@@ -11,6 +11,7 @@ import {
   Input,
   Popconfirm,
   Row,
+  Space,
   Typography,
   message,
 } from "antd";
@@ -213,20 +214,11 @@ const Information = (props: Props) => {
     <>
       <div style={{ minHeight: "100vh" }}>
         {!user ? (
-          <Card style={{ width: 300, marginTop: 16 }} loading={true}></Card>
+          <Card loading={true}></Card>
         ) : (
-          <Row>
-            <Col span={18} push={6}>
-              <Card
-                style={{ width: "100%" }}
-                tabList={tabListNoTitle}
-                activeTabKey={"setting"}
-              >
-                {contentListNoTitle["setting"]}
-              </Card>
-            </Col>
-            <Col span={5} pull={18}>
-              <Card bordered={false} style={{ width: 300 }}>
+          <Row className="py-3 ">
+            <Col xs={24} xl={5}>
+              <Card bordered={false} style={{ width: "90%" }}>
                 <div className="text-center">
                   <Avatar size={64} icon={<UserOutlined />} />
                   <p className="py-2">
@@ -249,6 +241,15 @@ const Information = (props: Props) => {
                 </div>
 
                 <Divider>More Information</Divider>
+              </Card>
+            </Col>
+            <Col xs={24} xl={14}>
+              <Card
+                style={{ width: "90%" }}
+                tabList={tabListNoTitle}
+                activeTabKey={"setting"}
+              >
+                {contentListNoTitle["setting"]}
               </Card>
             </Col>
           </Row>
