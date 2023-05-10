@@ -18,7 +18,9 @@ const getSuppliersSchema = yup.object({
   query: yup.object({
     name: yup.string(),
     email: yup.string(),
-    phoneNumber: yup.string(),
+    phoneNumber: yup
+      .string()
+      .matches(/^\d+$/, "phoneNumber is not valid Number"),
     address: yup.string(),
     skip: yup
       .string()

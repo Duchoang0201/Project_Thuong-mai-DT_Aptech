@@ -1,16 +1,23 @@
-import {
+import Icon, {
+  CheckCircleOutlined,
+  CheckCircleTwoTone,
   ClearOutlined,
+  CloseCircleOutlined,
+  CloseCircleTwoTone,
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
 } from "@ant-design/icons";
 import {
   Button,
+  Checkbox,
   Form,
   Input,
+  InputNumber,
   message,
   Modal,
   Pagination,
+  Popconfirm,
   Select,
   Space,
   Table,
@@ -18,8 +25,10 @@ import {
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Search from "antd/es/input/Search";
+import { useAuthStore } from "../../hooks/useAuthStore";
+import { CircleOutlined } from "@mui/icons-material";
 
 interface ISupplier {
   name: string;
@@ -29,6 +38,9 @@ interface ISupplier {
 }
 
 function SupperliersCRUD() {
+  const [refresh, setRefresh] = useState(0);
+  const { auth } = useAuthStore((state: any) => state);
+
   let API_URL = "http://localhost:9000/suppliers";
 
   // MODAL:
@@ -49,7 +61,7 @@ function SupperliersCRUD() {
   const [supplierTEST, setSupplierTEST] = useState<Array<any>>([]);
 
   // Change fillter (f=> f+1)
-  const [supplierFilter, setSupplierFilter] = useState(API_URL);
+  // const [supplierFilter, setSupplierFilter] = useState(API_URL);
 
   const [updateId, setUpdateId] = useState(0);
 
@@ -62,11 +74,17 @@ function SupperliersCRUD() {
 
   //Create data
   const handleCreate = (record: any) => {
+    record.createdBy = auth.payload;
+    record.createdDate = new Date().toISOString();
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    record.isDeleted = false;
     axios
       .post(API_URL, record)
       .then((res) => {
         console.log(res.data);
-        setSupplierFilter((f) => f + 1);
+        setRefresh((f) => f + 1);
         setOpenCreate(false);
 
         message.success(" Add new Suppliers sucessfully!", 1.5);
@@ -85,7 +103,7 @@ function SupperliersCRUD() {
         console.log(res.statusText);
         message.success(" Delete item sucessfully!!", 1.5);
         setOpenDeleteConfirm(false);
-        setSupplierFilter((f) => f + 1);
+        setRefresh((f) => f + 1);
       })
       .catch((err) => {
         console.log(err);
@@ -93,14 +111,21 @@ function SupperliersCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    console.log(record);
+    record.updatedBy = auth.payload;
+    record.updatedDate = new Date().toISOString();
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    if (record.isDeleted === undefined) {
+      record.isDeleted = false;
+    }
     axios
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
         console.log(res);
         setOpen(false);
         setOpenCreate(false);
-        setSupplierFilter((f) => f + 1);
+        setRefresh((f) => f + 1);
         message.success("Updated sucessfully!!", 1.5);
       })
       .catch((err) => {
@@ -108,12 +133,35 @@ function SupperliersCRUD() {
       });
   };
 
+  //SEARCH ISDELETE ITEM
+
+  //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
+
+  const [isDelete, setIsDelete] = useState("");
+  const [isActive, setIsActive] = useState("");
+  const onSearchIsDelete = useCallback((value: any) => {
+    console.log("««««« value »»»»»", value);
+    if (value === "active") {
+      setIsActive("true");
+      setIsDelete("");
+    }
+    if (value === "unActive") {
+      setIsActive("false");
+      setIsDelete("");
+    }
+    if (value === "Deleted") {
+      setIsDelete("true");
+      setIsActive("");
+    }
+    if (value !== "active" && value !== "unActive" && value !== "Deleted") {
+      setIsActive("");
+      setIsDelete("");
+    }
+  }, []);
+
   //SEARCH DEPEN ON NAME
   const [supplierName, setSuplierName] = useState("");
 
-  // const onSearchSupplierName = (record: any) => {
-  //   setSuplierName(record);
-  // };
   const onSearchSupplierName = useCallback((value: any) => {
     console.log(value);
     if (value) {
@@ -121,13 +169,6 @@ function SupperliersCRUD() {
     } else {
       setSuplierName("");
     }
-    // if (value) {
-    //   setCategoryId(value);
-    //   setProductsFilter((f) => f + 1);
-    // } else {
-    // setCategoryId("");
-    //   setProductsFilter((f) => f + 1);
-    // }
   }, []);
 
   //SEARCH DEPEN ON EMAIL
@@ -165,15 +206,16 @@ function SupperliersCRUD() {
   };
   //GET DATA ON FILLTER
   const URL_FILTER = `http://localhost:9000/suppliers?${[
-    supplierName && `&name=${supplierName}`,
-    supplierEmail && `&email=${supplierEmail}`,
-    supplierPhone && `&phoneNumber=${supplierPhone}`,
-    supplierAddress && `&address=${supplierAddress}`,
-    skip && `&skip=${skip}`,
+    supplierName && `name=${supplierName}`,
+    supplierEmail && `email=${supplierEmail}`,
+    supplierPhone && `phoneNumber=${supplierPhone}`,
+    supplierAddress && `address=${supplierAddress}`,
+    isActive && `active=${isActive}`,
+    isDelete && `isDeleted=${isDelete}`,
+    skip && `skip=${skip}`,
   ]
     .filter(Boolean)
-    .join("")}&limit=10`;
-  console.log(URL_FILTER);
+    .join("&")}&limit=10`;
 
   useEffect(() => {
     axios
@@ -183,23 +225,98 @@ function SupperliersCRUD() {
         setPages(res.data.amountResults);
       })
       .catch((err) => console.log(err));
-  }, [URL_FILTER, supplierFilter]);
+  }, [URL_FILTER, refresh]);
 
   console.log(pages);
   //Setting column
   const columns = [
+    //No
     {
-      title: "Id",
+      title: () => {
+        return (
+          <div>
+            {isActive || isDelete ? (
+              <div className="text-danger">No</div>
+            ) : (
+              <div className="secondary">No</div>
+            )}
+          </div>
+        );
+      },
       dataIndex: "id",
       key: "id",
       render: (text: string, record: any, index: number) => {
         return (
           <div>
-            {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+            <Space>
+              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {record.active === true && !record.isDeleted && (
+                <span style={{ fontSize: "16px", color: "#08c" }}>
+                  <CheckCircleOutlined /> Active
+                </span>
+              )}
+              {record.active === false && !record.isDeleted && (
+                <span className="text-danger">
+                  <CloseCircleOutlined
+                    style={{ fontSize: "16px", color: "#dc3545" }}
+                  />{" "}
+                  Unactive
+                </span>
+              )}
+
+              {record.isDeleted === true && (
+                <span className="text-danger">
+                  <CloseCircleOutlined
+                    style={{ fontSize: "16px", color: "#dc3545" }}
+                  />{" "}
+                  Deleted
+                </span>
+              )}
+            </Space>
           </div>
         );
       },
+      filterDropdown: () => {
+        return (
+          <>
+            <div>
+              <Select
+                allowClear
+                onClear={() => {
+                  setIsDelete("");
+                }}
+                style={{ width: "125px" }}
+                placeholder="Select a supplier"
+                optionFilterProp="children"
+                showSearch
+                onChange={onSearchIsDelete}
+                filterOption={(input, option) =>
+                  (option?.label ?? "")
+                    .toLowerCase()
+                    .includes(input.toLowerCase())
+                }
+                options={[
+                  {
+                    value: "active",
+                    label: "Active",
+                  },
+                  {
+                    value: "unActive",
+                    label: "Unactive",
+                  },
+                  {
+                    value: "Deleted",
+                    label: "Deleted",
+                  },
+                ]}
+              />
+            </div>
+          </>
+        );
+      },
+      width: "10%",
     },
+    //Email
     {
       title: () => {
         return (
@@ -227,6 +344,7 @@ function SupperliersCRUD() {
         );
       },
     },
+    //Name
     {
       title: () => {
         return (
@@ -283,7 +401,7 @@ function SupperliersCRUD() {
         );
       },
     },
-
+    //Phone Number
     {
       title: () => {
         return (
@@ -311,14 +429,15 @@ function SupperliersCRUD() {
         );
       },
     },
+    //Address
     {
       title: () => {
         return (
           <div>
             {supplierAddress ? (
-              <div className="text-danger">Adress</div>
+              <div className="text-danger">Address</div>
             ) : (
-              <div className="secondary">Adress</div>
+              <div className="secondary">Address</div>
             )}
           </div>
         );
@@ -338,6 +457,11 @@ function SupperliersCRUD() {
         );
       },
     },
+    //Note
+
+    { title: "Note", dataIndex: "note", key: "note", width: "10%" },
+
+    //Function
     {
       title: "Function",
       dataIndex: "function",
@@ -352,14 +476,20 @@ function SupperliersCRUD() {
               updateForm.setFieldsValue(record);
             }}
           ></Button>
-          <Button
-            danger
-            icon={<DeleteOutlined />}
-            onClick={() => {
-              setDeleteItem(record);
-              setOpenDeleteConfirm(true);
-            }}
-          ></Button>
+          <Popconfirm
+            okText="Delete"
+            okType="danger"
+            onConfirm={() => handleDelete(deleteItem)}
+            title={"Are you sure to delete this product?"}
+          >
+            <Button
+              danger
+              icon={<DeleteOutlined />}
+              onClick={() => {
+                setDeleteItem(record);
+              }}
+            ></Button>
+          </Popconfirm>
         </Space>
       ),
       filterDropdown: () => {
@@ -385,7 +515,7 @@ function SupperliersCRUD() {
                 }}
                 icon={<PlusCircleOutlined />}
               >
-                Add product
+                Add Supplier
               </Button>
             </Space>
           </>
@@ -394,7 +524,7 @@ function SupperliersCRUD() {
     },
   ];
   return (
-    <div className="container">
+    <div>
       {/* Modal Create A SUPPLIER */}
 
       <Modal
@@ -412,7 +542,12 @@ function SupperliersCRUD() {
           <Form form={createForm} name="createForm" onFinish={handleCreate}>
             <div className="row">
               <FormItem
-                className="col-6"
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
                 hasFeedback
                 label="Name"
                 name="name"
@@ -421,11 +556,25 @@ function SupperliersCRUD() {
                 <Input />
               </FormItem>
               <FormItem
-                className="col-6"
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
                 hasFeedback
                 label="Email"
                 name="email"
-                rules={[{ required: true, message: "Please input Email!" }]}
+                rules={[
+                  {
+                    type: "email",
+                    message: "Please enter a valid email address!",
+                  },
+                  {
+                    required: true,
+                    message: "Please enter your email address!",
+                  },
+                ]}
               >
                 <Input />
               </FormItem>
@@ -436,12 +585,32 @@ function SupperliersCRUD() {
                 hasFeedback
                 label="Phone"
                 name="phoneNumber"
-                className="col-6"
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                rules={[
+                  {
+                    pattern: /^[+]?[0-9]{8,}$/,
+                    message: "Please enter a valid phone number!",
+                  },
+                  {
+                    required: true,
+                    message: "Please enter your phone number!",
+                  },
+                ]}
               >
                 <Input />
               </FormItem>
               <FormItem
-                className="col-6"
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
                 hasFeedback
                 label="Address"
                 name="address"
@@ -449,6 +618,46 @@ function SupperliersCRUD() {
               >
                 <Input />
               </FormItem>
+              <Form.Item
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="active"
+                name="active"
+                valuePropName="checked"
+              >
+                <Checkbox />
+              </Form.Item>
+              <Form.Item
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="sortOder"
+                name="sortOder"
+              >
+                <InputNumber min={1} />
+              </Form.Item>
+              <Form.Item
+                labelCol={{
+                  span: 7,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="Note"
+                name="note"
+              >
+                <Input />
+              </Form.Item>
             </div>
           </Form>
         </div>
@@ -460,22 +669,19 @@ function SupperliersCRUD() {
         columns={columns}
         dataSource={supplierTEST}
         pagination={false}
+        scroll={{ x: "max-content", y: "max-content" }}
+        rowClassName={(record) => {
+          if (record.active === false && record.isDeleted === false) {
+            return "bg-dark-subtle";
+          } else if (record.isDeleted) {
+            return "text-danger bg-success-subtle";
+          } else {
+            return "";
+          }
+        }}
       >
         {" "}
       </Table>
-
-      {/* Modal confirm Delte */}
-      <Modal
-        open={openDeleteConfirm}
-        onOk={() => handleDelete(deleteItem)}
-        okText="Delete"
-        okType="danger"
-        onCancel={() => setOpenDeleteConfirm(false)}
-      >
-        <h5>Are you sure to delete?</h5>
-        <strong>Product : </strong>
-        <Text type="danger">{deleteItem?.name}</Text>
-      </Modal>
 
       {/* Model Update */}
       <Modal
@@ -489,7 +695,12 @@ function SupperliersCRUD() {
         <Form form={updateForm} name="updateForm" onFinish={handleUpdate}>
           <div className="row">
             <FormItem
-              className="col-6"
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
               hasFeedback
               label="Name"
               name="name"
@@ -498,7 +709,12 @@ function SupperliersCRUD() {
               <Input />
             </FormItem>
             <FormItem
-              className="col-6"
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
               hasFeedback
               label="Email"
               name="email"
@@ -513,12 +729,22 @@ function SupperliersCRUD() {
               hasFeedback
               label="Phone"
               name="phoneNumber"
-              className="col-6"
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
             >
               <Input />
             </FormItem>
             <FormItem
-              className="col-6"
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
               hasFeedback
               label="Address"
               name="address"
@@ -526,6 +752,47 @@ function SupperliersCRUD() {
             >
               <Input />
             </FormItem>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="active"
+              name="active"
+              valuePropName="checked"
+            >
+              <Checkbox />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="isDeleted"
+              name="isDeleted"
+              valuePropName="checked"
+            >
+              <Checkbox />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Note"
+              name="note"
+            >
+              <Input />
+            </Form.Item>
           </div>
         </Form>
       </Modal>

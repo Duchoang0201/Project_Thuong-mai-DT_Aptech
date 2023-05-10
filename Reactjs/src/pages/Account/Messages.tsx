@@ -32,7 +32,8 @@ interface Conversation {
   __v: number;
 }
 
-const Messages: React.FC<any> = ({ collapsed }) => {
+const Messages: React.FC<any> = () => {
+  const formRef = useRef<any>(null);
   const [createForm] = Form.useForm();
   const [createConversationForm] = Form.useForm();
 
@@ -41,7 +42,7 @@ const Messages: React.FC<any> = ({ collapsed }) => {
   console.log("««««« conversations »»»»»", conversations);
   //Create a conversation:
   const [openCreateConver, setOpenCreateConver] = useState(false);
-  const [newCoversations, setNewConversations] = useState<any>();
+  // const [newCoversations, setNewConversations] = useState<any>();
   //Data
   const [dataUserMenu, setDataUserMenu] = useState<any[]>([]);
 
@@ -200,6 +201,7 @@ const Messages: React.FC<any> = ({ collapsed }) => {
       receiverId: receiverId,
       text: e.text,
     });
+
     try {
       const res = await axios.post(
         "http://localhost:9000/messages",
@@ -208,6 +210,11 @@ const Messages: React.FC<any> = ({ collapsed }) => {
       setRefresh((f) => f + 1);
       setMessages([...messages, res.data]);
       createForm.resetFields();
+
+      setTimeout(() => {
+        const inputInstance = formRef.current.getFieldInstance("text");
+        inputInstance.focus();
+      }, 0);
     } catch (error) {
       console.log("««««« error »»»»»", error);
     }
@@ -251,94 +258,7 @@ const Messages: React.FC<any> = ({ collapsed }) => {
           <Card style={{ width: 300, marginTop: 16 }} loading={true}></Card>
         ) : (
           <Row>
-            <Col span={18} push={6}>
-              {activeTabKey1 ? (
-                <Card
-                  type="inner"
-                  title={`${activeTabKey1?.firstName} ${activeTabKey1?.lastName}`}
-                  bordered={false}
-                  style={{ width: "100%" }}
-                >
-                  <div
-                    id="scrollUP"
-                    ref={scrollRef}
-                    style={{ height: "400px", overflowY: "scroll" }}
-                  >
-                    {messages.map((item: any) => (
-                      <>
-                        {item?.employee?._id === auth.payload._id ? (
-                          <div className="d-flex flex-row-reverse">
-                            <div key={item?._id} className=" w-25">
-                              <h6 className="Name text-body-secondary ">
-                                <UserOutlined /> Me
-                              </h6>{" "}
-                              <h5
-                                className=" bg-light-subtle border rounded-2 text-break px-2 py-2 "
-                                // style={{
-                                //   marginLeft: collapsed ? "800px" : "730px",
-                                // }}
-                              >
-                                {item?.text}
-                              </h5>{" "}
-                              <div className=" text-end ">
-                                {format(item.createdAt)}
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            key={item?.employee?._id}
-                            className="py-3  "
-                            style={{ width: "auto" }}
-                          >
-                            <h6 className="Name text-primary ">
-                              {" "}
-                              <UserOutlined /> {item?.employee?.firstName}{" "}
-                              {item?.employee?.lastName}
-                            </h6>
-                            <h5 className=" text-start text-white  bg-primary border rounded-2 px-2 py-2 text-break w-25 ">
-                              {item.text}
-                            </h5>{" "}
-                            <div className="messageBottom ">
-                              {format(item.createdAt)}
-                            </div>
-                          </div>
-                        )}
-                      </>
-                    ))}
-                  </div>
-                  <Form
-                    style={{ marginTop: "50px" }}
-                    key={activeTabKey1}
-                    form={createForm}
-                    name="createForm"
-                    onFinish={handleSendMessages}
-                  >
-                    <Space.Compact style={{ width: "100%" }}>
-                      <Form.Item
-                        style={{ width: "100%" }}
-                        hasFeedback
-                        name="text"
-                      >
-                        <Input placeholder="Enter text" />
-                      </Form.Item>
-                      <Form.Item>
-                        <Button
-                          icon={<SendOutlined />}
-                          type="primary"
-                          htmlType="submit"
-                        />
-                      </Form.Item>
-                    </Space.Compact>
-                  </Form>
-                </Card>
-              ) : (
-                <Watermark content="Click to user to start conversation">
-                  <div style={{ height: 500 }} />
-                </Watermark>
-              )}
-            </Col>
-            <Col span={5} pull={18}>
+            <Col xs={24} xl={5}>
               <div>
                 <Button
                   onClick={() => setOpenCreateConver(true)}
@@ -405,8 +325,8 @@ const Messages: React.FC<any> = ({ collapsed }) => {
               <List>
                 <VirtualList
                   data={dataUserMenu}
-                  height={400}
-                  itemHeight={47}
+                  height={300}
+                  itemHeight={50}
                   itemKey="_id"
                   onScroll={onScroll}
                 >
@@ -435,6 +355,85 @@ const Messages: React.FC<any> = ({ collapsed }) => {
                   )}
                 </VirtualList>
               </List>
+            </Col>
+            <Col xs={24} xl={19}>
+              {activeTabKey1 ? (
+                <Card
+                  type="inner"
+                  title={`${activeTabKey1?.firstName} ${activeTabKey1?.lastName}`}
+                  bordered={false}
+                  style={{ width: "auto" }}
+                >
+                  <div
+                    id="scrollUP"
+                    ref={scrollRef}
+                    style={{ height: "400px", overflowY: "scroll" }}
+                  >
+                    {messages.map((item: any) => (
+                      <>
+                        {item?.employee?._id === auth.payload._id ? (
+                          <div className="d-flex flex-row-reverse">
+                            <div key={item?._id} className=" w-auto">
+                              <h6 className="Name text-body-secondary ">
+                                <UserOutlined /> Me
+                              </h6>{" "}
+                              <h5 className=" bg-light-subtle border rounded-2 text-break px-2 py-2 ">
+                                {item?.text}
+                              </h5>{" "}
+                              <div className=" text-end ">
+                                {format(item.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="d-flex ">
+                            <div key={item?._id} className=" w-auto">
+                              <h6 className="Name text-primary ">
+                                {" "}
+                                <UserOutlined /> {
+                                  item?.employee?.firstName
+                                }{" "}
+                                {item?.employee?.lastName}
+                              </h6>
+                              <h5 className=" text-white  bg-primary border rounded-2 px-2 py-2 text-break ">
+                                {item.text}
+                              </h5>{" "}
+                              <div className="text-start ">
+                                {format(item.createdAt)}
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ))}
+                  </div>
+                  <Form
+                    style={{ marginTop: "50px" }}
+                    key={activeTabKey1}
+                    form={createForm}
+                    name="createForm"
+                    onFinish={handleSendMessages}
+                    ref={formRef}
+                  >
+                    <Space.Compact style={{ width: "100%" }}>
+                      <Form.Item style={{ width: "100%" }} name="text">
+                        <Input type="text" placeholder="Enter text" />
+                      </Form.Item>
+                      <Form.Item>
+                        <Button
+                          icon={<SendOutlined />}
+                          type="primary"
+                          htmlType="submit"
+                        />
+                      </Form.Item>
+                    </Space.Compact>
+                  </Form>
+                </Card>
+              ) : (
+                <Watermark content="Click to user to start conversation">
+                  <div style={{ height: 500 }} />
+                </Watermark>
+              )}
             </Col>
           </Row>
         )}

@@ -2,7 +2,6 @@ const express = require("express");
 const router = express.Router();
 const yup = require("yup");
 const { Supplier } = require("../models");
-const { findById } = require("../models/Category");
 const ObjectId = require("mongodb").ObjectId;
 const {
   validateSchema,
@@ -23,41 +22,39 @@ const {
 // Get all on Multiple conditions
 router.get("/", validateSchema(getSuppliersSchema), async (req, res, next) => {
   try {
-    const { name, email, phoneNumber, address, skip, limit } = req.query;
+    const {
+      active,
+      isDeleted,
+      name,
+      email,
+      phoneNumber,
+      address,
+      skip,
+      limit,
+    } = req.query;
 
     const query = {
-      $expr: {
-        $and: [
-          name && {
-            $regexMatch: { input: "$name", regex: name, options: "i" },
-          },
-          email && {
-            $regexMatch: { input: "$email", regex: email, options: "i" },
-          },
-          phoneNumber && {
-            $regexMatch: {
-              input: "$phoneNumber",
-              regex: phoneNumber,
-              options: "i",
-            },
-          },
-          address && {
-            $regexMatch: {
-              input: "$address",
-              regex: address,
-              options: "i",
-            },
-          },
-        ].filter(Boolean),
-      },
+      $and: [
+        active === "true" ? { active: true, isDeleted: false } : null,
+        active === "false" ? { active: false, isDeleted: false } : null,
+        isDeleted === "true" ? { isDeleted: true } : null,
+        name ? { name: { $regex: new RegExp(name, "i") } } : null,
+        email ? { email: { $regex: new RegExp(email, "i") } } : null,
+        phoneNumber
+          ? { phoneNumber: { $regex: new RegExp(phoneNumber, "i") } }
+          : null,
+        address ? { address: { $regex: new RegExp(address, "i") } } : null,
+      ].filter(Boolean),
     };
+
     let results = await Supplier.find(query)
-      // .lean({ virtuals: true })
-      .skip(skip)
-      .limit(limit);
+      .sort({ isDeleted: 1 })
+      .skip(Number(skip))
+      .limit(Number(limit));
 
     let amountResults = await Supplier.countDocuments(query);
-    res.json({ results: results, amountResults: amountResults });
+
+    res.json({ results, amountResults });
   } catch (error) {
     res.status(500).json({ ok: false, error });
   }

@@ -18,6 +18,8 @@ import SupperliersCRUD from "./pages/Management/SupperliersCRUD";
 import Information from "./pages/Account/Information";
 
 import Messages from "./pages/Account/Messages";
+import Orders from "./pages/Order/Orders";
+import SearchOrdersByStatus from "./pages/Order/SearchOrdersByStatus";
 numeral.locale("vi");
 
 const { Header, Sider, Content } = Layout;
@@ -25,11 +27,7 @@ const { Header, Sider, Content } = Layout;
 const App: React.FC = () => {
   const { auth } = useAuthStore((state: any) => state);
 
-  // const [socket, setSocket] = useState<any>(null);
-  // useEffect(() => {
-  //   setSocket(io("http://localhost:8888"));
-  // }, []);
-  //Function reresh to clear local storage
+  // Function reresh to clear local storage
 
   const [collapsed, setCollapsed] = useState(false);
   const {
@@ -144,6 +142,11 @@ const App: React.FC = () => {
                     <Route
                       path="/management/customers"
                       element={<CustomerCRUD />}
+                    />
+                    <Route path="/order/orders" element={<Orders />} />
+                    <Route
+                      path="/order/status"
+                      element={<SearchOrdersByStatus />}
                     />
                     <Route
                       path="/account/information"

@@ -29,6 +29,17 @@ const customerSchema = Schema(
     },
     address: { type: String, require: true },
     birthday: { type: Date },
+    Locked: { type: Boolean },
+    createdDate: {
+      type: Date,
+    },
+    createdBy: { type: Object },
+
+    updatedDate: {
+      type: Date,
+    },
+    updatedBy: { type: Object },
+    note: { type: String },
   },
   {
     versionKey: false,

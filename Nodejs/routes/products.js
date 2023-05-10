@@ -20,6 +20,8 @@ const { validateSchema, getProductsSchema } = require("../validation/product");
 router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
   try {
     const {
+      active,
+      isDeleted,
       categoryId,
       supplierId,
       productName,
@@ -34,27 +36,27 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
     } = req.query;
 
     const query = {
-      $expr: {
-        $and: [
-          categoryId && { $eq: ["$categoryId", categoryId] },
-          supplierId && { $eq: ["$supplierId", supplierId] },
-          fromPrice && { $gte: ["$price", Number(fromPrice)] },
-          toPrice && { $lte: ["$price", Number(toPrice)] },
-          productName && {
-            $regexMatch: { input: "$name", regex: productName, options: "i" },
-          },
-          fromStock && { $gte: ["$stock", Number(fromStock)] },
-          toStock && { $lte: ["$stock", Number(toStock)] },
-          fromDiscount && { $gte: ["$discount", Number(fromDiscount)] },
-          toDiscount && { $lte: ["$discount", Number(toDiscount)] },
-        ].filter(Boolean),
-      },
+      $and: [
+        active === "true" ? { active: true, isDeleted: false } : null,
+        active === "false" ? { active: false, isDeleted: false } : null,
+        isDeleted === "true" ? { isDeleted: true } : null,
+        categoryId ? { categoryId: categoryId } : null,
+        supplierId ? { supplierId: supplierId } : null,
+        fromPrice ? { price: { $gte: Number(fromPrice) } } : null,
+        toPrice ? { price: { $lte: Number(toPrice) } } : null,
+        productName ? { name: { $regex: new RegExp(productName, "i") } } : null,
+        fromStock ? { stock: { $gte: Number(fromStock) } } : null,
+        toStock ? { stock: { $lte: Number(toStock) } } : null,
+        fromDiscount ? { discount: { $gte: Number(fromDiscount) } } : null,
+        toDiscount ? { discount: { $lte: Number(toDiscount) } } : null,
+      ].filter(Boolean),
     };
     let results = await Product.find(query)
       .populate("category")
       .populate("supplier")
       .lean({ virtuals: true })
       .skip(skip)
+      .sort({ isDeleted: 1 })
       .limit(limit);
     // .limit(10);
 
@@ -62,174 +64,6 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
     res.json({ results: results, amountResults: amountResults });
   } catch (error) {
     res.status(500).json({ ok: false, error });
-  }
-});
-
-//test
-
-// Get condition
-
-//Get data depend on Category
-
-router.get("/searchOnCategory", async (req, res, next) => {
-  try {
-    const { categoryId } = req.query;
-    const query = categoryId ? { categoryId } : {};
-
-    let found = await Product.find(query)
-      .populate("category")
-      .populate("supplier")
-      .lean({ virtuals: true });
-
-    res.status(200).json(found);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
-  }
-});
-//Get data depend on Supplier
-
-router.get("/searchOnSupplier", async (req, res, next) => {
-  try {
-    const { supplierId } = req.query;
-    const query = supplierId ? { supplierId } : {};
-
-    let found = await Product.find(query)
-      .populate("category")
-      .populate("supplier")
-      .lean({ virtuals: true });
-
-    res.status(200).json(found);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
-  }
-});
-
-//Get data depend on From, To Price
-
-router.get("/searchOnPrice", async (req, res, next) => {
-  try {
-    let { kind, fromPrice, toPrice } = req.query;
-    const fromCondition = parseInt(fromPrice);
-    const toCondition = parseInt(toPrice);
-    let query = {};
-
-    if (fromCondition && toCondition) {
-      query = {
-        $expr: {
-          $and: [
-            { $gte: ["$price", fromCondition] },
-            { $lte: ["$price", toCondition] },
-          ],
-        },
-      };
-    } else if (toCondition) {
-      query = {
-        $expr: {
-          $lte: ["$price", toCondition],
-        },
-      };
-    } else if (fromCondition) {
-      query = {
-        $expr: {
-          $gte: ["$price", fromCondition],
-        },
-      };
-    }
-    console.log("««««« query »»»»»", query);
-    let found = await Product.find(query)
-      .populate("category")
-      .populate("supplier")
-      .lean({ virtuals: true });
-
-    res.status(200).json(found);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
-  }
-});
-
-//Get data depend on From, To Discount
-
-router.get("/searchOnDiscount", async (req, res, next) => {
-  try {
-    let { kind, fromDiscount, toDiscount } = req.query;
-    const fromCondition = parseInt(fromDiscount);
-    const toCondition = parseInt(toDiscount);
-    let query = {};
-
-    if (fromCondition && toCondition) {
-      query = {
-        $expr: {
-          $and: [
-            { $gte: ["$discount", fromCondition] },
-            { $lte: ["$discount", toCondition] },
-          ],
-        },
-      };
-    } else if (toCondition) {
-      query = {
-        $expr: {
-          $lte: ["$discount", toCondition],
-        },
-      };
-    } else if (fromCondition) {
-      query = {
-        $expr: {
-          $gte: ["$discount", fromCondition],
-        },
-      };
-    }
-
-    let found = await Product.find(query)
-      .populate("category")
-      .populate("supplier")
-      .lean({ virtuals: true });
-
-    res.status(200).json(found);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
-  }
-});
-
-//Get data depend on From, To Stock
-
-router.get("/searchOnStock", async (req, res, next) => {
-  try {
-    let { kind, fromStock, toStock } = req.query;
-    const fromCondition = parseInt(fromStock);
-    const toCondition = parseInt(toStock);
-    let query = {};
-
-    if (fromCondition && toCondition) {
-      query = {
-        $expr: {
-          $and: [
-            { $gte: ["$stock", fromCondition] },
-            { $lte: ["$stock", toCondition] },
-          ],
-        },
-      };
-    } else if (toCondition) {
-      query = {
-        $expr: {
-          $lte: ["$stock", toCondition],
-        },
-      };
-    } else if (fromCondition) {
-      query = {
-        $expr: {
-          $gte: ["$stock", fromCondition],
-        },
-      };
-    }
-
-    let found = await Product.find(query)
-      .populate("category")
-      .populate("supplier")
-      .lean({ virtuals: true });
-
-    res.status(200).json(found);
-  } catch (error) {
-    res.status(400).send({ message: error.message });
   }
 });
 

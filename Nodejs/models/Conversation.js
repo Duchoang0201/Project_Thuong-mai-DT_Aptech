@@ -1,6 +1,6 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
-const ConversationSchema = new mongoose.Schema(
+const ConversationSchema = Schema(
   {
     members: {
       type: Array,
