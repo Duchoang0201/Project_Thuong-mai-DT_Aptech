@@ -11,7 +11,6 @@ import {
   Input,
   Popconfirm,
   Row,
-  Space,
   Typography,
   message,
 } from "antd";
@@ -51,11 +50,11 @@ const Information = (props: Props) => {
       })
       .catch((err) => console.log(err));
   }, [E_URL, refresh]);
+
   const [updateForm] = Form.useForm();
 
   const handleUpdate = (record: any) => {
     const confirmData = { [selectItem]: updateData[selectItem] };
-    console.log("««««« confirmData »»»»»", confirmData);
     updateForm.resetFields();
     axios
       .patch(`http://localhost:9000/employees/${auth.payload._id}`, confirmData)

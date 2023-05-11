@@ -14,6 +14,30 @@ const validateSchema = (schema) => async (req, res, next) => {
   }
 };
 
+const supplierBodySchema = yup.object({
+  body: yup.object({
+    id: yup.number(),
+    name: yup.string().required().max(100),
+    email: yup.string().required().max(50),
+    phoneNumber: yup
+      .string()
+      .matches(
+        /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/,
+        "Phone number is not valid"
+      ),
+    address: yup.string().required().max(100),
+  }),
+});
+const supplierIdSchema = yup.object({
+  params: yup.object({
+    id: yup
+      .string()
+      .test("Validate ObjectId", "${path} is not a valid ObjectId", (value) => {
+        return ObjectId.isValid(value);
+      }),
+  }),
+});
+
 const getSuppliersSchema = yup.object({
   query: yup.object({
     name: yup.string(),
@@ -35,4 +59,17 @@ const getSuppliersSchema = yup.object({
   }),
 });
 
-module.exports = { validateSchema, getSuppliersSchema };
+const loginSchema = yup.object({
+  body: yup.object({
+    email: yup.string().email().required(),
+    password: yup.string().min(3).max(31).required(),
+  }),
+  params: yup.object({}),
+});
+module.exports = {
+  validateSchema,
+  getSuppliersSchema,
+  supplierBodySchema,
+  supplierIdSchema,
+  loginSchema,
+};

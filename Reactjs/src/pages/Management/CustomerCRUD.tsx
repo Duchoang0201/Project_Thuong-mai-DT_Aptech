@@ -8,7 +8,7 @@ import {
 } from "@ant-design/icons";
 import {
   Button,
-  Checkbox,
+  Card,
   DatePicker,
   Form,
   Input,
@@ -20,7 +20,6 @@ import {
   Space,
   Switch,
   Table,
-  Typography,
   Upload,
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
@@ -28,11 +27,11 @@ import axios from "axios";
 import React, { useCallback, useEffect, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
-
 // Date Picker
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-
+import moment from "moment";
+moment().format();
 function CustomerCRUD() {
   const { auth } = useAuthStore((state: any) => state);
 
@@ -75,6 +74,16 @@ function CustomerCRUD() {
 
   //Text of Tyography:
 
+  //TableLoading
+
+  const [loadingTable, setLoadingTable] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingTable(false);
+    }, 1000); // 5000 milliseconds = 5 seconds
+  }, []);
+
   //Create data
   const handleCreate = (record: any) => {
     record.createdBy = auth.payload;
@@ -115,6 +124,7 @@ function CustomerCRUD() {
     record.updatedBy = auth.payload;
     record.updatedDate = new Date().toISOString();
 
+    record.birthday = record.birthday.toISOString();
     axios
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
@@ -512,8 +522,8 @@ function CustomerCRUD() {
               }}
               allowClear
               defaultValue={[
-                dayjs("2000/01/01", dateFormat),
-                dayjs("2023/01/01", dateFormat),
+                dayjs("01/01/1900", dateFormat),
+                dayjs("01/01/2023", dateFormat),
               ]}
               format={dateFormat}
               onChange={onSearchCustomerBirthday}
@@ -538,6 +548,8 @@ function CustomerCRUD() {
             onClick={() => {
               setOpen(true);
               setUpdateId(record._id);
+              const birthdayFormat = moment(record.birthday);
+              record.birthday = birthdayFormat;
               updateForm.setFieldsValue(record);
             }}
           ></Button>
@@ -595,6 +607,7 @@ function CustomerCRUD() {
                   setCustomerAddress("");
                   setCustomerBirthdayFrom("");
                   setCustomerBirthdayTo("");
+                  setIsLocked("");
                 }}
                 icon={<ClearOutlined />}
               >
@@ -732,22 +745,47 @@ function CustomerCRUD() {
             >
               <Input />
             </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              label="Birthday"
+              name="birthday"
+              rules={[{ required: true, message: "Please input Birthday!" }]}
+            >
+              <DatePicker placement="bottomLeft" format="DD/MM/YYYY" />
+            </Form.Item>
           </Form>
         </div>
       </Modal>
 
       {/* List and function  */}
 
-      <Table
-        rowKey="_id"
-        columns={columns}
-        dataSource={customersTEST}
-        pagination={false}
-        scroll={{ x: "max-content", y: 610 }}
-        rowClassName={(record) => {
-          return record.Locked === true ? "text-danger bg-success-subtle" : "";
-        }}
-      />
+      <div>
+        <Table
+          // loading={!customersTEST ? true : false}
+          loading={loadingTable}
+          rowKey="_id"
+          columns={columns}
+          dataSource={customersTEST}
+          pagination={false}
+          scroll={{ x: "max-content", y: 610 }}
+          rowClassName={(record) => {
+            return record.Locked === true
+              ? "text-danger bg-success-subtle"
+              : "";
+          }}
+        />
+        <Pagination
+          className="container text-end"
+          onChange={(e) => slideCurrent(e)}
+          defaultCurrent={1}
+          total={pages}
+        />
+      </div>
 
       {/* Modal confirm Delte */}
 
@@ -755,7 +793,9 @@ function CustomerCRUD() {
       <Modal
         open={open}
         title="Update Customer"
-        onCancel={() => setOpen(false)}
+        onCancel={() => {
+          setOpen(false);
+        }}
         onOk={() => {
           updateForm.submit();
         }}
@@ -862,15 +902,22 @@ function CustomerCRUD() {
             >
               <Input />
             </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              label="Birthday"
+              name="birthday"
+              rules={[{ required: true, message: "Please input Birthday!" }]}
+            >
+              <DatePicker placement="bottomLeft" format="DD/MM/YYYY" />
+            </Form.Item>
           </div>
         </Form>
       </Modal>
-      <Pagination
-        className="container text-end"
-        onChange={(e) => slideCurrent(e)}
-        defaultCurrent={1}
-        total={pages}
-      />
     </div>
   );
 }

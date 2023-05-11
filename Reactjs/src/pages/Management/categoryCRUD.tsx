@@ -61,7 +61,16 @@ function CategoryCRUD() {
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
 
-  //Check Active
+  //TableLoading
+
+  const [loadingTable, setLoadingTable] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingTable(false);
+    }, 1000); // 5000 milliseconds = 5 seconds
+  }, []);
+
   //Text of Tyography:
 
   //Create data
@@ -560,6 +569,7 @@ function CategoryCRUD() {
       {/* List and function  */}
 
       <Table
+        loading={loadingTable}
         rowKey="_id"
         columns={columns}
         dataSource={categoryTEST}

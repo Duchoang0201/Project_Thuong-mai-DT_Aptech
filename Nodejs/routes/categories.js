@@ -2,7 +2,11 @@ const express = require("express");
 const router = express.Router();
 const { Category } = require("../models");
 const yup = require("yup");
-const { validateSchema, categorySchema } = require("../validation/category");
+const {
+  validateSchema,
+  categoryBodySchema,
+  categoryIdSchema,
+} = require("../validation/category");
 
 // Get ALL DATA
 // router.get("/", async (req, res, next) => {
@@ -45,14 +49,24 @@ router.get("/", async (req, res, next) => {
 });
 
 //CREATE DATA
-router.post("/", async function (req, res, next) {
+router.post("/", validateSchema(categoryBodySchema), async (req, res, next) => {
   try {
-    const newItem = req.body;
-    const data = new Category(newItem);
-    let result = await data.save();
-    return res.send({ oke: true, message: "Created", result });
+    const { name } = req.body;
+
+    const categoryExists = await Category.findOne({ name });
+
+    if (categoryExists) {
+      return res
+        .status(400)
+        .send({ oke: false, message: "Category already exists" });
+    } else {
+      const newItem = req.body;
+      const data = new Category(newItem);
+      let result = await data.save();
+      return res.status(200).send({ oke: true, message: "Created", result });
+    }
   } catch (error) {
-    return res.status(500).json({ error: error });
+    return res.status(500).json({ error: error.message });
   }
 });
 
@@ -60,7 +74,7 @@ router.post("/", async function (req, res, next) {
 
 router.delete(
   "/:id",
-  validateSchema(categorySchema),
+  validateSchema(categoryIdSchema),
   async function (req, res, next) {
     try {
       const itemId = req.params.id;
@@ -80,7 +94,8 @@ router.delete(
 //PATCH DATA
 router.patch(
   "/:id",
-  validateSchema(categorySchema),
+  validateSchema(categoryIdSchema),
+  validateSchema(categoryBodySchema),
   async function (req, res, next) {
     try {
       const itemId = req.params.id;

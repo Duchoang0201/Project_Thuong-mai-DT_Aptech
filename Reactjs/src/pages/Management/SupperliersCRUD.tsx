@@ -69,6 +69,16 @@ function SupperliersCRUD() {
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
 
+  //TableLoading
+
+  const [loadingTable, setLoadingTable] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingTable(false);
+    }, 1000); // 5000 milliseconds = 5 seconds
+  }, []);
+
   //Text of Tyography:
   const { Text } = Typography;
 
@@ -665,6 +675,7 @@ function SupperliersCRUD() {
 
       {/* List and function  */}
       <Table
+        loading={loadingTable}
         rowKey="_id"
         columns={columns}
         dataSource={supplierTEST}

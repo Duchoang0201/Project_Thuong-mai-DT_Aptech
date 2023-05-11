@@ -70,6 +70,14 @@ const ProductsCRUD = () => {
   console.log("««««« productsTest »»»»»", productsTEST);
   // const [productsFilter, setProductsFilter] = useState(API_URL);
 
+  const [loadingTable, setLoadingTable] = useState(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setLoadingTable(false);
+    }, 1000); // 5000 milliseconds = 5 seconds
+  }, []);
+
   const [open, setOpen] = useState(false);
   const [openCreate, setOpenCreate] = useState(false);
   const [deleteItem, setDeleteItem] = useState<Product>();
@@ -1045,6 +1053,7 @@ const ProductsCRUD = () => {
       </Modal>
       {/* List and function Product */}
       <Table
+        loading={loadingTable}
         tableLayout="auto"
         rowKey="id"
         columns={columns}
