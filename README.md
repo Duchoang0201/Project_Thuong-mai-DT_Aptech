@@ -4,8 +4,7 @@ Project_Thuong-mai-DT_Aptech
 Thành viên nhóm 2:
 
 1. Nguyễn Bá Đức Hoàng
-2. Mai Đức Thanh Tùng
-3. Phạm Cao Thắng
+2. Phạm Cao Thắng
 
 Sử dụng git: (necessary)
 
