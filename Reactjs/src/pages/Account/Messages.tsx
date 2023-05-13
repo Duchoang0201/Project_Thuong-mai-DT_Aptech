@@ -372,7 +372,10 @@ const Messages: React.FC<any> = () => {
                     {messages.map((item: any) => (
                       <>
                         {item?.employee?._id === auth.payload._id ? (
-                          <div className="d-flex flex-row-reverse">
+                          <div
+                            key={item.employee._id}
+                            className="d-flex flex-row-reverse"
+                          >
                             <div key={item?._id} className=" w-auto">
                               <h6 className="Name text-body-secondary ">
                                 <UserOutlined /> Me

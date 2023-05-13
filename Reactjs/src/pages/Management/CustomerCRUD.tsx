@@ -4,6 +4,7 @@ import {
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
+  PlusOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import {
@@ -33,6 +34,10 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
 moment().format();
 function CustomerCRUD() {
+  //Set File avatar
+
+  const [file, setFile] = useState<any>(null);
+
   const { auth } = useAuthStore((state: any) => state);
 
   const [refresh, setRefresh] = useState(0);
@@ -91,15 +96,25 @@ function CustomerCRUD() {
     if (record.Locked === undefined) {
       record.Locked = false;
     }
+
     axios
       .post(API_URL, record)
       .then((res) => {
-        console.log(res.data);
-        setRefresh((f) => f + 1);
-        setOpenCreate(false);
+        // UPLOAD FILE
+        const { _id } = res.data.result;
 
-        message.success(" Add new Customer sucessfully!", 1.5);
-        createForm.resetFields();
+        console.log("««««« res »»»»»", res);
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+          .post(`http://localhost:9000/upload/customers/${_id}/image`, formData)
+          .then((respose) => {
+            message.success("Thêm mới thành công!");
+            createForm.resetFields();
+            setRefresh((f) => f + 1);
+            setOpenCreate(false);
+          });
       })
       .catch((err) => {
         console.log(err);
@@ -647,7 +662,7 @@ function CustomerCRUD() {
           <Form form={createForm} name="createForm" onFinish={handleCreate}>
             <FormItem
               labelCol={{
-                span: 8,
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
@@ -655,13 +670,19 @@ function CustomerCRUD() {
               hasFeedback
               label="Email"
               name="email"
-              rules={[{ required: true, message: "Please input Email!" }]}
+              rules={[
+                {
+                  type: "email",
+                  message: "Please enter a valid email address!",
+                },
+                { required: true, message: "Please input Email!" },
+              ]}
             >
               <Input />
             </FormItem>
             <FormItem
               labelCol={{
-                span: 8,
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
@@ -675,7 +696,7 @@ function CustomerCRUD() {
             </FormItem>
             <FormItem
               labelCol={{
-                span: 8,
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
@@ -689,7 +710,7 @@ function CustomerCRUD() {
             </FormItem>
             <FormItem
               labelCol={{
-                span: 8,
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
@@ -705,22 +726,35 @@ function CustomerCRUD() {
             </FormItem>
             <FormItem
               labelCol={{
-                span: 8,
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
               }}
               hasFeedback
               label="Address"
-              name="addresss"
+              name="address"
               rules={[{ required: true, message: "Please input Address!" }]}
             >
               <Input />
             </FormItem>
-
             <FormItem
               labelCol={{
-                span: 8,
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Password"
+              name="password"
+              rules={[{ required: true, message: "Please input Address!" }]}
+            >
+              <Input.Password />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
@@ -747,7 +781,7 @@ function CustomerCRUD() {
             </Form.Item>
             <Form.Item
               labelCol={{
-                span: 8,
+                span: 7,
               }}
               wrapperCol={{
                 span: 16,
@@ -757,6 +791,38 @@ function CustomerCRUD() {
               rules={[{ required: true, message: "Please input Birthday!" }]}
             >
               <DatePicker placement="bottomLeft" format="DD/MM/YYYY" />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 7,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              label="Hình minh họa"
+              name="file"
+            >
+              <Upload
+                maxCount={1}
+                listType="picture-card"
+                showUploadList={true}
+                beforeUpload={(file) => {
+                  setFile(file);
+                  return false;
+                }}
+                onRemove={() => {
+                  setFile("");
+                }}
+              >
+                {!file ? (
+                  <div>
+                    <PlusOutlined />
+                    <div style={{ marginTop: 8 }}>Upload</div>
+                  </div>
+                ) : (
+                  ""
+                )}
+              </Upload>
             </Form.Item>
           </Form>
         </div>

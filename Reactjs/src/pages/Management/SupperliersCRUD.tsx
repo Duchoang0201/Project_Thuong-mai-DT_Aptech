@@ -90,6 +90,8 @@ function SupperliersCRUD() {
       record.active = false;
     }
     record.isDeleted = false;
+
+    console.log("««««« record »»»»»", record);
     axios
       .post(API_URL, record)
       .then((res) => {

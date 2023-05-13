@@ -1,0 +1,8 @@
+.myInlineStyle {
+    margin: 5% 10%;
+    border: 0px solid grey;
+    border-radius: 30px;
+     background: linear-gradient(to top, #f4f5f7  , rgba(203, 203, 204, 0.7));
+     box-shadow: 5px 0 15px rgba(0, 0, 0, 0.5);
+    padding: 5% 20%;
+  };

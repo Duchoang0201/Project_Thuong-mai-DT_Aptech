@@ -57,7 +57,7 @@ const customerBodyPatchSchema = yup.object().shape({
 const getCustomersSchema = yup.object({
   query: yup.object({
     Locked: yup.boolean(),
-    email: yup.string().email(),
+    email: yup.string(),
     firstName: yup.string(),
     lastName: yup.string(),
     phoneNumber: yup

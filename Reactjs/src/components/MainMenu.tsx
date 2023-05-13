@@ -12,85 +12,91 @@ import { Menu } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../hooks/useAuthStore";
 
-const items = [
-  {
-    label: "Dashboard",
-    key: "darhboard",
-    icon: <HomeOutlined />,
-    children: [
-      {
-        key: "darhboard/home",
-        label: "Home",
-      },
-    ],
-  },
-
-  {
-    label: "Mangement",
-    key: "management",
-    icon: <SettingOutlined />,
-    children: [
-      {
-        key: "management/categories",
-        label: "Categories",
-      },
-      {
-        key: "management/suppliers",
-        label: "Suppliers",
-      },
-      {
-        key: "management/customers",
-        label: "Customers",
-      },
-
-      {
-        key: "management/products",
-        label: "Products",
-      },
-    ],
-  },
-  {
-    label: "Order",
-    key: "order",
-    icon: <OrderedListOutlined />,
-    children: [
-      {
-        key: "order/orders",
-        label: "Orders",
-      },
-      {
-        key: "order/status",
-        label: "OrderStatus",
-      },
-    ],
-  },
-
-  {
-    label: "Account",
-    key: "/account",
-    icon: <UsergroupAddOutlined />,
-    children: [
-      {
-        key: "account/information",
-        label: "Information",
-        icon: <UserOutlined />,
-      },
-      {
-        key: "account/message",
-        label: "Message",
-        icon: <CommentOutlined />,
-      },
-      {
-        key: "account/logout",
-        label: "Logout",
-        icon: <ExportOutlined />,
-        // render: () => {},
-      },
-    ],
-  },
-];
-
 const MainMenu = () => {
+  const { auth } = useAuthStore((state: any) => state);
+
+  const items = [
+    {
+      label: "Dashboard",
+      key: "darhboard",
+      icon: <HomeOutlined />,
+      children: [
+        {
+          key: "darhboard/home",
+          label: "Home",
+        },
+      ],
+    },
+
+    {
+      label: "Mangement",
+      key: "management",
+      icon: <SettingOutlined />,
+      children: [
+        {
+          key: "management/categories",
+          label: "Categories",
+        },
+        {
+          key: "management/suppliers",
+          label: "Suppliers",
+        },
+        {
+          key: "management/customers",
+          label: "Customers",
+        },
+
+        {
+          key: "management/products",
+          label: "Products",
+        },
+        auth?.payload?.isAdmin && {
+          key: "management/employees",
+          label: "Employees",
+        },
+      ],
+    },
+    {
+      label: "Order",
+      key: "order",
+      icon: <OrderedListOutlined />,
+      children: [
+        {
+          key: "order/orders",
+          label: "Orders",
+        },
+        {
+          key: "order/status",
+          label: "OrderStatus",
+        },
+      ],
+    },
+
+    {
+      label: "Account",
+      key: "/account",
+      icon: <UsergroupAddOutlined />,
+      children: [
+        {
+          key: "account/information",
+          label: "Information",
+          icon: <UserOutlined />,
+        },
+        {
+          key: "account/message",
+          label: "Message",
+          icon: <CommentOutlined />,
+        },
+        {
+          key: "account/logout",
+          label: "Logout",
+          icon: <ExportOutlined />,
+          // render: () => {},
+        },
+      ],
+    },
+  ];
+
   const navigate = useNavigate();
   const { logout } = useAuthStore((state: any) => state);
 

@@ -30,29 +30,98 @@ const ObjectId = require("mongodb").ObjectId;
 //   }
 // });
 
-router.get("/", async (req, res, next) => {
-  try {
-    const { employeeId } = req.query;
+// Get all on Multiple conditions
+router.get(
+  "/",
 
-    const conditionFind = {};
+  async (req, res, next) => {
+    try {
+      const {
+        Locked,
+        email,
+        firstName,
+        lastName,
+        phoneNumber,
+        birthdayFrom,
+        birthdayTo,
+        address,
+        skip,
+        limit,
+      } = req.query;
 
-    if (employeeId) {
-      conditionFind._id = employeeId;
+      let fromDate = null;
+      if (birthdayFrom) {
+        fromDate = new Date(birthdayFrom);
+        fromDate.setHours(0, 0, 0, 0);
+        if (isNaN(fromDate.getTime())) {
+          throw new Error("Invalid date format for birthdayFrom");
+        }
+      }
+
+      let toDate = null;
+      if (birthdayTo) {
+        const tempToDate = new Date(birthdayTo);
+        toDate = new Date(tempToDate.setDate(tempToDate.getDate() + 1));
+        toDate.setHours(0, 0, 0, 0);
+        if (isNaN(toDate.getTime())) {
+          throw new Error("Invalid date format for birthdayTo");
+        }
+      }
+
+      const query = {
+        $expr: {
+          $and: [
+            Locked && { $eq: ["$Locked", Locked] },
+            email && {
+              $regexMatch: { input: "$email", regex: email, options: "i" },
+            },
+            firstName && {
+              $regexMatch: {
+                input: "$firstName",
+                regex: firstName,
+                options: "i",
+              },
+            },
+            lastName && {
+              $regexMatch: {
+                input: "$lastName",
+                regex: lastName,
+                options: "i",
+              },
+            },
+            fromDate && { $gte: ["$birthday", fromDate] },
+            toDate && { $lte: ["$birthday", toDate] },
+            address && {
+              $regexMatch: {
+                input: "$address",
+                regex: address,
+                options: "i",
+              },
+            },
+            phoneNumber && {
+              $regexMatch: {
+                input: "$phoneNumber",
+                regex: phoneNumber,
+                options: "i",
+              },
+            },
+          ].filter(Boolean),
+        },
+      };
+
+      let results = await Employee.find(query)
+        .sort({ Locked: 1 })
+        .skip(skip)
+        .limit(limit);
+
+      let amountResults = await Employee.countDocuments(query);
+      res.json({ results: results, amountResults: amountResults });
+    } catch (error) {
+      res.status(500).json({ ok: false, error: error.message });
     }
-
-    // const query = {
-    //   $expr: {
-    //     $and: [employeeId && { $eq: ["$_id", employeeId] }].filter(Boolean),
-    //   },
-    // };
-    // const query = { _id: { $in: employeeId } };
-    let results = await Employee.find(conditionFind);
-
-    res.json({ results: results });
-  } catch (error) {
-    res.status(500).json({ ok: false, error });
   }
-});
+);
+
 //GET A DATA
 // router.get("/:id", async (req, res, next) => {
 //   const validationSchema = yup.object().shape({

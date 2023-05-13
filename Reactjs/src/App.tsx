@@ -20,6 +20,7 @@ import Information from "./pages/Account/Information";
 import Messages from "./pages/Account/Messages";
 import Orders from "./pages/Order/Orders";
 import SearchOrdersByStatus from "./pages/Order/SearchOrdersByStatus";
+import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 numeral.locale("vi");
 
 const { Header, Sider, Content } = Layout;
@@ -122,6 +123,13 @@ const App: React.FC = () => {
                     <Route path="darhboard/home" element={<HomePage />} />
 
                     {/* MANAGEMENT */}
+
+                    {auth.payload.isAdmin && (
+                      <Route
+                        path="/management/employees"
+                        element={<EmployeesCRUD />}
+                      />
+                    )}
                     <Route
                       path="/management/products"
                       element={<ProductsCRUD />}
