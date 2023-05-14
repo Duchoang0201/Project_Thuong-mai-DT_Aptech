@@ -73,7 +73,6 @@ const ProductsCRUD = () => {
   // const [products, setProducts] = useState<Array<any>>([]);
   const [productsTEST, setProductsTEST] = useState<Array<any>>([]);
 
-  console.log("««««« productsTest »»»»»", productsTEST);
   // const [productsFilter, setProductsFilter] = useState(API_URL);
 
   const [loadingTable, setLoadingTable] = useState(true);
@@ -90,7 +89,6 @@ const ProductsCRUD = () => {
 
   const [updateId, setUpdateId] = useState<any>();
 
-  console.log("««««« updateId »»»»»", updateId);
   const [pictureForm] = Form.useForm();
   const [updateForm] = Form.useForm();
   const [createForm] = Form.useForm();

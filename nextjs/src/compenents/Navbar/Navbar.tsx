@@ -1,9 +1,6 @@
-import axios from "axios";
-import React from "react";
-
+import React, { useEffect, useState } from "react";
 import type { MenuProps } from "antd";
-import { Menu, Input, Space } from "antd";
-import { useState } from "react";
+import { Menu, Input } from "antd";
 import Style from "./NavBar.module.css";
 import { useRouter } from "next/router";
 import {
@@ -16,11 +13,14 @@ import {
 } from "react-icons/ai";
 import { useAuthStore } from "@/hook/useAuthStore";
 import {
+  CarOutlined,
   HomeOutlined,
   PhoneOutlined,
   ShoppingCartOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
+import Link from "next/link";
+
 const { Search } = Input;
 type Props = {};
 
@@ -70,7 +70,6 @@ const items: MenuProps["items"] = [
   {
     label: "Đồng hồ",
     key: "app",
-    // disabled: true,
     children: [
       {
         type: "group",
@@ -94,12 +93,10 @@ const items: MenuProps["items"] = [
       },
     ],
   },
-
   {
     label: "Hot trong tháng",
     key: "Hot",
   },
-
   {
     label: "Khuyến mãi",
     key: "Discount",
@@ -108,50 +105,88 @@ const items: MenuProps["items"] = [
     label: "Thương hiệu",
     key: "Us",
   },
-  // {
-  //   label: (
-  //     <a href="https://ant.design" target="_blank" rel="noopener noreferrer">
-  //       Navigation Four - Link
-  //     </a>
-  //   ),
-  //   key: "alipay",
-  // },
 ];
 
 function NavBar({}: Props) {
   const { auth } = useAuthStore((state: any) => state);
   const { logout } = useAuthStore((state: any) => state);
 
-  const [find, setFind] = useState<string>("");
   const router = useRouter();
 
   const handleNavigation = (path: any) => {
     router.push(path);
   };
 
-  const handleChange = (e: any) => {
-    console.log(e);
-    setFind(e);
+  // Use a state to track the initial rendering
+  const [isClient, setIsClient] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const renderAuthLinks = (): React.ReactNode => {
+    if (!isHydrated) {
+      // Server-side rendering
+      return null;
+    }
+
+    if (auth) {
+      return (
+        <>
+          <li
+            className={Style.listTopItem2}
+            onClick={() => {
+              logout();
+            }}
+          >
+            <div className={Style.icon}>
+              <ShoppingCartOutlined />
+            </div>
+            <span>Giỏ Hàng</span>
+          </li>
+          <li
+            className={Style.listTopItem2}
+            onClick={() => {
+              logout();
+            }}
+          >
+            <div className={Style.icon}></div>
+            <span>Đăng Xuất</span>
+          </li>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <li className={Style.listTopItem2}>
+            <Link href="/login">Đăng nhập</Link>
+          </li>
+          <li className={Style.listTopItem2}>
+            <Link href="/register">Đăng ký</Link>
+          </li>
+        </>
+      );
+    }
   };
 
   return (
     <>
-      <div className={Style.container}>
-        <div className={Style.titleSmall}>JewelShop</div>
+      <div className={`${Style.container}`}>
+        <div className={`${Style.titleSmall}`}>JewelShop</div>
         <div>
-          <ul className={Style.listTop}>
+          <ul className={`${Style.listTop}`}>
             <li
               className={Style.listTopItem1}
               onClick={() => {
                 handleNavigation("/phone");
               }}
             >
-              <div className={Style.icon}>
-                <PhoneOutlined />
-              </div>
+              <div className={Style.icon}></div>
               <span>Điện Thoại</span>
-
-              <link />
             </li>
             <li
               className={Style.listTopItem1}
@@ -159,9 +194,7 @@ function NavBar({}: Props) {
                 handleNavigation("/Branch");
               }}
             >
-              <div className={Style.icon}>
-                <HomeOutlined />
-              </div>
+              <div className={Style.icon}></div>
               <span>Chi nhánh</span>
             </li>
             <li
@@ -172,71 +205,14 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {auth && (
-              <li
-                className={Style.listTopItem2}
-                onClick={() => {
-                  handleNavigation("/cart");
-                }}
-              >
-                <div className={Style.icon}>
-                  <ShoppingCartOutlined />
-                </div>
-                <span>Giỏ hàng</span>
-              </li>
-            )}
-            {auth ? (
-              <li
-                className={Style.listTopItem2}
-                onClick={() => {
-                  logout();
-                }}
-              >
-                <div className={Style.icon}>
-                  <AiOutlineLogin />
-                </div>
-                <span>Đăng Xuất</span>
-              </li>
-            ) : (
-              <>
-                <li
-                  className={Style.listTopItem2}
-                  onClick={() => {
-                    handleNavigation("/login");
-                  }}
-                >
-                  <div className={Style.icon}>
-                    <AiOutlineLogin />
-                  </div>
-                  <span>Đăng nhập</span>
-                </li>
-                <li
-                  className={Style.listTopItem2}
-                  onClick={() => {
-                    handleNavigation("/register");
-                  }}
-                >
-                  <div className={Style.icon}>
-                    <TeamOutlined />
-                  </div>
-                  <span>Đăng ký</span>
-                </li>
-              </>
-            )}
+            {renderAuthLinks()}
           </ul>
         </div>
 
         <div className={Style.menuAnt}>
-          <Menu
-            style={{ width: "35%" }}
-            // onClick={onClick}
-            // selectedKeys={[current]}
-            mode="horizontal"
-            items={items}
-          />
+          <Menu style={{ width: "35%" }} mode="horizontal" items={items} />
           <Search
             placeholder="input search text"
-            // onSearch={onSearch}
             style={{ margin: "10px", width: 200 }}
           />
         </div>

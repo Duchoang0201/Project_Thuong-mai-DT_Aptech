@@ -4,7 +4,6 @@ import {
   Col,
   Form,
   Input,
-  List,
   Modal,
   Row,
   Select,
@@ -16,21 +15,14 @@ import React, { useEffect, useRef, useState } from "react";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import axios from "axios";
 import {
+  CheckCircleTwoTone,
   PlusCircleOutlined,
   SendOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import VirtualList from "rc-virtual-list";
 import { format } from "timeago.js";
 // Socket;
 import { io } from "socket.io-client";
-interface Conversation {
-  _id: string;
-  members: string[];
-  createdAt: string;
-  updatedAt: string;
-  __v: number;
-}
 
 const Messages: React.FC<any> = () => {
   const formRef = useRef<any>(null);
@@ -39,34 +31,37 @@ const Messages: React.FC<any> = () => {
 
   //Get conversation
   const [conversations, setConversations] = useState<any>([]);
-  console.log("««««« conversations »»»»»", conversations);
   //Create a conversation:
   const [openCreateConver, setOpenCreateConver] = useState(false);
   // const [newCoversations, setNewConversations] = useState<any>();
-  //Data
-  const [dataUserMenu, setDataUserMenu] = useState<any[]>([]);
 
   //Get all User to Create conversation
   const [users, getUsers] = useState<any>([]);
   //Get Meessage
   const [messages, setMessages] = useState<any[any]>([]);
+
   const [arrivalMessage, setArrivalMessage] = useState<any>([]);
-  console.log("««««« arrivalMessage »»»»»", arrivalMessage);
   //loading
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(false);
   const { auth } = useAuthStore((state: any) => state);
 
-  //active tab key
-  const [activeTabKey1, setActiveTabKey1] = useState<any>();
+  ///conversation infor
+  const [conversationInfor, setConversationInfor] = useState<any>();
 
+  //userOnline
+
+  const [usersOnline, setUsersOnline] = useState<any>();
   // Setting socket.io
 
   const socket = useRef<any>();
+
   useEffect(() => {
     socket.current = io("http://localhost:8888");
+  }, []);
+
+  useEffect(() => {
     socket.current.on("getMessage", (data: any) => {
-      console.log("««««« data »»»»»", data);
       if (data == null) {
         setRefresh((f) => f + 1);
       } else {
@@ -83,7 +78,7 @@ const Messages: React.FC<any> = () => {
   // Get message live socket.io
   useEffect(() => {
     arrivalMessage &&
-      conversationCurrent?.members.includes(arrivalMessage.senderId);
+      conversationInfor?.friends._id.includes(arrivalMessage.senderId);
     setMessages((prev: any) => [...prev, arrivalMessage]);
   }, [arrivalMessage, conversations]);
 
@@ -91,6 +86,22 @@ const Messages: React.FC<any> = () => {
   useEffect(() => {
     socket.current.emit("addUser", auth.payload._id);
   }, [auth]);
+
+  //Get User Online IO
+  useEffect(() => {
+    socket.current.on("userOnline", (users: any) => {
+      setUsersOnline(users);
+    });
+  }, [auth]);
+
+  //Get User Online after disconnect IO
+  useEffect(() => {
+    socket.current.on("userOffline", (users: any) => {
+      setUsersOnline(users);
+      console.log("««««« usersOffline »»»»»", users);
+    });
+  }, [auth]);
+
   //GEt all Users
   useEffect(() => {
     const getAllUsers = async () => {
@@ -142,59 +153,15 @@ const Messages: React.FC<any> = () => {
     }
   };
 
-  //GET Menu user to chat
-
-  useEffect(() => {
-    const friendId = conversations.flatMap((object: { members: any[] }): any =>
-      object.members.filter((memberId: any) => memberId !== auth.payload._id)
-    );
-
-    const query = friendId
-      .map((employeeId: string) => `employeeId=${employeeId}`)
-      .join("&");
-    const getUser = async () => {
-      try {
-        const res = await axios.get(`http://localhost:9000/employees?${query}`);
-        setDataUserMenu(res.data.results);
-      } catch (error) {}
-    };
-    getUser();
-  }, [auth.payload._id, conversations]);
-
-  //Function Get ConversationId back
-
-  const memberId1 = `${auth.payload._id}`;
-  const memberId2 = `${activeTabKey1?._id}`;
-  function getConversationIdByMembers(
-    conversations: Conversation[],
-    memberId1: string,
-    memberId2: string
-  ): any {
-    const conversation = conversations.find(
-      (conv) =>
-        conv.members.includes(memberId1) && conv.members.includes(memberId2)
-    );
-    return conversation ? conversation : null;
-  }
-
-  const conversationCurrent = getConversationIdByMembers(
-    conversations,
-    memberId1,
-    memberId2
-  );
-
-  console.log("««««« conversationCurrent »»»»»", conversationCurrent);
   //Function send message
   const handleSendMessages = async (e: any) => {
     const messageSend = {
       sender: auth.payload._id,
       text: e.text,
-      conversationId: conversationCurrent._id,
+      conversationId: conversationInfor.conversationId,
     };
 
-    const receiverId = conversationCurrent.members.find(
-      (member: any) => member !== auth.payload._id
-    );
+    const receiverId = conversationInfor.friends._id;
 
     socket.current.emit("sendMessage", {
       senderId: `${auth.payload._id}`,
@@ -214,7 +181,7 @@ const Messages: React.FC<any> = () => {
       setTimeout(() => {
         const inputInstance = formRef.current.getFieldInstance("text");
         inputInstance.focus();
-      }, 0);
+      }, 30);
     } catch (error) {
       console.log("««««« error »»»»»", error);
     }
@@ -225,18 +192,14 @@ const Messages: React.FC<any> = () => {
     const getMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:9000/messages/${conversationCurrent._id}`
+          `http://localhost:9000/messages/${conversationInfor.conversationId}`
         );
         setMessages(res.data);
+        console.log("««««« res »»»»»", res.data);
       } catch (error) {}
     };
     getMessages();
-  }, [activeTabKey1, conversationCurrent, refresh]);
-  //For scroll when scroll down menu user
-  const onScroll = (e: React.UIEvent<HTMLElement, UIEvent>) => {
-    if (e.currentTarget.scrollHeight - e.currentTarget.scrollTop === 400) {
-    }
-  };
+  }, [conversationInfor, refresh]);
 
   /// PART OF CHATBOX
 
@@ -251,6 +214,53 @@ const Messages: React.FC<any> = () => {
   }, [messages]);
   scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
 
+  const [friendData, setFriendData] = useState<any>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const conversationsWithAuthMember = conversations.filter((item: any) =>
+        item.members.includes(auth.payload._id)
+      );
+
+      const friendPromises = conversationsWithAuthMember.map(
+        async (item: any) => {
+          const otherMembers = item.members.filter(
+            (member: any) => member !== auth.payload._id
+          );
+
+          try {
+            const response = await axios.get(
+              `http://localhost:9000/employees/${otherMembers}`
+            );
+            const friendData = response.data.result; // Assuming the friend data is in the 'result' property
+            const friendInfo = {
+              conversationId: item._id,
+              friends: friendData
+                ? {
+                    ...friendData,
+                    _id: friendData._id.toString(),
+                  }
+                : null,
+            };
+            return friendInfo;
+          } catch (error) {
+            console.log("Error fetching friend information:", error);
+            const friendInfo = {
+              conversationId: item._id,
+              friends: null,
+            };
+            return friendInfo;
+          }
+        }
+      );
+
+      const friendInfo = await Promise.all(friendPromises);
+      setFriendData(friendInfo);
+    };
+
+    fetchData();
+  }, [conversations]);
+
   return (
     <>
       <Card style={{ minHeight: "84vh" }}>
@@ -258,7 +268,7 @@ const Messages: React.FC<any> = () => {
           <Card style={{ width: 300, marginTop: 16 }} loading={true}></Card>
         ) : (
           <Row>
-            <Col xs={24} xl={5}>
+            <Col xs={24} xl={6}>
               <div>
                 <Button
                   onClick={() => setOpenCreateConver(true)}
@@ -268,7 +278,6 @@ const Messages: React.FC<any> = () => {
                 />{" "}
                 <span className="text-primary">New conversation?</span>
               </div>
-
               <Modal
                 open={openCreateConver}
                 onCancel={() => setOpenCreateConver(false)}
@@ -322,86 +331,93 @@ const Messages: React.FC<any> = () => {
                   </Form.Item>{" "}
                 </Form>
               </Modal>
-              <List>
-                <VirtualList
-                  data={dataUserMenu}
-                  height={300}
-                  itemHeight={50}
-                  itemKey="_id"
-                  onScroll={onScroll}
-                >
-                  {(item: any) => (
-                    <List.Item key={item._id}>
-                      <Button
-                        onClick={() => setActiveTabKey1(item)}
-                        className="text-start "
-                        style={{ width: "300px", height: "auto" }}
-                      >
-                        <List.Item.Meta
-                          // avatar={<Avatar src={item.picture.large} />}
-                          avatar={<UserOutlined />}
-                          title={
-                            <div>
-                              {" "}
-                              {item.firstName}
-                              <span> </span>
-                              {item.lastName}
-                            </div>
-                          }
-                          description={item.email}
-                        />
-                      </Button>
-                    </List.Item>
-                  )}
-                </VirtualList>
-              </List>
+              <div
+                className="conversation"
+                style={{ height: "125px", overflowY: "auto" }}
+              >
+                {friendData?.map((friends: any, index: any) => (
+                  <div key={`friend-${index}`}>
+                    <Button
+                      onClick={() => setConversationInfor(friends)}
+                      className="text-start"
+                      style={{ width: "300px", height: "auto" }}
+                    >
+                      {friends?.friends?.firstName} {friends?.friends?.lastName}
+                    </Button>
+                  </div>
+                ))}
+              </div>
             </Col>
-            <Col xs={24} xl={19}>
-              {activeTabKey1 ? (
+            <Col xs={24} xl={18}>
+              {conversationInfor ? (
                 <Card
                   type="inner"
-                  title={`${activeTabKey1?.firstName} ${activeTabKey1?.lastName}`}
+                  title={`${conversationInfor?.friends.firstName} ${conversationInfor?.friends.lastName} 
+                
+                  `}
+                  extra={
+                    usersOnline?.users?.some(
+                      (user: any) =>
+                        user.userId === conversationInfor.friends._id
+                    ) ? (
+                      <div>
+                        <Space>
+                          <CheckCircleTwoTone twoToneColor="#52c41a" />
+                          Online
+                        </Space>
+                      </div>
+                    ) : (
+                      <div>
+                        <Space>
+                          <CheckCircleTwoTone twoToneColor="#eb2f96" />
+                          Offline
+                        </Space>
+                      </div>
+                    )
+                  }
                   bordered={false}
                   style={{ width: "auto" }}
                 >
                   <div
-                    id="scrollUP"
                     ref={scrollRef}
                     style={{ height: "400px", overflowY: "scroll" }}
                   >
-                    {messages.map((item: any) => (
+                    {messages.map((item: any, index: number) => (
                       <>
                         {item?.employee?._id === auth.payload._id ? (
                           <div
-                            key={item.employee._id}
+                            key={`${item?._id}-me-${index}`}
                             className="d-flex flex-row-reverse"
                           >
-                            <div key={item?._id} className=" w-auto">
-                              <h6 className="Name text-body-secondary ">
+                            <div
+                              key={`${item?._id}-me-${index}`}
+                              className="w-auto"
+                            >
+                              <h6 className="Name text-body-secondary">
                                 <UserOutlined /> Me
-                              </h6>{" "}
-                              <h5 className=" bg-light-subtle border rounded-2 text-break px-2 py-2 ">
+                              </h6>
+                              <h5 className="bg-light-subtle border rounded-2 text-break px-2 py-2">
                                 {item?.text}
-                              </h5>{" "}
-                              <div className=" text-end ">
+                              </h5>
+                              <div className="text-end">
                                 {format(item.createdAt)}
                               </div>
                             </div>
                           </div>
                         ) : (
-                          <div className="d-flex ">
-                            <div key={item?._id} className=" w-auto">
-                              <h6 className="Name text-primary ">
-                                {" "}
-                                <UserOutlined /> {
-                                  item?.employee?.firstName
-                                }{" "}
+                          <div key={`${item?._id}-${index}`} className="d-flex">
+                            <div
+                              key={`${item?._id}-me-${index}`}
+                              className="w-auto"
+                            >
+                              <h6 className="Name text-primary">
+                                <UserOutlined /> {item?.employee?.firstName}{" "}
                                 {item?.employee?.lastName}
                               </h6>
-                              <h5 className=" text-white  bg-primary border rounded-2 px-2 py-2 text-break ">
+                              <h5 className="text-white bg-primary border rounded-2 px-2 py-2 text-break">
                                 {item.text}
-                              </h5>{" "}
-                              <div className="text-start ">
+                              </h5>
+                              <div className="text-start">
                                 {format(item.createdAt)}
                               </div>
                             </div>
@@ -410,9 +426,10 @@ const Messages: React.FC<any> = () => {
                       </>
                     ))}
                   </div>
+
                   <Form
                     style={{ marginTop: "50px" }}
-                    key={activeTabKey1}
+                    key={conversationInfor}
                     form={createForm}
                     name="createForm"
                     onFinish={handleSendMessages}

@@ -85,7 +85,6 @@ function CategoryCRUD() {
     axios
       .post(API_URL, record)
       .then((res) => {
-        console.log(res.data);
         setRefresh((f) => f + 1);
         setOpenCreate(false);
 
@@ -132,11 +131,9 @@ function CategoryCRUD() {
     if (record.isDeleted === undefined) {
       record.isDeleted = false;
     }
-    console.log("««««« record »»»»»", record);
     axios
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
-        console.log(res);
         setOpen(false);
         setOpenCreate(false);
         setRefresh((f) => f + 1);
@@ -152,7 +149,6 @@ function CategoryCRUD() {
   const [isDelete, setIsDelete] = useState("");
   const [isActive, setIsActive] = useState("");
   const onSearchIsDelete = useCallback((value: any) => {
-    console.log("««««« value »»»»»", value);
     if (value === "active") {
       setIsActive("true");
       setIsDelete("");
@@ -213,19 +209,16 @@ function CategoryCRUD() {
     .filter(Boolean)
     .join("")}&limit=10`;
 
-  console.log("««««« URL_FILTER »»»»»", URL_FILTER);
   useEffect(() => {
     axios
       .get(URL_FILTER)
       .then((res) => {
-        console.log("««««« res »»»»»", res);
         setCategoryTEST(res.data.results);
         setPages(res.data.amountResults);
       })
       .catch((err) => console.log(err));
   }, [URL_FILTER, refresh]);
 
-  console.log(pages);
   //Setting column
   const columns = [
     {

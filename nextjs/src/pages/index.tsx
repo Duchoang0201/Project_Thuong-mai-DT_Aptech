@@ -7,6 +7,13 @@ import NavBar from "@/compenents/Navbar/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const imageLoader = (src: any) => {
+    return `localhost:9000${src}}`;
+  };
+  imageLoader(
+    `/uploads/products/641b0dfdb5b1ca7f1713e8ea/img-1682533076800-1682568987131--1-.jpg`
+  );
+
   return (
     <>
       <Head>
@@ -111,7 +118,15 @@ export default function Home() {
         </div>
       </main> */}
       <NavBar />
-      <main>hello shop</main>
+      <main>
+        hello shop
+        <Image
+          src="http://localhost:9000/uploads/products/641b0dfdb5b1ca7f1713e8f0/9g4z1sbr-wallha-com.png"
+          alt="Picture of the author"
+          width={500}
+          height={500}
+        />
+      </main>
     </>
   );
 }

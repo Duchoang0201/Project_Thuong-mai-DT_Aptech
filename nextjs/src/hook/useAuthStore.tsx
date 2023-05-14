@@ -62,7 +62,7 @@ export const useAuthStore = create(
         };
       },
       {
-        name: "onlineshop-storage",
+        name: "shopWeb-storage",
         storage: createJSONStorage(() => localStorage),
       }
     )

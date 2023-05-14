@@ -122,41 +122,41 @@ router.get(
   }
 );
 
-//GET A DATA
-// router.get("/:id", async (req, res, next) => {
-//   const validationSchema = yup.object().shape({
-//     params: yup.object({
-//       id: yup
-//         .string()
-//         .test(
-//           "validate ObjectId",
-//           "${path} is not a valid ObjectId",
-//           (value) => {
-//             return ObjectId.isValid(value);
-//           }
-//         ),
-//     }),
-//   });
+// GET A DATA
+router.get("/:id", async (req, res, next) => {
+  const validationSchema = yup.object().shape({
+    params: yup.object({
+      id: yup
+        .string()
+        .test(
+          "validate ObjectId",
+          "${path} is not a valid ObjectId",
+          (value) => {
+            return ObjectId.isValid(value);
+          }
+        ),
+    }),
+  });
 
-//   validationSchema
-//     .validate({ params: req.params }, { abortEarly: false })
-//     .then(async () => {
-//       const itemId = req.params.id;
-//       let found = await Employee.findById(itemId);
-//       if (found) {
-//         return res.status(200).json({ oke: true, result: found });
-//       }
-//       return res.status(410).json({ oke: false, message: "Object not found" });
-//     })
-//     .catch((err) => {
-//       return res.status(400).json({
-//         type: err.name,
-//         errors: err.errors,
-//         message: err.message,
-//         provider: "Yup",
-//       });
-//     });
-// });
+  validationSchema
+    .validate({ params: req.params }, { abortEarly: false })
+    .then(async () => {
+      const itemId = req.params.id;
+      let found = await Employee.findById(itemId);
+      if (found) {
+        return res.status(200).json({ oke: true, result: found });
+      }
+      return res.status(410).json({ oke: false, message: "Object not found" });
+    })
+    .catch((err) => {
+      return res.status(400).json({
+        type: err.name,
+        errors: err.errors,
+        message: err.message,
+        provider: "Yup",
+      });
+    });
+});
 // POST DATA
 router.post("/", async (req, res, next) => {
   const validationSchema = yup.object({

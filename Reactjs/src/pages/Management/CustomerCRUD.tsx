@@ -9,7 +9,6 @@ import {
 } from "@ant-design/icons";
 import {
   Button,
-  Card,
   DatePicker,
   Form,
   Input,
@@ -103,7 +102,6 @@ function CustomerCRUD() {
         // UPLOAD FILE
         const { _id } = res.data.result;
 
-        console.log("««««« res »»»»»", res);
         const formData = new FormData();
         formData.append("file", file);
 
@@ -158,7 +156,6 @@ function CustomerCRUD() {
 
   const [isLocked, setIsLocked] = useState("");
   const onSearchIsLocked = useCallback((value: any) => {
-    console.log("««««« value »»»»»", value);
     if (value) {
       setIsLocked(value);
     } else {

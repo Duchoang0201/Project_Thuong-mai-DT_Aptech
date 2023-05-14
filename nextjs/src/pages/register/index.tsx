@@ -19,6 +19,9 @@ import {
   message,
 } from "antd";
 import { relative } from "path";
+import { PlusOutlined } from "@ant-design/icons";
+import login from "../login";
+import { useAuthStore } from "@/hook/useAuthStore";
 
 const { RangePicker } = DatePicker;
 const { TextArea } = Input;
@@ -42,6 +45,9 @@ type customertype = {
 };
 
 function Register({}: customertype) {
+  const [file, setFile] = useState<any>(null);
+  const { login } = useAuthStore((state: any) => state);
+
   const API_URL = "http://localhost:9000/customers";
   const [registerForm] = Form.useForm();
 
@@ -54,9 +60,19 @@ function Register({}: customertype) {
     };
     axios
       .post(API_URL, newData)
-      .then((response) => {
-        console.log(response.data);
-        message.success("Create a new Employee successfully!!", 1.5);
+      .then((res) => {
+        // UPLOAD FILE
+        const { _id, email, password } = res.data.result;
+        const formData = new FormData();
+        formData.append("file", file);
+        axios
+          .post(`http://localhost:9000/upload/customers/${_id}/image`, formData)
+          .then((response) => {
+            login({ email, password });
+          })
+          .catch((error: any) => {
+            console.log(error);
+          });
       })
       .catch((err) => {
         console.log(err);
@@ -79,13 +95,11 @@ function Register({}: customertype) {
             labelCol={{ span: 4 }}
             wrapperCol={{ span: 14 }}
             layout="horizontal"
-            //   disabled={componentDisabled}
             style={{ maxWidth: 600 }}
           >
             <div className="row">
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="Password"
                 name="password"
                 rules={[{ required: true, message: "Enter password" }]}
@@ -94,7 +108,6 @@ function Register({}: customertype) {
               </Form.Item>
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="First name"
                 name="firstName"
                 rules={[
@@ -105,7 +118,6 @@ function Register({}: customertype) {
               </Form.Item>
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="Last name"
                 name="lastName"
                 rules={[
@@ -116,7 +128,6 @@ function Register({}: customertype) {
               </Form.Item>
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="Email"
                 name="email"
                 rules={[{ required: true, message: "Please enter your email" }]}
@@ -125,7 +136,6 @@ function Register({}: customertype) {
               </Form.Item>
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="Phone"
                 name="phoneNumber"
                 rules={[
@@ -136,7 +146,6 @@ function Register({}: customertype) {
               </Form.Item>
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="Address"
                 name="address"
                 rules={[{ required: true, message: "Please enter address" }]}
@@ -145,26 +154,33 @@ function Register({}: customertype) {
               </Form.Item>
               <Form.Item
                 hasFeedback
-                className="col-4"
                 label="Birthday"
                 name="birthday"
                 rules={[{ required: true, message: "Please enter Birthday" }]}
               >
                 <DatePicker />
               </Form.Item>
-              <Form.Item
-                hasFeedback
-                className="col-4"
-                label="Photo"
-                valuePropName="fileList"
-                name="imageUrl"
-                getValueFromEvent={normFile}
-              >
-                <Upload action="/upload.do" listType="picture-card">
-                  <div>
-                    {/* <PlusOutlined /> */}
-                    <div style={{ marginTop: 8 }}>Upload</div>
-                  </div>
+              <Form.Item label="Hình minh họa" name="file">
+                <Upload
+                  maxCount={1}
+                  listType="picture-card"
+                  showUploadList={true}
+                  beforeUpload={(file) => {
+                    setFile(file);
+                    return false;
+                  }}
+                  onRemove={() => {
+                    setFile("");
+                  }}
+                >
+                  {!file ? (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
                 </Upload>
               </Form.Item>
             </div>

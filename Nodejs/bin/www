@@ -55,7 +55,7 @@ const getUser = (userId) => {
 };
 
 io.on("connection", (socket) => {
-  //when ceonnect
+  // when connect
   console.log("a user connected.");
 
   // take userId and socketId from user
@@ -64,7 +64,12 @@ io.on("connection", (socket) => {
     io.emit("getUsers", users);
   });
 
-  //send and get message
+  // Emit userOnline event when a user connects
+  io.emit("userOnline", {
+    users,
+  });
+
+  // send and get message
   socket.on("sendMessage", ({ senderId, receiverId, text }) => {
     const user = getUser(receiverId);
 
@@ -86,8 +91,16 @@ io.on("connection", (socket) => {
     console.log("a user disconnected!");
     removeUser(socket.id);
     io.emit("getUsers", users);
+
+    // Emit userOnline event when a user disconnects
+    setTimeout(() => {
+      io.emit("userOnline", {
+        users,
+      });
+    }, 2000);
   });
 });
+
 //send and get messages
 
 /**
