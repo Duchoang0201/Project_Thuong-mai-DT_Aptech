@@ -1,0 +1,33 @@
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+<<<<<<< HEAD
+
+  //Config images:
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "9000",
+        pathname: "**",
+      },
+    ],
+  },
+};
+
+=======
+  images: {
+    remotePatterns: [
+      {
+        protocol: "http",
+        hostname: "localhost",
+        port: "9000",
+        pathname: "**",
+      },
+    ],
+  },
+};
+
+>>>>>>> main
+module.exports = nextConfig;
