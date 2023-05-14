@@ -37,7 +37,7 @@ const customerSchema = Schema(
       type: Date,
     },
     createdBy: { type: Object },
-
+    imageUrl: { type: String },
     updatedDate: {
       type: Date,
     },

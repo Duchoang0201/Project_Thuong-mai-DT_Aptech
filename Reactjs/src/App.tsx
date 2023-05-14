@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./hooks/useAuthStore";
 import { Layout, Button, theme } from "antd";
+import { io } from "socket.io-client";
 
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
 import numeral from "numeral";
@@ -20,12 +21,18 @@ import Information from "./pages/Account/Information";
 import Messages from "./pages/Account/Messages";
 import Orders from "./pages/Order/Orders";
 import SearchOrdersByStatus from "./pages/Order/SearchOrdersByStatus";
+import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 numeral.locale("vi");
-
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
   const { auth } = useAuthStore((state: any) => state);
+
+  const socket = useRef<any>();
+
+  useEffect(() => {
+    socket.current = io("http://localhost:8888");
+  }, []);
 
   // Function reresh to clear local storage
 
@@ -122,6 +129,13 @@ const App: React.FC = () => {
                     <Route path="darhboard/home" element={<HomePage />} />
 
                     {/* MANAGEMENT */}
+
+                    {auth.payload.isAdmin && (
+                      <Route
+                        path="/management/employees"
+                        element={<EmployeesCRUD />}
+                      />
+                    )}
                     <Route
                       path="/management/products"
                       element={<ProductsCRUD />}

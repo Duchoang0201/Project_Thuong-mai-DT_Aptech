@@ -147,7 +147,9 @@ router.post("/", validateSchema(customerBodySchema), async (req, res, next) => {
       const newItem = req.body;
       const data = new Customer(newItem);
       let result = await data.save();
-      return res.status(200).send({ oke: true, message: "Created", result });
+      return res
+        .status(200)
+        .send({ oke: true, message: "Created succesfully", result: result });
     }
   } catch (error) {
     return res.status(500).json({ error: error.message });
@@ -196,30 +198,36 @@ router.patch(
 );
 
 /// LOGIN
-router.post("/login", validateSchema(loginSchema), async (req, res, next) => {
-  try {
-    const { email, password } = req.body;
+router.post(
+  "/login",
 
-    const customer = await Customer.findOne({ email, password });
+  // validateSchema(loginSchema),
 
-    console.log(customer);
-    if (!customer) return res.status(404).send({ message: "Not found" });
+  async (req, res, next) => {
+    try {
+      const { email, password } = req.body;
 
-    const { _id, email: empEmail, firstName, lastName } = customer;
+      const customer = await Customer.findOne({ email, password });
 
-    const token = encodeToken(_id, empEmail, firstName, lastName);
+      console.log(customer);
+      if (!customer) return res.status(404).send({ message: "Not found" });
 
-    console.log(token);
-    res.status(200).json({
-      token,
-      payload: customer,
-    });
-  } catch (err) {
-    res.status(401).json({
-      statusCode: 401,
-      message: "Login Unsuccessful",
-    });
+      const { _id, email: empEmail, firstName, lastName } = customer;
+
+      const token = encodeToken(_id, empEmail, firstName, lastName);
+
+      console.log(token);
+      res.status(200).json({
+        token,
+        payload: customer,
+      });
+    } catch (err) {
+      res.status(401).json({
+        statusCode: 401,
+        message: "Login Unsuccessful",
+      });
+    }
   }
-});
+);
 
 module.exports = router;

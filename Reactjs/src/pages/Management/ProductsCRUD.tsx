@@ -6,6 +6,7 @@ import {
   EditOutlined,
   PlusCircleOutlined,
   SearchOutlined,
+  UnorderedListOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
 import {
@@ -22,6 +23,7 @@ import {
   Space,
   Table,
   Upload,
+  Image,
 } from "antd";
 import Search from "antd/es/input/Search";
 import axios from "axios";
@@ -59,6 +61,10 @@ const ProductsCRUD = () => {
   const [refresh, setRefresh] = useState(0);
   const { auth } = useAuthStore((state: any) => state);
 
+  //File to upload (createProduct)
+  const [file, setFile] = useState<any>();
+
+  //API_URL
   const API_URL = "http://localhost:9000/products";
   const [categories, setCategories] = useState<Array<any>>([]);
   const [suppliers, setSuppliers] = useState([]);
@@ -67,7 +73,6 @@ const ProductsCRUD = () => {
   // const [products, setProducts] = useState<Array<any>>([]);
   const [productsTEST, setProductsTEST] = useState<Array<any>>([]);
 
-  console.log("««««« productsTest »»»»»", productsTEST);
   // const [productsFilter, setProductsFilter] = useState(API_URL);
 
   const [loadingTable, setLoadingTable] = useState(true);
@@ -82,9 +87,15 @@ const ProductsCRUD = () => {
   const [openCreate, setOpenCreate] = useState(false);
   const [deleteItem, setDeleteItem] = useState<Product>();
 
-  const [updateId, setUpdateId] = useState(0);
+  const [updateId, setUpdateId] = useState<any>();
+
+  const [pictureForm] = Form.useForm();
   const [updateForm] = Form.useForm();
   const [createForm] = Form.useForm();
+
+  /// Open detail PICTURE:
+
+  const [openDetailPicture, setOpenDetailPicture] = useState(false);
 
   //Search on SupplierID
   const [supplierId, setSupplierId] = useState("");
@@ -136,6 +147,14 @@ const ProductsCRUD = () => {
       setIsDelete("");
     }
   }, []);
+
+  useEffect(() => {
+    // Check if the selected order exists in the updated dataResource
+    const updatedSelectedOrder = productsTEST.find(
+      (product: any) => product._id === updateId?._id
+    );
+    setUpdateId(updatedSelectedOrder || null);
+  }, [productsTEST]);
 
   //Columns of TABLE ANT_DESIGN
   const columns = [
@@ -223,11 +242,11 @@ const ProductsCRUD = () => {
           </>
         );
       },
-      width: "10%",
+      width: "1%",
     },
     //IMAGE
     {
-      width: "10%",
+      width: "1%",
 
       title: "Picture",
       key: "imageUrl",
@@ -236,11 +255,21 @@ const ProductsCRUD = () => {
         return (
           <div>
             {record.imageUrl && (
-              <img
-                src={"http://localhost:9000" + record.imageUrl}
-                style={{ height: 60 }}
-                alt="record.imageUrl"
-              />
+              <div className="d-flex justify-content-between">
+                <img
+                  src={"http://localhost:9000" + record.imageUrl}
+                  style={{ height: 60 }}
+                  alt="record.imageUrl"
+                />
+                <Button
+                  onClick={() => {
+                    setUpdateId(record);
+                    setOpenDetailPicture(true);
+                    pictureForm.setFieldsValue(record);
+                  }}
+                  icon={<UnorderedListOutlined />}
+                />
+              </div>
             )}
           </div>
         );
@@ -248,7 +277,7 @@ const ProductsCRUD = () => {
     },
     //Category
     {
-      width: "10%",
+      width: "1%",
 
       title: () => {
         return (
@@ -291,7 +320,7 @@ const ProductsCRUD = () => {
     },
     //Supplier
     {
-      width: "10%",
+      width: "1%",
 
       title: () => {
         return (
@@ -343,7 +372,7 @@ const ProductsCRUD = () => {
     },
     //Name
     {
-      width: "10%",
+      width: "5%",
 
       title: () => {
         return (
@@ -373,7 +402,7 @@ const ProductsCRUD = () => {
     },
     //Price
     {
-      width: "10%",
+      width: "1%",
 
       title: () => {
         return (
@@ -443,7 +472,8 @@ const ProductsCRUD = () => {
 
     //Stock
     {
-      width: "10%",
+      width: "1%",
+
       title: () => {
         return (
           <div>
@@ -511,7 +541,7 @@ const ProductsCRUD = () => {
     },
     //Discount
     {
-      width: "10%",
+      width: "1%",
 
       title: () => {
         return (
@@ -580,11 +610,11 @@ const ProductsCRUD = () => {
     },
     //Note
 
-    { title: "Note", dataIndex: "note", key: "note", width: "10%" },
+    { title: "Note", dataIndex: "note", key: "note", width: "1%" },
 
     //Function
     {
-      width: "10%",
+      width: "1%",
 
       title: "Function",
       dataIndex: "function",
@@ -610,14 +640,14 @@ const ProductsCRUD = () => {
             icon={<EditOutlined />}
             onClick={() => {
               setOpen(true);
-              setUpdateId(record._id);
+              setUpdateId(record);
               updateForm.setFieldsValue(record);
             }}
           />
           <Upload
             showUploadList={false}
             name="file"
-            action={`http://localhost:9000/upload/products/${record._id}/image`}
+            action={`http://localhost:9000/upload/products/${record._id}/images`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {
@@ -628,7 +658,6 @@ const ProductsCRUD = () => {
                 message.success(`${info.file.name} file uploaded successfully`);
 
                 setTimeout(() => {
-                  console.log("««««« run »»»»»");
                   setRefresh(refresh + 1);
                 }, 1000);
               } else if (info.file.status === "error") {
@@ -698,11 +727,22 @@ const ProductsCRUD = () => {
     axios
       .post(API_URL, record)
       .then((res) => {
-        console.log(res);
-        setRefresh((f) => f + 1);
-        setOpenCreate(false);
-        createForm.resetFields();
-        message.success("Create a product successFully!!", 1.5);
+        // UPLOAD FILE
+        const { _id } = res.data.results;
+
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+          .post(API_URL + "/upload/products/" + _id, formData)
+          .then((respose) => {
+            message.success("Create a product successFully!!", 1.5);
+            createForm.resetFields();
+            setRefresh((f) => f + 1);
+          })
+          .catch((err) => {
+            message.error("Upload file bị lỗi!");
+          });
       })
       .catch((err) => {
         console.log(err.response.data.message);
@@ -733,7 +773,7 @@ const ProductsCRUD = () => {
       record.isDeleted = false;
     }
     axios
-      .patch(API_URL + "/" + updateId, record)
+      .patch(API_URL + "/" + updateId._id, record)
       .then((res) => {
         setRefresh((f) => f + 1);
         message.success(`Update product ${record.name} successFully!!`, 3);
@@ -746,6 +786,8 @@ const ProductsCRUD = () => {
 
   // UPLOAD
 
+  //Handle Change Picture:
+  // const handleChangeListPicture =
   //Search DEPEN ON CATEGORY
   //Search on CategoryID
   const [categoryId, setCategoryId] = useState("");
@@ -1011,7 +1053,7 @@ const ProductsCRUD = () => {
           </Form.Item>{" "}
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1025,7 +1067,7 @@ const ProductsCRUD = () => {
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1038,7 +1080,7 @@ const ProductsCRUD = () => {
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1048,6 +1090,26 @@ const ProductsCRUD = () => {
             name="note"
           >
             <Input />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 8,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            label="Hình minh họa"
+            name="file"
+          >
+            <Upload
+              showUploadList={true}
+              beforeUpload={(file) => {
+                setFile(file);
+                return false;
+              }}
+            >
+              <Button icon={<UploadOutlined />}>Chọn hình ảnh</Button>
+            </Upload>
           </Form.Item>
         </Form>
       </Modal>
@@ -1059,7 +1121,7 @@ const ProductsCRUD = () => {
         columns={columns}
         dataSource={productsTEST}
         pagination={false}
-        scroll={{ x: 1000, y: 600 }}
+        scroll={{ x: "max-content", y: 600 }}
         rowClassName={(record) => {
           if (record.active === false && record.isDeleted === false) {
             return "bg-dark-subtle";
@@ -1281,6 +1343,118 @@ const ProductsCRUD = () => {
             <Input />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* Model Detail Picture */}
+
+      <Modal
+        open={openDetailPicture}
+        onCancel={() => setOpenDetailPicture(false)}
+      >
+        {updateId && (
+          <div>
+            {" "}
+            Avatar:
+            <Image
+              width={200}
+              height={200}
+              src={`http://localhost:9000${updateId?.imageUrl}`}
+            />
+            <Upload
+              showUploadList={false}
+              name="file"
+              action={`http://localhost:9000/upload/products/${updateId?._id}/image`}
+              headers={{ authorization: "authorization-text" }}
+              onChange={(info) => {
+                if (info.file.status !== "uploading") {
+                  console.log(info.file);
+                }
+
+                if (info.file.status === "done") {
+                  message.success(
+                    `${info.file.name} file uploaded successfully`
+                  );
+
+                  setTimeout(() => {
+                    setRefresh(refresh + 1);
+                  }, 1000);
+                } else if (info.file.status === "error") {
+                  message.error(`${info.file.name} file upload failed.`);
+                }
+              }}
+            >
+              <Button icon={<EditOutlined />} />
+            </Upload>
+          </div>
+        )}
+        <div className="listofproduct">
+          <Space>
+            {/* {updateId &&
+              updateId?.images?.map((item: any, index: any) => (
+                <Image
+                
+                  key={index}
+                  width={200}
+                  height={200}
+                  src={`http://localhost:9000${item}`}
+                />
+              ))} */}
+            {updateId && (
+              <Upload
+                name="file"
+                action={`http://localhost:9000/upload/products/${updateId?._id}/images`}
+                listType="picture-card"
+                fileList={updateId?.images?.map((item: any, index: any) => ({
+                  uid: `${-index}`,
+                  name: `image${index}.png`,
+                  status: "done",
+                  url: `http://localhost:9000${item}`,
+                }))}
+                onChange={(record: any) => {
+                  if (record.file.status !== "uploading") {
+                    console.log(record.file);
+                  }
+                  if (record.file.status === "removed") {
+                    const newlistPicture = updateId?.images?.filter(
+                      (item: any) =>
+                        `http://localhost:9000${item}` !== record.file.url
+                    );
+                    console.log("««««« newlistPicture »»»»»", newlistPicture);
+                    axios
+                      .patch(API_URL + "/" + updateId._id, {
+                        images: newlistPicture,
+                      })
+                      .then((res) => {
+                        message.success(
+                          `Delete Picture product successfully!!`,
+                          3
+                        );
+                        setTimeout(() => {
+                          setRefresh(refresh + 1);
+                        }, 500);
+                      });
+                  }
+                  if (record.file.status === "done") {
+                    updateId?.images?.push({ images: record.file.url });
+                    message.success(
+                      `${record.file.name} file uploaded successfully`
+                    );
+                    setTimeout(() => {
+                      setRefresh(refresh + 1);
+                    }, 3000);
+                  } else if (record.file.status === "error") {
+                    message.error(`${record.file.name} file upload failed.`);
+                  }
+                  setTimeout(() => {
+                    setRefresh(refresh + 1);
+                  }, 3000);
+                }}
+              >
+                {updateId?.images?.length >= 5 ? null : <UploadOutlined />}
+              </Upload>
+            )}
+          </Space>
+        </div>
       </Modal>
 
       {/* Pagination */}

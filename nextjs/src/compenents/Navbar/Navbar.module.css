@@ -1,0 +1,130 @@
+.container {
+    margin: 10px 50px;
+    font-size: larger;
+    display: inline;
+    position: relative;
+  }
+  
+  .titleSmall {
+    display: none;
+  }
+  
+  .horizontalLine {
+    border-bottom: 2px solid black;
+    margin: 5px auto;
+    width: 50%;
+  }
+  
+  .listTop {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .listTopItem1 {
+    margin-left: 2%;
+    display: flex;
+  }
+  
+  .listTopItem2 {
+    margin-right: 2%;
+    display: flex;
+  }
+  
+  .listTopItem1:hover,
+  .listTopItem2:hover {
+    color: rgb(60, 197, 197);
+    cursor: pointer;
+  }
+  
+  .listTopIcon {
+    margin-right: 10%;
+    margin-left: 10%;
+    font-style: oblique;
+    color: blue;
+    font-size: 30px;
+  }
+  
+  .listTopIcon:hover {
+    cursor: pointer;
+  }
+  
+  .list {
+    margin-top: 30px;
+    height: fit-content;
+  }
+  
+  .itemList {
+    margin-right: 70px;
+  }
+  
+  .itemList:hover {
+    color: rgb(60, 197, 197);
+    cursor: pointer;
+  }
+  
+  .subMenu {
+    /* position: absolute; */
+    /* top: 200px; */
+    left: 100px;
+  }
+  
+  .itemfind {
+    height: 25px;
+    width: 230px;
+    border: 2px solid black;
+    border-radius: 10px;
+  }
+  
+  .itemIcon {
+    margin-left: -26px;
+    width: 25px;
+    border: none;
+    border-radius: 10px;
+    background-color: white;
+  }
+  
+  .ul {
+    list-style-type: none;
+    display: flex;
+    justify-content: center;
+  }
+  
+  .itemList:hover .subMenu {
+    display: flex;
+    justify-content: left;
+    width: 140px;
+    margin-left: 40px;
+  }
+  
+  .menuAnt {
+    display: flex;
+    justify-content: center;
+  }
+  
+  @media screen and (min-width: 300px) and (max-width: 768px) {
+    .listTopItem1 {
+      margin-left: 2%;
+      display: flex;
+      font-size: 12px;
+    }
+  
+    .listTopItem2 {
+      margin-right: 2%;
+      display: flex;
+      font-size: 12px;
+    }
+  
+    .listTopIcon {
+      margin-right: 3%;
+      margin-left: 3%;
+      font-style: oblique;
+      color: blue;
+      font-size: 20px;
+    }
+  
+    .icon {
+      display: none;
+    }
+  }
+  

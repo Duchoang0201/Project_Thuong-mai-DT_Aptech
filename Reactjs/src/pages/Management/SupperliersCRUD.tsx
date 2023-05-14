@@ -90,6 +90,7 @@ function SupperliersCRUD() {
       record.active = false;
     }
     record.isDeleted = false;
+
     axios
       .post(API_URL, record)
       .then((res) => {
@@ -237,7 +238,6 @@ function SupperliersCRUD() {
       .catch((err) => console.log(err));
   }, [URL_FILTER, refresh]);
 
-  console.log(pages);
   //Setting column
   const columns = [
     //No

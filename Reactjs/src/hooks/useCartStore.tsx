@@ -33,7 +33,7 @@ export const useAuthStore = create(
         },
       }),
       {
-        name: "onlineshop-storage", // unique name
+        name: "adminWeb-storage", // unique name
         storage: createJSONStorage(() => localStorage), // (optional) by default, 'localStorage' is used
       }
     )

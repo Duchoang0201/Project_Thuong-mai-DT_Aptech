@@ -40,13 +40,13 @@ const Information = (props: Props) => {
   };
   const { auth } = useAuthStore((state: any) => state);
 
-  const E_URL = `http://localhost:9000/employees?employeeId=${auth.payload._id}`;
+  const E_URL = `http://localhost:9000/employees/${auth.payload._id}`;
 
   useEffect(() => {
     axios
       .get(E_URL)
       .then((res) => {
-        setUser(res.data.results[0]);
+        setUser(res.data.result);
       })
       .catch((err) => console.log(err));
   }, [E_URL, refresh]);

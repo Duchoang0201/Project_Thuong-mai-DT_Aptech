@@ -29,6 +29,7 @@ const productSchema = Schema(
     },
     updatedBy: { type: Object },
     note: { type: String },
+    images: { type: Array },
   },
 
   {
