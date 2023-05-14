@@ -46,6 +46,8 @@ export default function ProductDetails({ product }: Props) {
             <div>
               <span className="fs-4">{product.price}đ</span>
             </div>
+
+            <div></div>
             <div>
               <b>{product.active === true ? "Còn hàng" : "Hết hàng"}</b>
             </div>

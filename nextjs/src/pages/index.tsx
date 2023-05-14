@@ -117,16 +117,7 @@ export default function Home() {
           </a>
         </div>
       </main> */}
-      <NavBar />
-      <main>
-        hello shop
-        <Image
-          src="http://localhost:9000/uploads/products/641b0dfdb5b1ca7f1713e8f0/9g4z1sbr-wallha-com.png"
-          alt="Picture of the author"
-          width={500}
-          height={500}
-        />
-      </main>
+      <main>hello shop</main>
     </>
   );
 }

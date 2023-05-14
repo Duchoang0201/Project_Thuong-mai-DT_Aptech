@@ -135,14 +135,14 @@ router.get(
 // CREATE DATA
 router.post("/", validateSchema(customerBodySchema), async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, phoneNumber } = req.body;
 
-    const customerExists = await Customer.findOne({ email });
+    const customerExists = await Customer.findOne({ email, phoneNumber });
 
     if (customerExists) {
       return res
         .status(400)
-        .send({ oke: false, message: "Email already exists" });
+        .send({ oke: false, message: "Email or Phone Number already exists" });
     } else {
       const newItem = req.body;
       const data = new Customer(newItem);

@@ -140,7 +140,7 @@ function NavBar({}: Props) {
           <li
             className={Style.listTopItem2}
             onClick={() => {
-              logout();
+              handleNavigation("/cart");
             }}
           >
             <div className={Style.icon}>
@@ -185,7 +185,9 @@ function NavBar({}: Props) {
                 handleNavigation("/phone");
               }}
             >
-              <div className={Style.icon}></div>
+              <div className={Style.icon}>
+                <PhoneOutlined />
+              </div>
               <span>Điện Thoại</span>
             </li>
             <li
@@ -194,7 +196,9 @@ function NavBar({}: Props) {
                 handleNavigation("/Branch");
               }}
             >
-              <div className={Style.icon}></div>
+              <div className={Style.icon}>
+                <HomeOutlined />
+              </div>
               <span>Chi nhánh</span>
             </li>
             <li
