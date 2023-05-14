@@ -43,7 +43,9 @@ function Register({}: customertype) {
             )
             .then((response) => {
               login({ email, password });
-              router.push("/");
+              if (auth) {
+                router.push("/");
+              }
             })
             .catch((error: any) => {
               console.log(error);
