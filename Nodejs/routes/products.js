@@ -54,11 +54,11 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
     let results = await Product.find(query)
       .populate("category")
       .populate("supplier")
+      // .populate("averageRate") // Include rateInfo field in the populate method
       .lean({ virtuals: true })
       .skip(skip)
       .sort({ isDeleted: 1 })
       .limit(limit);
-    // .limit(10);
 
     let amountResults = await Product.countDocuments(query);
     res.json({ results: results, amountResults: amountResults });
