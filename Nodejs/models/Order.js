@@ -7,6 +7,72 @@ const { Schema, model } = mongoose;
 // Validator
 // https://mongoosejs.com/docs/validation.html#built-in-validators
 
+const contactInformationSchema = new Schema({
+  address: { type: String, required: true },
+  city: { type: String, required: true },
+  district: { type: String, required: true },
+  ward: { type: String, required: true },
+  addressDetail: { type: String, required: true },
+  email: {
+    type: String,
+    validate: {
+      validator: function (value) {
+        const emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+        return emailRegex.test(value);
+      },
+      message: `{VALUE} is not a valid email`,
+    },
+    required: [true, "email is required"],
+  },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  phoneNumber: {
+    type: String,
+    validate: {
+      validator: function (value) {
+        const phoneRegex =
+          /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
+        return phoneRegex.test(value);
+      },
+      message: `{VALUE} is not a valid phone number`,
+    },
+  },
+});
+
+const shippingInformationSchema = new Schema({
+  city: { type: String, required: true },
+  district: { type: String, required: true },
+  ward: { type: String, required: true },
+  addressDetail: { type: String, required: true },
+  firstName: { type: String, required: true },
+  lastName: { type: String, required: true },
+  phoneNumber: {
+    type: String,
+    validate: {
+      validator: function (value) {
+        const phoneRegex =
+          /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/;
+        return phoneRegex.test(value);
+      },
+      message: `{VALUE} is not a valid phone number`,
+    },
+  },
+  status: {
+    type: String,
+    required: true,
+    default: "WAITING",
+    validate: {
+      validator: (value) => {
+        if (["WAITING", "COMPLETED", "CANCELED"].includes(value)) {
+          return true;
+        }
+        return false;
+      },
+      message: `Status: {VALUE} is invalid!`,
+    },
+  },
+});
+
 const orderDetailSchema = new Schema({
   productId: { type: Schema.Types.ObjectId, ref: "Product", required: true },
   quantity: { type: Number, require: true, min: 0 },
@@ -48,15 +114,17 @@ const orderSchema = new Schema({
       message: `Shipped date: {VALUE} is invalid!`,
     },
   },
-  ShippingAddress: { type: String },
-
+  description: { type: String, require: false },
+  shippingAddress: { type: String, require: true },
   paymentType: {
     type: String,
     required: true,
     default: "CASH",
     validate: {
       validator: (value) => {
-        if (["CASH", "CREDIT CARD"].includes(value.toUpperCase())) {
+        if (
+          ["CASH", "CREDIT CARD", "MOMO", "VNPAY"].includes(value.toUpperCase())
+        ) {
           return true;
         }
         return false;

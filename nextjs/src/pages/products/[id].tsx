@@ -1,7 +1,7 @@
 import React from "react";
 import axios from "axios";
 import Image from "next/image";
-import "bootstrap/dist/css/bootstrap.min.css";
+
 type Props = {
   product: any;
 };

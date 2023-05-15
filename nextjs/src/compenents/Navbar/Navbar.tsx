@@ -118,11 +118,7 @@ function NavBar({}: Props) {
   };
 
   // Use a state to track the initial rendering
-  const [isClient, setIsClient] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   useEffect(() => {
     setIsHydrated(true);

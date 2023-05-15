@@ -2,14 +2,13 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    remotePatterns: [
-      {
-        protocol: "http",
-        hostname: "localhost",
-        port: "9000",
-        pathname: "**",
-      },
+    domains: [
+      "localhost",
+      "upload.wikimedia.org",
+      "vivnpay.vn",
+      "encrypted-tbn0.gstatic.com",
     ],
+    loader: "default",
   },
 };
 
