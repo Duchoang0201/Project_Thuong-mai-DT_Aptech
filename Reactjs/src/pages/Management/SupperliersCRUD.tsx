@@ -1,9 +1,7 @@
-import Icon, {
+import {
   CheckCircleOutlined,
-  CheckCircleTwoTone,
   ClearOutlined,
   CloseCircleOutlined,
-  CloseCircleTwoTone,
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
@@ -21,14 +19,12 @@ import {
   Select,
   Space,
   Table,
-  Typography,
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
-import { CircleOutlined } from "@mui/icons-material";
 
 interface ISupplier {
   name: string;
@@ -50,8 +46,6 @@ function SupperliersCRUD() {
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
-  //Model open Confirm Delete
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<ISupplier>();
 
@@ -80,7 +74,6 @@ function SupperliersCRUD() {
   }, []);
 
   //Text of Tyography:
-  const { Text } = Typography;
 
   //Create data
   const handleCreate = (record: any) => {
@@ -113,7 +106,6 @@ function SupperliersCRUD() {
       .then((res) => {
         console.log(res.statusText);
         message.success(" Delete item sucessfully!!", 1.5);
-        setOpenDeleteConfirm(false);
         setRefresh((f) => f + 1);
       })
       .catch((err) => {
@@ -513,6 +505,8 @@ function SupperliersCRUD() {
                   setSuplierEmail("");
                   setSuplierPhone("");
                   setSuplierAddress("");
+                  setIsActive("");
+                  setIsDelete("");
                 }}
                 icon={<ClearOutlined />}
               >

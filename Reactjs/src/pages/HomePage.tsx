@@ -2,14 +2,14 @@ import React, { useState, useEffect, useRef } from "react";
 import { Column } from "@ant-design/plots";
 import { Bar } from "@ant-design/plots";
 import { Col, Row } from "antd";
-import { io } from "socket.io-client";
+import io from "socket.io-client";
 
 const HomePage = () => {
   const socket = useRef<any>();
-
   useEffect(() => {
     socket.current = io("http://localhost:8888");
   }, []);
+  useEffect(() => {}, []);
 
   const [data1, setData1] = useState([]);
   const [data2, setData2] = useState([]);

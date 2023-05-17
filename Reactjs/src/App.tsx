@@ -22,6 +22,8 @@ import Messages from "./pages/Account/Messages";
 import Orders from "./pages/Order/Orders";
 import SearchOrdersByStatus from "./pages/Order/SearchOrdersByStatus";
 import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
+import SlidesCRUD from "./pages/Management/SlideCRUD";
+import FeaturesCRUD from "./pages/Management/FeaturesCRUD";
 numeral.locale("vi");
 const { Header, Sider, Content } = Layout;
 
@@ -140,14 +142,16 @@ const App: React.FC = () => {
                       path="/management/products"
                       element={<ProductsCRUD />}
                     />
+                    <Route path="/function/slides" element={<SlidesCRUD />} />
+                    <Route
+                      path="/function/features"
+                      element={<FeaturesCRUD />}
+                    />
                     <Route
                       path="/management/suppliers"
                       element={<SupperliersCRUD />}
                     />
-                    {/* <Route
-                      path="/management/employees"
-                      element={<EmployeesCRUD />}
-                    /> */}
+
                     <Route
                       path="/management/categories"
                       element={<CategoryCRUD />}

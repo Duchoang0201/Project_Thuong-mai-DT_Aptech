@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, Button, Divider, List, Skeleton } from "antd";
+import { Button, Divider, List, Skeleton } from "antd";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import { UserOutlined } from "@ant-design/icons";
@@ -25,7 +25,7 @@ const Conversation = ({ conver }: { conver: any }) => {
       setData(res.data.results);
     };
     getUser();
-  }, []);
+  }, [auth.payload._id, conver]);
 
   const loadMoreData = () => {
     if (loading) {

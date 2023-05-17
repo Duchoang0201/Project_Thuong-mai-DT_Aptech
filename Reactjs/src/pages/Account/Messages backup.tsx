@@ -20,7 +20,6 @@ import {
   SendOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-import VirtualList from "rc-virtual-list";
 import { format } from "timeago.js";
 // Socket;
 import { io } from "socket.io-client";

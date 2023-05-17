@@ -1,14 +1,14 @@
 import {
   CheckCircleOutlined,
   ClearOutlined,
-  CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
+  PlusOutlined,
+  UploadOutlined,
 } from "@ant-design/icons";
 import {
   Button,
-  Checkbox,
   Form,
   Input,
   InputNumber,
@@ -18,7 +18,9 @@ import {
   Popconfirm,
   Select,
   Space,
+  Switch,
   Table,
+  Upload,
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
@@ -26,15 +28,25 @@ import React, { useCallback, useEffect, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
 // Date Picker
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import moment from "moment";
+moment().format();
+function FeaturesCRUD() {
+  //Set File avatar
 
-function CategoryCRUD() {
+  const [file, setFile] = useState<any>(null);
+
   const { auth } = useAuthStore((state: any) => state);
+
   const [refresh, setRefresh] = useState(0);
 
   // Date Picker Setting
 
-  // API OF
-  let API_URL = "http://localhost:9000/categories";
+  dayjs.extend(customParseFormat);
+
+  // API OF COLLECTIOn
+  let API_URL = "http://localhost:9000/features";
 
   // MODAL:
   // Modal open Create:
@@ -43,15 +55,13 @@ function CategoryCRUD() {
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
-  //Model open Confirm Delete
-  // const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
   //For fillter:
 
   //Data fillter
-  const [categoryTEST, setCategoryTEST] = useState<any>([]);
+  const [featuresTEST, setFeaturesTEST] = useState<any>([]);
 
   // Change fillter (f=> f+1)
 
@@ -60,6 +70,8 @@ function CategoryCRUD() {
   //Create, Update Form setting
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
+
+  //Text of Tyography:
 
   //TableLoading
 
@@ -71,8 +83,6 @@ function CategoryCRUD() {
     }, 1000); // 5000 milliseconds = 5 seconds
   }, []);
 
-  //Text of Tyography:
-
   //Create data
   const handleCreate = (record: any) => {
     record.createdBy = auth.payload;
@@ -80,16 +90,27 @@ function CategoryCRUD() {
     if (record.active === undefined) {
       record.active = false;
     }
-    record.isDeleted = false;
 
     axios
       .post(API_URL, record)
       .then((res) => {
-        setRefresh((f) => f + 1);
-        setOpenCreate(false);
+        // UPLOAD FILE
+        const { _id } = res.data.result;
 
-        message.success(" Add new Category sucessfully!", 1.5);
-        createForm.resetFields();
+        const formData = new FormData();
+        formData.append("file", file);
+
+        axios
+          .post(`http://localhost:9000/upload/features/${_id}/image`, formData)
+          .then((respose) => {
+            message.success("Thêm mới thành công!");
+            createForm.resetFields();
+            setFile(null);
+            setOpenCreate(false);
+          });
+        setTimeout(() => {
+          setRefresh((f) => f + 1);
+        }, 4000);
       })
       .catch((err) => {
         console.log(err);
@@ -98,19 +119,6 @@ function CategoryCRUD() {
   };
   //Delete a Data
   const handleDelete = (record: any) => {
-    // axios
-    //   .patch(API_URL + "/" + record._id, { isDeleted: true })
-    //   .then((res) => {
-    //     console.log(res);
-    //     setOpen(false);
-    //     setOpenCreate(false);
-    //     setRefresh((f) => f + 1);
-    //     message.success("Deleted sucessfully!!", 1.5);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-
     axios
       .delete(API_URL + "/" + record._id)
       .then((res) => {
@@ -125,15 +133,11 @@ function CategoryCRUD() {
   const handleUpdate = (record: any) => {
     record.updatedBy = auth.payload;
     record.updatedDate = new Date().toISOString();
-    if (record.active === undefined) {
-      record.active = false;
-    }
-    if (record.isDeleted === undefined) {
-      record.isDeleted = false;
-    }
+
     axios
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
+        console.log(res);
         setOpen(false);
         setOpenCreate(false);
         setRefresh((f) => f + 1);
@@ -146,46 +150,47 @@ function CategoryCRUD() {
 
   //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
 
-  const [isDelete, setIsDelete] = useState("");
-  const [isActive, setIsActive] = useState("");
-  const onSearchIsDelete = useCallback((value: any) => {
-    if (value === "active") {
-      setIsActive("true");
-      setIsDelete("");
+  const [isLocked, setIsLocked] = useState("");
+  const onSearchIsLocked = useCallback((value: any) => {
+    if (value) {
+      setIsLocked(value);
+    } else {
+      setIsLocked("");
     }
-    if (value === "unActive") {
-      setIsActive("false");
-      setIsDelete("");
-    }
-    if (value === "Deleted") {
-      setIsDelete("true");
-      setIsActive("");
-    }
-    if (value !== "active" && value !== "unActive" && value !== "Deleted") {
-      setIsActive("");
-      setIsDelete("");
+  }, []);
+
+  //SEARCH DEPEN ON TITLE
+  const [featureTitle, setFeatureTitle] = useState("");
+
+  const onSearchFeaturesTitle = useCallback((value: any) => {
+    console.log(value);
+    if (value) {
+      setFeatureTitle(value);
+    } else {
+      setFeatureTitle("");
     }
   }, []);
 
   //SEARCH DEPEN ON NAME
-  const [categoriesName, setCategoriesName] = useState("");
+  const [featureSummary, setFeatureSummary] = useState("");
 
-  const onSearchCategoriesName = useCallback((value: any) => {
+  const onSearchFeaturesSumary = useCallback((value: any) => {
+    console.log(value);
     if (value) {
-      setCategoriesName(value);
+      setFeatureSummary(value);
     } else {
-      setCategoriesName("");
+      setFeatureSummary("");
     }
   }, []);
 
-  //SEARCH DEPEN ON DESCRIPTION
-  const [categoryDescription, setCategoryDescription] = useState("");
+  //SEARCH DEPEN ON LastName
+  const [featureUrl, setFeatureUrl] = useState("");
 
-  const onSearchCategoryDescription = (record: any) => {
+  const onSearchFeaturesUrl = (record: any) => {
     if (record) {
-      setCategoryDescription(record);
+      setFeatureUrl(record);
     } else {
-      setCategoryDescription("");
+      setFeatureUrl("");
     }
   };
 
@@ -194,16 +199,14 @@ function CategoryCRUD() {
   const [pages, setPages] = useState();
   const [skip, setSkip] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
-  const slideCurrent = (value: any) => {
+  const featureCurrent = (value: any) => {
     setSkip(value * 10 - 10);
     setCurrentPage(value);
   };
   //GET DATA ON FILLTER
   const URL_FILTER = `${API_URL}?${[
-    categoriesName && `&name=${categoriesName}`,
-    categoryDescription && `&description=${categoryDescription}`,
-    isActive && `&active=${isActive}`,
-    isDelete && `&isDeleted=${isDelete}`,
+    featureTitle && `&email=${featureTitle}`,
+    isLocked && `&Locked=${isLocked}`,
     skip && `&skip=${skip}`,
   ]
     .filter(Boolean)
@@ -213,7 +216,7 @@ function CategoryCRUD() {
     axios
       .get(URL_FILTER)
       .then((res) => {
-        setCategoryTEST(res.data.results);
+        setFeaturesTEST(res.data.results);
         setPages(res.data.amountResults);
       })
       .catch((err) => console.log(err));
@@ -221,11 +224,12 @@ function CategoryCRUD() {
 
   //Setting column
   const columns = [
+    //NO
     {
       title: () => {
         return (
           <div>
-            {isActive || isDelete ? (
+            {isLocked ? (
               <div className="text-danger">No</div>
             ) : (
               <div className="secondary">No</div>
@@ -239,27 +243,16 @@ function CategoryCRUD() {
         return (
           <div>
             <Space>
+              {" "}
               {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
-              {record.active === true && !record.isDeleted && (
+              {record.active === true && (
                 <span style={{ fontSize: "16px", color: "#08c" }}>
                   <CheckCircleOutlined /> Active
                 </span>
               )}
-              {record.active === false && !record.isDeleted && (
-                <span className="text-danger">
-                  <CloseCircleOutlined
-                    style={{ fontSize: "16px", color: "#dc3545" }}
-                  />{" "}
-                  Unactive
-                </span>
-              )}
-
-              {record.isDeleted === true && (
-                <span className="text-danger">
-                  <CloseCircleOutlined
-                    style={{ fontSize: "16px", color: "#dc3545" }}
-                  />{" "}
-                  Deleted
+              {record.active === false && (
+                <span style={{ fontSize: "16px", color: "#dc3545" }}>
+                  <CheckCircleOutlined /> Locked
                 </span>
               )}
             </Space>
@@ -273,13 +266,13 @@ function CategoryCRUD() {
               <Select
                 allowClear
                 onClear={() => {
-                  setIsDelete("");
+                  setIsLocked("");
                 }}
                 style={{ width: "125px" }}
                 placeholder="Select a supplier"
                 optionFilterProp="children"
                 showSearch
-                onChange={onSearchIsDelete}
+                onChange={onSearchIsLocked}
                 filterOption={(input, option) =>
                   (option?.label ?? "")
                     .toLowerCase()
@@ -287,15 +280,12 @@ function CategoryCRUD() {
                 }
                 options={[
                   {
-                    value: "active",
+                    value: "false",
                     label: "Active",
                   },
+
                   {
-                    value: "unActive",
-                    label: "Unactive",
-                  },
-                  {
-                    value: "Deleted",
+                    value: "true",
                     label: "Deleted",
                   },
                 ]}
@@ -304,58 +294,78 @@ function CategoryCRUD() {
           </>
         );
       },
-      width: "11%",
     },
-    //Name
+    //IMAGE
     {
-      title: () => {
+      width: "10%",
+
+      title: "Picture",
+      key: "imageUrl",
+      dataIndex: "imageUrl",
+      render: (text: any, record: any, index: any) => {
         return (
           <div>
-            {categoriesName ? (
-              <div className="text-danger">Name</div>
-            ) : (
-              <div className="secondary">Name</div>
+            {record.imageUrl && (
+              <img
+                src={"http://localhost:9000" + record.imageUrl}
+                style={{ height: 60 }}
+                alt="record.imageUrl"
+              />
             )}
           </div>
         );
       },
-      dataIndex: "name",
-      key: "name",
+    },
+    //Title
+    {
+      title: () => {
+        return (
+          <div>
+            {featureTitle ? (
+              <div className="text-danger">Title</div>
+            ) : (
+              <div className="secondary">Title</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "title",
+      key: "title",
       filterDropdown: () => {
         return (
           <div style={{ padding: 8 }}>
             <Search
               allowClear
+              onSearch={onSearchFeaturesTitle}
               placeholder="input search text"
-              onSearch={onSearchCategoriesName}
               style={{ width: 200 }}
             />
           </div>
         );
       },
     },
-    //Desciption
+    //Summary
     {
       title: () => {
         return (
           <div>
-            {categoryDescription ? (
-              <div className="text-danger">Description</div>
+            {featureSummary ? (
+              <div className="text-danger">Summary</div>
             ) : (
-              <div className="secondary">Description</div>
+              <div className="secondary">Summary</div>
             )}
           </div>
         );
       },
-      dataIndex: "description",
-      key: "description",
+      dataIndex: "summary",
+      key: "summary",
       filterDropdown: () => {
         return (
           <div style={{ padding: 8 }}>
             <Search
               allowClear
               placeholder="input search text"
-              onSearch={onSearchCategoryDescription}
+              onSearch={onSearchFeaturesSumary}
               style={{ width: 200 }}
             />
           </div>
@@ -363,13 +373,37 @@ function CategoryCRUD() {
       },
     },
 
-    //Note
+    //URL
     {
-      title: "Note",
-      dataIndex: "note",
-      key: "note",
-      width: "10%",
+      title: () => {
+        return (
+          <div>
+            {featureUrl ? (
+              <div className="text-danger">URL</div>
+            ) : (
+              <div className="secondary">URL</div>
+            )}
+          </div>
+        );
+      },
+      dataIndex: "url",
+      key: "url",
+      filterDropdown: () => {
+        return (
+          <div style={{ padding: 8 }}>
+            <Search
+              allowClear
+              onSearch={onSearchFeaturesUrl}
+              placeholder="input search text"
+              style={{ width: 200 }}
+            />
+          </div>
+        );
+      },
     },
+    //Note
+
+    { title: "Note", dataIndex: "note", key: "note", width: "10%" },
 
     //function
     {
@@ -378,6 +412,16 @@ function CategoryCRUD() {
       key: "function",
       render: (text: any, record: any) => (
         <Space>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => {
+              setOpen(true);
+              setUpdateId(record._id);
+              const birthdayFormat = moment(record.birthday);
+              record.birthday = birthdayFormat;
+              updateForm.setFieldsValue(record);
+            }}
+          ></Button>
           <Popconfirm
             okText="Delete"
             okType="danger"
@@ -392,14 +436,30 @@ function CategoryCRUD() {
               }}
             ></Button>
           </Popconfirm>
-          <Button
-            icon={<EditOutlined />}
-            onClick={() => {
-              setOpen(true);
-              setUpdateId(record._id);
-              updateForm.setFieldsValue(record);
+          <Upload
+            showUploadList={false}
+            name="file"
+            action={`http://localhost:9000/upload/features/${record._id}/image`}
+            headers={{ authorization: "authorization-text" }}
+            onChange={(info) => {
+              if (info.file.status !== "uploading") {
+                console.log(info.file);
+              }
+
+              if (info.file.status === "done") {
+                message.success(`${info.file.name} file uploaded successfully`);
+
+                setTimeout(() => {
+                  console.log("««««« run »»»»»");
+                  setRefresh(refresh + 1);
+                }, 1000);
+              } else if (info.file.status === "error") {
+                message.error(`${info.file.name} file upload failed.`);
+              }
             }}
-          ></Button>
+          >
+            <Button icon={<UploadOutlined />} />
+          </Upload>
         </Space>
       ),
       filterDropdown: () => {
@@ -409,10 +469,9 @@ function CategoryCRUD() {
               <Button
                 style={{ width: "150px" }}
                 onClick={() => {
-                  setCategoriesName("");
-                  setCategoryDescription("");
-                  setIsActive("");
-                  setIsDelete("");
+                  setFeatureTitle("");
+                  setFeatureSummary("");
+                  onSearchFeaturesUrl("");
                 }}
                 icon={<ClearOutlined />}
               >
@@ -425,7 +484,7 @@ function CategoryCRUD() {
                 }}
                 icon={<PlusCircleOutlined />}
               >
-                Add Category
+                Add Features
               </Button>
             </Space>
           </>
@@ -436,9 +495,9 @@ function CategoryCRUD() {
 
   return (
     <div>
-      {/* Modal Create A Category */}
+      {/* Modal Create A Features */}
       <Modal
-        title={`Create Category `}
+        title={`Create Features `}
         open={openCreate}
         onCancel={() => {
           setOpenCreate(false);
@@ -448,104 +507,84 @@ function CategoryCRUD() {
         }}
         okText="Submit"
       >
-        <div className="container d-flex flex-row ">
+        <div className="container ">
           <Form form={createForm} name="createForm" onFinish={handleCreate}>
             <div className="row">
               <FormItem
                 labelCol={{
-                  span: 7,
+                  span: 6,
                 }}
                 wrapperCol={{
                   span: 16,
                 }}
                 hasFeedback
-                label="Name"
-                name="name"
-                rules={[{ required: true, message: "Please input Name!" }]}
+                label="Title"
+                name="title"
+                rules={[{ required: true, message: "Please input Title!" }]}
               >
                 <Input />
               </FormItem>
               <FormItem
                 labelCol={{
-                  span: 7,
+                  span: 6,
                 }}
                 wrapperCol={{
                   span: 16,
                 }}
                 hasFeedback
-                label="description"
-                name="description"
-                rules={[
-                  { required: true, message: "Please input Description!" },
-                ]}
+                label="Summary"
+                name="summary"
+                rules={[{ required: true, message: "Please input Summary!" }]}
               >
                 <Input />
               </FormItem>
               <FormItem
                 labelCol={{
-                  span: 7,
+                  span: 6,
                 }}
                 wrapperCol={{
                   span: 16,
                 }}
                 hasFeedback
-                label="promotionPosition"
-                name="promotionPosition"
+                label="URL"
+                name="url"
+                rules={[{ required: true, message: "Please input URL!" }]}
               >
-                <Select
-                  mode="multiple"
-                  allowClear
-                  showSearch
-                  placeholder="Select promotion"
-                  optionFilterProp="children"
-                  filterOption={(input, option) =>
-                    (option?.label ?? "")
-                      .toLowerCase()
-                      .includes(input.toLowerCase())
-                  }
-                  options={[
-                    {
-                      value: "TOP-MONTH",
-                      label: "TOP-MONTH",
-                    },
-                    {
-                      value: "DEAL",
-                      label: "DEAL",
-                    },
-                  ]}
-                />
+                <Input />
               </FormItem>
-              <Form.Item
+
+              <FormItem
                 labelCol={{
-                  span: 7,
+                  span: 6,
                 }}
                 wrapperCol={{
                   span: 16,
                 }}
                 hasFeedback
-                label="active"
+                label="Sort Oder"
+                name="sortOder"
+                rules={[{ required: true, message: "Please input Sort Oder!" }]}
+              >
+                <InputNumber />
+              </FormItem>
+
+              <FormItem
+                labelCol={{
+                  span: 6,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                hasFeedback
+                label="Active"
                 name="active"
                 valuePropName="checked"
               >
-                <Checkbox />
-              </Form.Item>
-
+                <Switch />
+              </FormItem>
               <Form.Item
                 labelCol={{
-                  span: 7,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="sortOder"
-                name="sortOder"
-              >
-                <InputNumber min={1} />
-              </Form.Item>
-              <Form.Item
-                labelCol={{
-                  span: 7,
+                  span: 6,
                 }}
                 wrapperCol={{
                   span: 16,
@@ -556,6 +595,37 @@ function CategoryCRUD() {
               >
                 <Input />
               </Form.Item>
+              <Form.Item
+                labelCol={{
+                  span: 6,
+                }}
+                wrapperCol={{
+                  span: 16,
+                }}
+                label="Hình minh họa"
+                name="file"
+              >
+                <Upload
+                  listType="picture-card"
+                  showUploadList={true}
+                  beforeUpload={(file) => {
+                    setFile(file);
+                    return false;
+                  }}
+                  onRemove={() => {
+                    setFile("");
+                  }}
+                >
+                  {!file ? (
+                    <div>
+                      <PlusOutlined />
+                      <div style={{ marginTop: 8 }}>Upload</div>
+                    </div>
+                  ) : (
+                    ""
+                  )}
+                </Upload>
+              </Form.Item>
             </div>
           </Form>
         </div>
@@ -563,29 +633,38 @@ function CategoryCRUD() {
 
       {/* List and function  */}
 
-      <Table
-        loading={loadingTable}
-        rowKey="_id"
-        columns={columns}
-        dataSource={categoryTEST}
-        pagination={false}
-        scroll={{ x: "max-content", y: 630 }}
-        rowClassName={(record) => {
-          if (record.active === false && record.isDeleted === false) {
-            return "bg-dark-subtle";
-          } else if (record.isDeleted) {
-            return "text-danger bg-success-subtle";
-          } else {
-            return "";
-          }
-        }}
-      />
+      <div>
+        <Table
+          // loading={!featuresTEST ? true : false}
+          loading={loadingTable}
+          rowKey="_id"
+          columns={columns}
+          dataSource={featuresTEST}
+          pagination={false}
+          scroll={{ x: "max-content", y: 610 }}
+          rowClassName={(record) => {
+            return record.active === false
+              ? "text-danger bg-success-subtle"
+              : "";
+          }}
+        />
+        <Pagination
+          className="container text-end"
+          onChange={(e) => featureCurrent(e)}
+          defaultCurrent={1}
+          total={pages}
+        />
+      </div>
+
+      {/* Modal confirm Delte */}
 
       {/* Model Update */}
       <Modal
         open={open}
-        title="Update Category"
-        onCancel={() => setOpen(false)}
+        title="Update Features"
+        onCancel={() => {
+          setOpen(false);
+        }}
         onOk={() => {
           updateForm.submit();
         }}
@@ -594,110 +673,79 @@ function CategoryCRUD() {
           <div className="row">
             <FormItem
               labelCol={{
-                span: 7,
+                span: 6,
               }}
               wrapperCol={{
                 span: 16,
               }}
               hasFeedback
-              label="Name"
-              name="name"
-              rules={[{ required: true, message: "Please input Name!" }]}
+              label="Title"
+              name="title"
+              rules={[{ required: true, message: "Please input Title!" }]}
             >
               <Input />
             </FormItem>
             <FormItem
               labelCol={{
-                span: 7,
+                span: 6,
               }}
               wrapperCol={{
                 span: 16,
               }}
               hasFeedback
-              label="Description"
-              name="description"
-              rules={[{ required: true, message: "Please input Description!" }]}
+              label="Summary"
+              name="summary"
+              rules={[{ required: true, message: "Please input Summary!" }]}
             >
               <Input />
             </FormItem>
             <FormItem
               labelCol={{
-                span: 7,
+                span: 6,
               }}
               wrapperCol={{
                 span: 16,
               }}
               hasFeedback
-              label="promotionPosition"
-              name="promotionPosition"
+              label="URL"
+              name="url"
+              rules={[{ required: true, message: "Please input URL!" }]}
             >
-              <Select
-                mode="multiple"
-                allowClear
-                showSearch
-                placeholder="Select promotion"
-                optionFilterProp="children"
-                filterOption={(input, option) =>
-                  (option?.label ?? "")
-                    .toLowerCase()
-                    .includes(input.toLowerCase())
-                }
-                options={[
-                  {
-                    value: "TOP-MONTH",
-                    label: "TOP-MONTH",
-                  },
-                  {
-                    value: "DEAL",
-                    label: "DEAL",
-                  },
-                ]}
-              />
+              <Input />
             </FormItem>
-            <Form.Item
+
+            <FormItem
               labelCol={{
-                span: 7,
+                span: 6,
               }}
               wrapperCol={{
                 span: 16,
               }}
               hasFeedback
-              label="active"
+              label="Sort Oder"
+              name="sortOder"
+              rules={[{ required: true, message: "Please input Sort Oder!" }]}
+            >
+              <InputNumber />
+            </FormItem>
+
+            <FormItem
+              labelCol={{
+                span: 6,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Active"
               name="active"
               valuePropName="checked"
             >
-              <Checkbox />
-            </Form.Item>
+              <Switch />
+            </FormItem>
             <Form.Item
               labelCol={{
-                span: 7,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="isDeleted"
-              name="isDeleted"
-              valuePropName="checked"
-            >
-              <Checkbox />
-            </Form.Item>
-            <Form.Item
-              labelCol={{
-                span: 7,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="sortOrder"
-              name="sortOrder"
-            >
-              <InputNumber min={1} />
-            </Form.Item>
-            <Form.Item
-              labelCol={{
-                span: 7,
+                span: 6,
               }}
               wrapperCol={{
                 span: 16,
@@ -711,14 +759,8 @@ function CategoryCRUD() {
           </div>
         </Form>
       </Modal>
-      <Pagination
-        className="container text-end"
-        onChange={(e) => slideCurrent(e)}
-        defaultCurrent={1}
-        total={pages}
-      />
     </div>
   );
 }
 
-export default CategoryCRUD;
+export default FeaturesCRUD;

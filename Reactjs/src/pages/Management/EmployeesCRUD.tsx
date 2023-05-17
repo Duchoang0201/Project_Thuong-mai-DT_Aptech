@@ -58,7 +58,6 @@ function EmployeeCRUD() {
   const [open, setOpen] = useState(false);
 
   //Model open Confirm Delete
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
@@ -125,7 +124,6 @@ function EmployeeCRUD() {
       .delete(API_URL + "/" + record._id)
       .then((res) => {
         message.success(" Delete item sucessfully!!", 1.5);
-        setOpenDeleteConfirm(false);
         setRefresh((f) => f + 1);
       })
       .catch((err) => {

@@ -58,8 +58,6 @@ function CustomerCRUD() {
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
-  //Model open Confirm Delete
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
@@ -112,6 +110,7 @@ function CustomerCRUD() {
             createForm.resetFields();
             setRefresh((f) => f + 1);
             setOpenCreate(false);
+            setFile(null);
           });
       })
       .catch((err) => {
@@ -125,7 +124,6 @@ function CustomerCRUD() {
       .delete(API_URL + "/" + record._id)
       .then((res) => {
         message.success(" Delete item sucessfully!!", 1.5);
-        setOpenDeleteConfirm(false);
         setRefresh((f) => f + 1);
       })
       .catch((err) => {

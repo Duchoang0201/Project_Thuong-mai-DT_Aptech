@@ -154,7 +154,7 @@ const ProductsCRUD = () => {
       (product: any) => product._id === updateId?._id
     );
     setUpdateId(updatedSelectedOrder || null);
-  }, [productsTEST]);
+  }, [productsTEST, updateId]);
 
   //Columns of TABLE ANT_DESIGN
   const columns = [
@@ -728,24 +728,26 @@ const ProductsCRUD = () => {
       .post(API_URL, record)
       .then((res) => {
         // UPLOAD FILE
-        const { _id } = res.data.results;
+        const { _id } = res.data.result;
 
         const formData = new FormData();
         formData.append("file", file);
 
         axios
-          .post(API_URL + "/upload/products/" + _id, formData)
+          .post(`http://localhost:9000/upload/products/${_id}/image`, formData)
           .then((respose) => {
             message.success("Create a product successFully!!", 1.5);
             createForm.resetFields();
             setRefresh((f) => f + 1);
+            setOpen(false);
+            setFile(null);
           })
           .catch((err) => {
             message.error("Upload file bị lỗi!");
           });
       })
-      .catch((err) => {
-        console.log(err.response.data.message);
+      .catch((err: any) => {
+        console.log(err);
       });
   };
 
@@ -863,6 +865,8 @@ const ProductsCRUD = () => {
     setFromStock("");
     setToStock("");
     inforStock.resetFields();
+    setIsActive("");
+    setIsDelete("");
   };
   //CALL API PRODUCT FILLTER
   const queryParams = [
@@ -1073,10 +1077,31 @@ const ProductsCRUD = () => {
               span: 16,
             }}
             hasFeedback
-            label="sortOder"
-            name="sortOder"
+            label="PromotionPosition"
+            name="promotionPosition"
           >
-            <InputNumber min={1} />
+            <Select
+              mode="multiple"
+              allowClear
+              showSearch
+              placeholder="Select promotion"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={[
+                {
+                  value: "TOP-MONTH",
+                  label: "TOP-MONTH",
+                },
+                {
+                  value: "DEAL",
+                  label: "DEAL",
+                },
+              ]}
+            />
           </Form.Item>
           <Form.Item
             labelCol={{
@@ -1290,7 +1315,7 @@ const ProductsCRUD = () => {
           </Form.Item>{" "}
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1304,20 +1329,41 @@ const ProductsCRUD = () => {
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
             }}
             hasFeedback
-            label="sortOder"
-            name="sortOder"
+            label="PromotionPosition"
+            name="promotionPosition"
           >
-            <InputNumber min={1} />
+            <Select
+              mode="multiple"
+              allowClear
+              showSearch
+              placeholder="Select promotion"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={[
+                {
+                  value: "TOP-MONTH",
+                  label: "TOP-MONTH",
+                },
+                {
+                  value: "DEAL",
+                  label: "DEAL",
+                },
+              ]}
+            />
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1331,7 +1377,7 @@ const ProductsCRUD = () => {
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
