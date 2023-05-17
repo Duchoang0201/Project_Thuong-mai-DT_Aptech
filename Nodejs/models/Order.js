@@ -9,10 +9,9 @@ const { Schema, model } = mongoose;
 
 const contactInformationSchema = new Schema({
   address: { type: String, required: true },
-  city: { type: String, required: true },
-  district: { type: String, required: true },
-  ward: { type: String, required: true },
-  addressDetail: { type: String, required: true },
+  // city: { type: String, required: true },
+  // district: { type: String, required: true },
+  // ward: { type: String, required: true },
   email: {
     type: String,
     validate: {
@@ -150,7 +149,7 @@ const orderSchema = new Schema({
 
   customerId: { type: Schema.Types.ObjectId, ref: "Customer", required: false },
   employeeId: { type: Schema.Types.ObjectId, ref: "Employee", required: false },
-
+  contactInformation: contactInformationSchema,
   orderDetails: [orderDetailSchema],
 });
 

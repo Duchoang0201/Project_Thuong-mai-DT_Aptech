@@ -33,6 +33,7 @@ const productSchema = Schema(
     note: { type: String },
     images: { type: Array },
     rateInfo: [rateSchema],
+    promotionPosition: { type: Array },
   },
   {
     versionKey: false,

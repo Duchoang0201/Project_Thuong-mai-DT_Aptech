@@ -1,5 +1,6 @@
 const { CONNECTION_STRING } = require("../constants/dbSettings");
 const { default: mongoose } = require("mongoose");
+var ObjectId = require("mongodb").ObjectId;
 const axios = require("axios");
 const crypto = require("crypto");
 const moment = require("moment");
@@ -29,6 +30,37 @@ router.get("/", function (req, res, next) {
         res.status(400).send({ message: err.message });
       });
   } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+// GET PERSONAL ORDERS
+router.get("/personal/:id", async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const objectId = ObjectId.isValid(id) ? new ObjectId(id) : null;
+    if (!objectId) {
+      return res.status(400).send({ message: "Invalid customer ID" });
+    }
+    const query = { customerId: objectId };
+    const order = await Order.find(query)
+      .populate({
+        path: "orderDetails.product",
+        populate: { path: "category" },
+      })
+      .populate("customer")
+      .populate("employee");
+
+    if (!order) {
+      return res.status(404).send({ message: "Order not found" });
+    }
+
+    let amountResults = await Order.countDocuments(query);
+
+    res.send({ results: order, amountResults: amountResults });
+  } catch (err) {
+    console.error(err);
     res.sendStatus(500);
   }
 });
@@ -290,8 +322,8 @@ router.post("/pay/create_momo_url", (req, res) => {
   const orderInfo = "Thanh toán qua MoMo";
   const amount = req.body.amount * 100;
   const orderId = `${Date.now()}`;
-  const redirectUrl = "http://localhost:4444";
-  const ipnUrl = "http://localhost:4444";
+  const redirectUrl = "http://localhost:4444/success-payment";
+  const ipnUrl = "http://localhost:4444/success-payment";
   const extraData = "";
 
   const requestBody = {
@@ -343,7 +375,7 @@ router.post("/pay/create_vnpay_url", (req, res, next) => {
   const tmnCode = config.vnp_TmnCode;
   const secretKey = config.vnp_HashSecret;
   const vnpUrl = config.vnp_Url;
-  const returnUrl = "http://localhost:4444";
+  const returnUrl = "http://localhost:4444/success-payment";
 
   const date = moment(); // Use moment to get the current date and time
 
@@ -385,20 +417,8 @@ router.post("/pay/create_vnpay_url", (req, res, next) => {
   const vnpUrlWithParams =
     vnpUrl + "?" + new URLSearchParams(sortedParams).toString();
 
-  res.redirect(vnpUrlWithParams);
+  res.send({ urlPay: vnpUrlWithParams });
 });
-
-function sortObject(obj) {
-  const sortedObj = {};
-  Object.keys(obj)
-    .sort()
-    .forEach((key) => {
-      sortedObj[key] = obj[key];
-    });
-  return sortedObj;
-}
-
-module.exports = router;
 
 function sortObject(obj) {
   const sortedObj = {};
@@ -482,7 +502,7 @@ router.get("/vnpay_ipn", function (req, res, next) {
             //that bai
             //paymentStatus = '2'
             // Ở đây cập nhật trạng thái giao dịch thanh toán thất bại vào CSDL của bạn
-            res.status(200).json({ RspCode: "00", Message: "Success" });
+            res.redirect("http://localhost:4444/checkout");
           }
         } else {
           res.status(200).json({

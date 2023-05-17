@@ -120,13 +120,11 @@ router.post("/", async (req, res, next) => {
     .then(async () => {
       try {
         const newItem = req.body;
-        let data = new Product(newItem);
-        let result = data.save();
-        return res.status(200).json({
-          oke: true,
-          message: "Created successfully!",
-          result: result,
-        });
+        const data = new Product(newItem);
+        let result = await data.save();
+        res
+          .status(200)
+          .json({ success: true, message: "Created successfully", result });
       } catch (error) {
         res.status(500).json({ error: error });
       }
