@@ -32,7 +32,7 @@ const AccountInformation = (props: Props) => {
 
   const [user, setUser] = useState<any>();
 
-  const [selectItem, setSelectItem] = useState("0");
+  const [selectItem, setSelectItem] = useState<any>();
   const [updateData, setUpdateData] = useState<any>();
   const [updateForm] = Form.useForm();
 
@@ -160,10 +160,10 @@ const AccountInformation = (props: Props) => {
                     </Form.Item>
                     <Popconfirm
                       title="Edit profile"
-                      description="Are you sure to edit this First Name?"
+                      description="Are you sure to edit this Last Name?"
                       okText="Yes"
                       cancelText="No"
-                      // onConfirm={handleUpdate}
+                      onConfirm={handleUpdate}
                     >
                       <Button
                         style={{ width: "30px", right: "-4px" }}

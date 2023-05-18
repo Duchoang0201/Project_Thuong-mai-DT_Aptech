@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { Dropdown, MenuProps, Space } from "antd";
+import { Badge, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input } from "antd";
-import style from "./Navbar.module.css";
+import Style from "./Navbar.module.css";
 import { useRouter } from "next/router";
 import {} from "react-icons/ai";
 import { useAuthStore } from "@/hook/useAuthStore";
@@ -14,16 +14,19 @@ import {
 } from "@ant-design/icons";
 import Link from "next/link";
 import axios from "axios";
+import { useCartStore } from "@/hook/useCountStore";
 
 const { Search } = Input;
 type Props = {};
 
 function NavBar({}: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
+  const { items: itemsCart }: any = useCartStore((state: any) => state);
   const E_URL = `http://localhost:9000/customers/${auth?.payload?._id}`;
 
   const [user, setUser] = useState<any>();
 
+  console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
@@ -160,28 +163,28 @@ function NavBar({}: Props) {
   return (
     <>
       <div>
-        <div>
+        <div className={` ${Style.container}`}>
           <ul className={`nav justify-content-center`}>
             <li
-              className={`nav-item`}
+              className={Style.listTopItem2}
               onClick={() => {
                 handleNavigation("/phone");
               }}
             >
-              <div className="nav-link">
+              <div className={Style.icon}>
                 <div>
                   <PhoneOutlined />
-                  <span className={style.icon}>Điện Thoại</span>
+                  <span className={Style.icon}>Điện Thoại</span>
                 </div>
               </div>
             </li>
             <li
-              className={`nav-item`}
+              className={Style.listTopItem2}
               onClick={() => {
                 handleNavigation("/Branch");
               }}
             >
-              <div className="nav-link">
+              <div className={Style.icon}>
                 <div>
                   <HomeOutlined />
                   <span className={`style.icon`}>Chi nhánh</span>
@@ -189,28 +192,32 @@ function NavBar({}: Props) {
               </div>
             </li>
             <li
-              className={style.listTopIcon}
+              className={`${Style.listTopIcon}`}
               onClick={() => {
                 handleNavigation("/");
               }}
             >
               JewelShop
             </li>
-            {user ? (
+            {auth && (
               <>
                 <li
-                  className={`nav-item`}
+                  className={Style.listTopItem2}
                   onClick={() => {
                     handleNavigation("/cart");
                   }}
                 >
-                  <div className="nav-link">
-                    <ShoppingCartOutlined />
+                  <div className={Style.icon}>
+                    <Badge count={itemsCart.length}>
+                      <ShoppingCartOutlined
+                        style={{ fontSize: 20, cursor: "pointer" }}
+                      />
+                    </Badge>
                   </div>
                 </li>
-                <li className={`nav-item`}>
+                <li className={Style.listTopItem2}>
                   {" "}
-                  <div className="nav-link">
+                  <div className={Style.icon}>
                     {" "}
                     <Dropdown
                       overlay={
@@ -221,21 +228,24 @@ function NavBar({}: Props) {
                         </Menu>
                       }
                     >
-                      <Space>
-                        <UserOutlined />
-                      </Space>
+                      <Badge>
+                        <UserOutlined
+                          style={{ fontSize: 20, cursor: "pointer" }}
+                        />
+                      </Badge>
                     </Dropdown>
                   </div>
                 </li>
               </>
-            ) : (
+            )}
+            {auth === null && (
               <>
-                <li className={`nav-item`}>
+                <li className={Style.listTopItem2}>
                   <Link className="nav-link" href="/login">
                     Đăng nhập
                   </Link>
                 </li>
-                <li className={`nav-item`}>
+                <li className={Style.listTopItem2}>
                   <Link className="nav-link" href="/register">
                     Đăng ký
                   </Link>
@@ -245,7 +255,7 @@ function NavBar({}: Props) {
           </ul>
         </div>
 
-        <div className={style.menuAnt}>
+        <div className={Style.menuAnt}>
           <Menu style={{ width: "35%" }} mode="horizontal" items={items} />
           <Search
             placeholder="input search text"
