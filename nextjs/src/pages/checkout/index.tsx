@@ -128,7 +128,13 @@ const CheckoutPayment = (props: Props) => {
       productId: item.product._id,
       quantity: item.quantity,
     }));
-    // orderData.customerId = `${auth.payload._id}`;
+    orderData.contactInformation = {
+      address: orderData.shippingAddress,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phoneNumber: values.phoneNumber,
+    };
+    orderData.customerId = `${auth.payload._id}`;
 
     console.log("««««« oderData »»»»»", orderData);
     if (payMethod === "shipCod") {
@@ -154,13 +160,19 @@ const CheckoutPayment = (props: Props) => {
 
       const payPost = async () => {
         try {
-          const found = await axios.post(
-            "http://localhost:9000/orders/pay/create_momo_url",
-            { amount: amount }
+          const postOder = await axios.post(
+            "http://localhost:9000/orders",
+            orderData
           );
+          if (postOder) {
+            const found = await axios.post(
+              "http://localhost:9000/orders/pay/create_momo_url",
+              { amount: amount }
+            );
 
-          console.log("««««« found »»»»»", found.data);
-          window.location.href = found.data.urlPay;
+            console.log("««««« found »»»»»", found.data);
+            window.location.href = found.data.urlPay;
+          }
         } catch (error) {
           console.log("««««« error »»»»»", error);
         }

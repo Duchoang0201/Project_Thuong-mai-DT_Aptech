@@ -132,6 +132,20 @@ router.get(
   }
 );
 
+// GET A DATA
+router.get("/:id", validateSchema(customerIdSchema), async (req, res, next) => {
+  try {
+    const itemId = req.params.id;
+    let found = await Customer.findById(itemId);
+    if (found) {
+      return res.status(200).json({ oke: true, result: found });
+    }
+    return res.status(410).json({ oke: false, message: "Object not found" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // CREATE DATA
 router.post("/", validateSchema(customerBodySchema), async (req, res, next) => {
   try {
@@ -201,7 +215,7 @@ router.patch(
 router.post(
   "/login",
 
-  // validateSchema(loginSchema),
+  validateSchema(loginSchema),
 
   async (req, res, next) => {
     try {

@@ -33,9 +33,6 @@ const CheckoutPayment = (props: Props) => {
 
   const [payMethod, setPayMethod] = useState<any>("shipCod");
 
-  // const handleChangePayMethod = (value: any) => {
-  //   setPayMethod(value);
-  // };
   const { items } = useCartStore((state: any) => state);
   const { auth }: any = useAuthStore((state: any) => state);
   useEffect(() => {
@@ -128,7 +125,14 @@ const CheckoutPayment = (props: Props) => {
       productId: item.product._id,
       quantity: item.quantity,
     }));
-    // orderData.customerId = `${auth.payload._id}`;
+    orderData.contactInformation = {
+      address: values.address,
+      email: values.email,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phoneNumber: values.phoneNumber,
+    };
+    orderData.customerId = `${auth.payload._id}`;
 
     console.log("««««« oderData »»»»»", orderData);
     if (payMethod === "shipCod") {
@@ -154,13 +158,43 @@ const CheckoutPayment = (props: Props) => {
 
       const payPost = async () => {
         try {
-          const found = await axios.post(
-            "http://localhost:9000/orders/pay/create_momo_url",
-            { amount: amount }
+          const postCheck = await axios.post(
+            "http://localhost:9000/orders",
+            orderData
           );
+          if (postCheck) {
+            const found = await axios.post(
+              "http://localhost:9000/orders/pay/create_momo_url",
+              { amount: amount }
+            );
+            window.location.href = found.data.urlPay;
+          }
+        } catch (error) {
+          console.log("««««« error »»»»»", error);
+        }
+      };
+      payPost();
+    }
+    if (payMethod === "vnpay") {
+      orderData.paymentType = "VNPAY";
 
-          console.log("««««« found »»»»»", found.data);
-          window.location.href = found.data.urlPay;
+      const amount = items
+        .map((item: any) => item.product.price)
+        .reduce((acc: any, curr: any) => acc + curr, 0);
+
+      const payPost = async () => {
+        try {
+          const postCheck = await axios.post(
+            "http://localhost:9000/orders",
+            orderData
+          );
+          if (postCheck) {
+            const found = await axios.post(
+              "http://localhost:9000/orders/pay/create_vnpay_url",
+              { amount: amount }
+            );
+            window.location.href = found.data.urlPay;
+          }
         } catch (error) {
           console.log("««««« error »»»»»", error);
         }
@@ -190,16 +224,16 @@ const CheckoutPayment = (props: Props) => {
             return (
               <>
                 <div
-                  key={i.product.id}
+                  key={i.product._id}
                   className="d-flex justify-content-between"
                 >
-                  <div className="w-75">
+                  <div key={index} className="w-75">
                     <span>{i.product.name}</span> x{" "}
                     <span className="text-danger">{i.quantity}</span>
                   </div>
                   <span>{i.product.price}</span>
                 </div>
-                <Divider></Divider>
+                <Divider key={`${index}-${i.product._id}`}></Divider>
               </>
             );
           })}

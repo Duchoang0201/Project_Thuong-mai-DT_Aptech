@@ -11,7 +11,7 @@ export default function Products() {
       {products.map((p) => {
         return (
           <div
-            key={p._id}
+            key={`${p._id}-${p.imageUrl}`}
             style={{
               display: "flex",
               flexDirection: "column",

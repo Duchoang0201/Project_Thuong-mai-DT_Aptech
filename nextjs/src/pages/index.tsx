@@ -1,19 +1,42 @@
 import Head from "next/head";
 import Image from "next/image";
-import { Inter } from "next/font/google";
-import styles from "@/styles/Home.module.css";
-import NavBar from "@/compenents/Navbar/Navbar";
+import axios from "axios";
+import { useRouter } from "next/router";
+// import { Inter } from "next/font/google";
+// import styles from "@/styles/Home.module.css";
+// import NavBar from "@/compenents/Navbar/Navbar";
+import "bootstrap/dist/css/bootstrap.min.css";
 
-const inter = Inter({ subsets: ["latin"] });
+import { Swiper, SwiperSlide } from "swiper/react";
+import "swiper/swiper.min.css";
+import "swiper/css/pagination";
+import { Pagination } from "swiper";
 
-export default function Home() {
+// import { img } from "../imgBanner";
+
+type Props = {
+  allProduct: any;
+  // product: any;
+};
+
+const imgBanner = [
+  "31-trangchu-tskc-1175x375.jpg",
+  "32-trangchu-tscuoi-471x675.jpg",
+  "33-trangchu-dojiwatch-580x350.jpg",
+  "/Upload/banner/2023/02/bannerweb/32-trangchu-tscuoi-471x675.jpg",
+];
+
+export default function Home({ allProduct }: Props) {
   const imageLoader = (src: any) => {
     return `localhost:9000${src}}`;
   };
   imageLoader(
     `/uploads/products/641b0dfdb5b1ca7f1713e8ea/img-1682533076800-1682568987131--1-.jpg`
   );
-
+  const router = useRouter();
+  const handlePageId = (path: any) => {
+    // router.push(`products/${product._id}`);
+  };
   return (
     <>
       <Head>
@@ -22,102 +45,64 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      {/* <main className={`${styles.main} ${inter.className}`}>
-        <div className={styles.description}>
-          <p>
-            Get started by editing&nbsp;
-            <code className={styles.code}>src/pages/index.tsx</code>
-          </p>
-          <div>
-            <a
-              href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
+
+      <main>
+        hello shop Index
+        {/* <Image
+          src="http://localhost:9000/uploads/products/641b0dfdb5b1ca7f1713e8f0/9g4z1sbr-wallha-com.png"
+          alt="Picture of the author"
+          width={500}
+          height={500}
+        /> */}
+        <div className="container">
+          <div className="p-4 " style={{ height: "300px" }}>
+            <Swiper
+              slidesPerView={3}
+              spaceBetween={30}
+              pagination={{
+                clickable: true,
+              }}
+              modules={[Pagination]}
+              className=" w-100"
             >
-              By{" "}
-              <Image
-                src="/vercel.svg"
-                alt="Vercel Logo"
-                className={styles.vercelLogo}
-                width={100}
-                height={24}
-                priority
-              />
-            </a>
+              {imgBanner?.map((items: any, index: any) => {
+                if (index <= 20)
+                  return (
+                    <>
+                      <SwiperSlide className="m-3 w-25 ">
+                        <Image
+                          src={`http://localhost:9000/${items.imageUrl}`}
+                          // src={items}
+                          alt="Description of the image"
+                          width={200}
+                          height={200}
+                          className="w-100 h-25"
+                          onClick={() => handlePageId(`/products/${items._id}`)}
+                          style={{ maxHeight: "180px", minHeight: "80px" }}
+                        ></Image>
+                        <p className="fs-6 ">{items.name}</p>
+                      </SwiperSlide>
+                    </>
+                  );
+              })}
+            </Swiper>
           </div>
+          <div></div>
+          <div></div>
         </div>
-
-        <div className={styles.center}>
-          <Image
-            className={styles.logo}
-            src="/next.svg"
-            alt="Next.js Logo"
-            width={180}
-            height={37}
-            priority
-          />
-        </div>
-
-        <div className={styles.grid}>
-          <a
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Docs <span>-&gt;</span>
-            </h2>
-            <p>
-              Find in-depth information about Next.js features and&nbsp;API.
-            </p>
-          </a>
-
-          <a
-            href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Learn <span>-&gt;</span>
-            </h2>
-            <p>
-              Learn about Next.js in an interactive course with&nbsp;quizzes!
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Templates <span>-&gt;</span>
-            </h2>
-            <p>
-              Discover and deploy boilerplate example Next.js&nbsp;projects.
-            </p>
-          </a>
-
-          <a
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
-            className={styles.card}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <h2>
-              Deploy <span>-&gt;</span>
-            </h2>
-            <p>
-              Instantly deploy your Next.js site to a shareable URL
-              with&nbsp;Vercel.
-            </p>
-          </a>
-        </div>
-      </main> */}
-      <main>hello shop</main>
+      </main>
     </>
   );
+}
+
+export async function getStaticProps({ params }: any) {
+  // const product = await axios.get(`http://localhost:9000/products/${params}`);
+  const allProduct = await axios
+    .get("http://localhost:9000/products")
+    .then((response) => {
+      return response.data;
+    });
+  return {
+    props: { allProduct: allProduct }, // will be passed to the page component as props
+  };
 }

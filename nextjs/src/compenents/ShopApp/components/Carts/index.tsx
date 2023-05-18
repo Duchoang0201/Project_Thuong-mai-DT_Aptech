@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../../../../hook/useAuthStore";
 import { useCartStore } from "../../../../hook/useCountStore";
 
@@ -6,21 +6,18 @@ export default function Carts() {
   const { items, remove, increase, decrease } = useCartStore(
     (state: any) => state
   );
-  const { auth }: any = useAuthStore((state: any) => state);
-  return (
-    <div>
-      <h1 style={{ color: "red" }}>{auth?.name}</h1>
-      <table className="table">
-        <thead>
-          <tr>
-            <th>No.</th>
-            <th>Name</th>
-            <th className="text-end">Price</th>
-            <th className="text-end">Qty</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
+  const [isHydrated, setIsHydrated] = useState(false);
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+  const { auth } = useAuthStore((state: any) => state);
+  const renderTable = (): React.ReactNode => {
+    if (!isHydrated) {
+      return null;
+    }
+    if (items) {
+      return (
+        <>
           {items.map((i: any, index: any) => {
             return (
               <tr key={i.product._id}>
@@ -28,16 +25,19 @@ export default function Carts() {
                 <td>{i.product.name}</td>
                 <td className="text-end">{i.product.price}</td>
                 <td className="text-end">{i.quantity}</td>
-                <td>
+                <td className="d-flex justify-content-evenly">
                   <button
+                    type="button"
+                    className="btn btn-outline-primary"
                     onClick={() => {
                       increase(i.product._id);
                     }}
                   >
                     +
                   </button>
-
                   <button
+                    type="button"
+                    className="btn btn-outline-danger"
                     onClick={() => {
                       decrease(i.product._id);
                     }}
@@ -45,6 +45,8 @@ export default function Carts() {
                     -
                   </button>
                   <button
+                    type="button"
+                    className="btn btn-outline-dark"
                     onClick={() => {
                       remove(i.product._id);
                     }}
@@ -55,8 +57,27 @@ export default function Carts() {
               </tr>
             );
           })}
-        </tbody>
-      </table>
-    </div>
+        </>
+      );
+    }
+  };
+  return (
+    <>
+      <h1 style={{ color: "red" }}>{auth?.name}</h1>
+      <div className="container">
+        <table className="table">
+          <thead>
+            <tr>
+              <th>STT</th>
+              <th>Tên sản phẩm</th>
+              <th className="text-end">Đơn giá</th>
+              <th className="text-end">Số lượng</th>
+              <th className="text-center"> Chức năng</th>
+            </tr>
+          </thead>
+          <tbody>{renderTable()}</tbody>
+        </table>
+      </div>
+    </>
   );
 }
