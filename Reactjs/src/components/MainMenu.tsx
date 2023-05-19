@@ -118,7 +118,6 @@ const MainMenu = () => {
 
   //   const [current, setCurrent] = useState("category");
   const onMenuClick = (value: any) => {
-    console.log(value);
     if (value.key === "account/logout") {
       logout();
       navigate("/");

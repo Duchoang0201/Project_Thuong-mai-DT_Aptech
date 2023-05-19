@@ -28,13 +28,31 @@ numeral.locale("vi");
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    // Update windowWidth when the window is resized
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    // Add event listener to the window resize event
+    window.addEventListener("resize", handleResize);
+
+    // Clean up the event listener on component unmount
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []); // Empty dependency array ensures that the effect runs only once
+
   const { auth } = useAuthStore((state: any) => state);
 
   const socket = useRef<any>();
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
   useEffect(() => {
-    socket.current = io("http://localhost:8888");
-  }, []);
+    socket.current = io(URL_ENV);
+  }, [URL_ENV]);
 
   // Function reresh to clear local storage
 
@@ -60,6 +78,7 @@ const App: React.FC = () => {
           {auth && (
             <Layout>
               <Sider
+                collapsedWidth={windowWidth <= 768 ? 0 : undefined}
                 trigger={null}
                 collapsible
                 collapsed={collapsed}
@@ -83,8 +102,10 @@ const App: React.FC = () => {
                 <MainMenu />
               </Sider>
               <Layout
-                className="site-layout"
-                style={{ marginLeft: collapsed ? 80 : 200 }}
+                // className="container"
+                style={{
+                  marginLeft: collapsed ? (windowWidth <= 768 ? 0 : 60) : 200,
+                }}
               >
                 <Header
                   style={{
@@ -123,7 +144,7 @@ const App: React.FC = () => {
                   </div>
                 </Header>
 
-                <Content style={{ margin: "24px 16px 0", overflow: "initial" }}>
+                <Content className="mx-5 my-5">
                   {/* Register routes */}
 
                   <Routes>

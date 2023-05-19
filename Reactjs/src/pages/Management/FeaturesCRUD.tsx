@@ -33,6 +33,8 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
 moment().format();
 function FeaturesCRUD() {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   //Set File avatar
 
   const [file, setFile] = useState<any>(null);
@@ -46,7 +48,7 @@ function FeaturesCRUD() {
   dayjs.extend(customParseFormat);
 
   // API OF COLLECTIOn
-  let API_URL = "http://localhost:9000/features";
+  let API_URL = `${URL_ENV}/features`;
 
   // MODAL:
   // Modal open Create:
@@ -101,7 +103,7 @@ function FeaturesCRUD() {
         formData.append("file", file);
 
         axios
-          .post(`http://localhost:9000/upload/features/${_id}/image`, formData)
+          .post(`${URL_ENV}/upload/features/${_id}/image`, formData)
           .then((respose) => {
             message.success("Thêm mới thành công!");
             createForm.resetFields();
@@ -307,7 +309,7 @@ function FeaturesCRUD() {
           <div>
             {record.imageUrl && (
               <img
-                src={"http://localhost:9000" + record.imageUrl}
+                src={`${URL_ENV}${record.imageUrl}`}
                 style={{ height: 60 }}
                 alt="record.imageUrl"
               />
@@ -439,7 +441,7 @@ function FeaturesCRUD() {
           <Upload
             showUploadList={false}
             name="file"
-            action={`http://localhost:9000/upload/features/${record._id}/image`}
+            action={`${URL_ENV}/upload/features/${record._id}/image`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {

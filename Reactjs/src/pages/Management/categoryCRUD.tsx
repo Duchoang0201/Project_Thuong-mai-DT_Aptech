@@ -28,13 +28,15 @@ import { useAuthStore } from "../../hooks/useAuthStore";
 // Date Picker
 
 function CategoryCRUD() {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   const { auth } = useAuthStore((state: any) => state);
   const [refresh, setRefresh] = useState(0);
 
   // Date Picker Setting
 
   // API OF
-  let API_URL = "http://localhost:9000/categories";
+  let API_URL = `${URL_ENV}/categories`;
 
   // MODAL:
   // Modal open Create:
