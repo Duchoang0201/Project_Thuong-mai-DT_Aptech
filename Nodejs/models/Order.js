@@ -137,6 +137,11 @@ const orderSchema = new Schema({
   employeeId: { type: Schema.Types.ObjectId, ref: "Employee", required: false },
   contactInformation: contactInformationSchema,
   orderDetails: [orderDetailSchema],
+  position: {
+    lat: { type: String },
+    lng: { type: String },
+    name: { type: String },
+  },
 });
 
 // Virtual with Populate

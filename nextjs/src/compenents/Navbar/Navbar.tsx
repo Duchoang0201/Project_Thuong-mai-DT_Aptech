@@ -26,7 +26,6 @@ function NavBar({}: Props) {
 
   const [user, setUser] = useState<any>();
 
-  console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
@@ -199,7 +198,7 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {auth && (
+            {user && (
               <>
                 <li
                   className={Style.listTopItem2}
@@ -238,7 +237,7 @@ function NavBar({}: Props) {
                 </li>
               </>
             )}
-            {auth === null && (
+            {user === null && (
               <>
                 <li className={Style.listTopItem2}>
                   <Link className="nav-link" href="/login">

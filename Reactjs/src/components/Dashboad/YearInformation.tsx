@@ -17,7 +17,6 @@ const YearInformation = (props: Props) => {
   const [orderTotal, setOrderTotal] = useState<any>();
   const [totalUser, setTotalUser] = useState<any>();
   const [productsActive, setProductsActive] = useState<any>();
-  console.log("««««« productsActive »»»»»", productsActive);
   useEffect(() => {
     axios.get(`${URL_ENV}/questions/23`).then((res) => {
       setOrderTotal(res.data);

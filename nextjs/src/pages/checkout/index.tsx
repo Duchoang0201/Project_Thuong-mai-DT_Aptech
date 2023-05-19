@@ -17,7 +17,6 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import { useCartStore } from "@/hook/useCountStore";
 import { useAuthStore } from "@/hook/useAuthStore";
 import router from "next/router";
-import { DollarOutlined } from "@ant-design/icons";
 import Image from "next/image";
 
 const { Option } = Select;
@@ -28,10 +27,8 @@ const CheckoutPayment = (props: Props) => {
   const [districts, setDistricts] = useState<any>([]);
   const [wards, setWards] = useState<any>([]);
 
-  const [fromAction, setFormAction] = useState<any>();
-  //setPayMethod
-
   const [payMethod, setPayMethod] = useState<any>("shipCod");
+  const [position, setPosition] = useState<any>();
 
   // const handleChangePayMethod = (value: any) => {
   //   setPayMethod(value);
@@ -45,6 +42,18 @@ const CheckoutPayment = (props: Props) => {
           "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json"
         );
         setCities(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://ip-api.com/json");
+        setPosition(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -135,7 +144,11 @@ const CheckoutPayment = (props: Props) => {
       phoneNumber: values.phoneNumber,
     };
     orderData.customerId = `${auth.payload._id}`;
-
+    orderData.position = {
+      name: position.regionName,
+      lat: position.lat,
+      lng: position.lon,
+    };
     console.log("««««« oderData »»»»»", orderData);
     if (payMethod === "shipCod") {
       orderData.paymentType = "CASH";
@@ -200,19 +213,16 @@ const CheckoutPayment = (props: Props) => {
         <>
           {items.map((i: any, index: any) => {
             return (
-              <>
-                <div
-                  key={i.product.id}
-                  className="d-flex justify-content-between"
-                >
+              <React.Fragment key={i.product.id}>
+                <div className="d-flex justify-content-between">
                   <div className="w-75">
                     <span>{i.product.name}</span> x{" "}
                     <span className="text-danger">{i.quantity}</span>
                   </div>
                   <span>{i.product.price}</span>
                 </div>
-                <Divider></Divider>
-              </>
+                <Divider key={i.product.id}></Divider>
+              </React.Fragment>
             );
           })}
           <div className="d-flex justify-content-between">
@@ -237,8 +247,8 @@ const CheckoutPayment = (props: Props) => {
           <Col
             xs={24}
             xl={8}
-            className="px-3 py-2"
-            style={{ backgroundColor: "grey" }}
+            className="px-3 py-2 rounded-start "
+            style={{ backgroundColor: "#7ea0d0" }}
           >
             {" "}
             <Card title="Thông tin thanh toán" style={{ width: "100%" }}>
@@ -316,8 +326,8 @@ const CheckoutPayment = (props: Props) => {
           <Col
             xs={24}
             xl={14}
-            className="py-2 px-3"
-            style={{ backgroundColor: "grey" }}
+            className="py-2 px-3 rounded-end "
+            style={{ backgroundColor: "#7ea0d0" }}
           >
             {" "}
             <Card title="Đơn hàng của bạn" style={{ width: "100%" }}>

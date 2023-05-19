@@ -9,7 +9,6 @@ const HomePage = () => {
   const socket = useRef<any>();
   const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
-  console.log("««««« process.env »»»»»", process.env);
   useEffect(() => {
     socket.current = io(URL_ENV);
   }, [URL_ENV]);
