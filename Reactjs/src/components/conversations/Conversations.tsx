@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Avatar, Button, Divider, List, Skeleton } from "antd";
+import { Button, Divider, List, Skeleton } from "antd";
 import InfiniteScroll from "react-infinite-scroll-component";
 import { useAuthStore } from "../../hooks/useAuthStore";
 import { UserOutlined } from "@ant-design/icons";
@@ -20,34 +20,19 @@ const Conversation = ({ conver }: { conver: any }) => {
       .join("&");
     console.log("««««« query »»»»»", query);
     const getUser = async () => {
-      const res = await axios.get(`http://localhost:9000/employees?${query}`);
+      const res = await axios.get(`${process.env.REACT_APP_BASE_URL}?${query}`);
       console.log("««««« res.data »»»»»", res.data);
       setData(res.data.results);
     };
     getUser();
-  }, []);
+  }, [auth.payload._id, conver]);
 
   const loadMoreData = () => {
     if (loading) {
       return;
     }
     setLoading(true);
-
-    // fetch(`http://localhost:9000/employees?employeeId=${auth.payload._id}`)
-    //   .then((res) => res.json())
-    //   .then((body) => {
-    //     console.log(body);
-    //     setData([...data, ...body.results]);
-    //     // setLoading(false);
-    //   })
-    //   .catch(() => {
-    //     setLoading(false);
-    //   });
   };
-
-  //   useEffect(() => {
-  //     loadMoreData();
-  //   }, []);
 
   return (
     <div

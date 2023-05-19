@@ -12,13 +12,15 @@ export const useAuthStore = create(
     persist(
       (set, get) => {
         let loginData: any = null; // Variable to store the login data
+        const URL_ENV =
+          process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
         return {
           auth: null,
           login: async ({ email, password }: isLogin) => {
             try {
               const response = await axios.post(
-                "http://localhost:9000/employees/login",
+                `${URL_ENV}http://localhost:9000/employees/login`,
                 {
                   email: email,
                   password: password,
@@ -30,12 +32,9 @@ export const useAuthStore = create(
                 type: "auth/login-success",
               });
               if (loginData && loginData.payload && loginData.payload._id) {
-                axios.patch(
-                  `http://localhost:9000/employees/${loginData.payload._id}`,
-                  {
-                    LastActivity: new Date(),
-                  }
-                );
+                axios.patch(`${URL_ENV}/employees/${loginData.payload._id}`, {
+                  LastActivity: new Date(),
+                });
               }
             } catch (err) {
               set({ auth: null }, false, { type: "auth/login-error" });
@@ -46,12 +45,9 @@ export const useAuthStore = create(
             // Use the loginData in the logout function
 
             if (loginData && loginData.payload && loginData.payload._id) {
-              axios.patch(
-                `http://localhost:9000/employees/${loginData.payload._id}`,
-                {
-                  LastActivity: new Date(),
-                }
-              );
+              axios.patch(`${URL_ENV}/employees/${loginData.payload._id}`, {
+                LastActivity: new Date(),
+              });
             }
             localStorage.clear();
 

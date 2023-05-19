@@ -1,9 +1,7 @@
-import Icon, {
+import {
   CheckCircleOutlined,
-  CheckCircleTwoTone,
   ClearOutlined,
   CloseCircleOutlined,
-  CloseCircleTwoTone,
   DeleteOutlined,
   EditOutlined,
   PlusCircleOutlined,
@@ -21,14 +19,12 @@ import {
   Select,
   Space,
   Table,
-  Typography,
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
 import { useCallback, useEffect, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
-import { CircleOutlined } from "@mui/icons-material";
 
 interface ISupplier {
   name: string;
@@ -38,10 +34,12 @@ interface ISupplier {
 }
 
 function SupperliersCRUD() {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   const [refresh, setRefresh] = useState(0);
   const { auth } = useAuthStore((state: any) => state);
 
-  let API_URL = "http://localhost:9000/suppliers";
+  let API_URL = `${URL_ENV}/suppliers`;
 
   // MODAL:
   // Modal open Create:
@@ -50,8 +48,6 @@ function SupperliersCRUD() {
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
-  //Model open Confirm Delete
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<ISupplier>();
 
@@ -80,7 +76,6 @@ function SupperliersCRUD() {
   }, []);
 
   //Text of Tyography:
-  const { Text } = Typography;
 
   //Create data
   const handleCreate = (record: any) => {
@@ -113,7 +108,6 @@ function SupperliersCRUD() {
       .then((res) => {
         console.log(res.statusText);
         message.success(" Delete item sucessfully!!", 1.5);
-        setOpenDeleteConfirm(false);
         setRefresh((f) => f + 1);
       })
       .catch((err) => {
@@ -216,7 +210,7 @@ function SupperliersCRUD() {
     setCurrentPage(value);
   };
   //GET DATA ON FILLTER
-  const URL_FILTER = `http://localhost:9000/suppliers?${[
+  const URL_FILTER = `${URL_ENV}/suppliers?${[
     supplierName && `name=${supplierName}`,
     supplierEmail && `email=${supplierEmail}`,
     supplierPhone && `phoneNumber=${supplierPhone}`,
@@ -513,6 +507,8 @@ function SupperliersCRUD() {
                   setSuplierEmail("");
                   setSuplierPhone("");
                   setSuplierAddress("");
+                  setIsActive("");
+                  setIsDelete("");
                 }}
                 icon={<ClearOutlined />}
               >

@@ -1,6 +1,7 @@
 import React from "react";
 import {
   CommentOutlined,
+  EllipsisOutlined,
   ExportOutlined,
   HomeOutlined,
   OrderedListOutlined,
@@ -50,6 +51,7 @@ const MainMenu = () => {
           key: "management/products",
           label: "Products",
         },
+
         auth?.payload?.isAdmin && {
           key: "management/employees",
           label: "Employees",
@@ -71,7 +73,21 @@ const MainMenu = () => {
         },
       ],
     },
-
+    {
+      label: "Function",
+      key: "function",
+      icon: <EllipsisOutlined />,
+      children: [
+        {
+          key: "function/slides",
+          label: "Slides",
+        },
+        {
+          key: "function/features",
+          label: "Features",
+        },
+      ],
+    },
     {
       label: "Account",
       key: "/account",
@@ -102,7 +118,6 @@ const MainMenu = () => {
 
   //   const [current, setCurrent] = useState("category");
   const onMenuClick = (value: any) => {
-    console.log(value);
     if (value.key === "account/logout") {
       logout();
       navigate("/");

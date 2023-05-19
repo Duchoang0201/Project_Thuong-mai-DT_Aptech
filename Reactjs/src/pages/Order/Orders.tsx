@@ -8,25 +8,24 @@ import {
   Divider,
   Row,
   Col,
-  Collapse,
-  Input,
 } from "antd";
 import numeral from "numeral";
 import axios from "axios";
 import { axiosClient } from "../../libraries/axiosClient";
 
 export default function Orders() {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   const [refresh, setRefresh] = useState(0);
-  const [open, setOpen] = useState(false);
   const [addProductsModalVisible, setAddProductsModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   // Products
   const [products, setProducts] = useState<any>([]);
   useEffect(() => {
-    axios.get("http://localhost:9000/products").then((response) => {
+    axios.get(`${URL_ENV}/products`).then((response) => {
       setProducts(response.data.results);
     });
-  }, [refresh]);
+  }, [URL_ENV, refresh]);
 
   const [orders, setOrders] = useState<any>([]);
   useEffect(() => {
@@ -41,7 +40,7 @@ export default function Orders() {
       (order: any) => order.id === selectedOrder?.id
     );
     setSelectedOrder(updatedSelectedOrder || null);
-  }, [orders]);
+  }, [orders, selectedOrder]);
 
   const handleDelete = async (record: any, index: any) => {
     const currentProduct = record;
@@ -182,7 +181,6 @@ export default function Orders() {
           <Button
             onClick={() => {
               setSelectedOrder(record);
-              setOpen(true);
             }}
           >
             Select

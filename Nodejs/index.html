@@ -47,7 +47,7 @@
   </script> -->
 
   <script>
-    const socket = io();
+    const socket = io("http://localhost:9000");
 
     const name = prompt("tên bạn");
     const chatForm = document.querySelector("#chat-form");

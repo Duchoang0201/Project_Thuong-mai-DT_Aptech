@@ -19,6 +19,8 @@ const actionRouter = require("./routes/action");
 const categoriesRouter = require("./routes/categories");
 const ordersRouter = require("./routes/orders");
 const questionsRouter = require("./routes/questions");
+const slidesRouter = require("./routes/slides");
+const featuresRouter = require("./routes/features");
 
 const uploadRouter = require("./routes/upload");
 
@@ -93,6 +95,8 @@ app.use("/orders", ordersRouter);
 app.use("/questions", questionsRouter);
 app.use("/conversations", conversationsRouter);
 app.use("/messages", messagesRouter);
+app.use("/slides", slidesRouter);
+app.use("/features", featuresRouter);
 
 app.use("/upload", uploadRouter);
 

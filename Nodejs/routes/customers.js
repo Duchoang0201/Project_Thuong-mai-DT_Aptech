@@ -132,17 +132,33 @@ router.get(
   }
 );
 
+// GET A DATA
+router.get("/:id", validateSchema(customerIdSchema), async (req, res, next) => {
+  try {
+    const itemId = req.params.id;
+    let found = await Customer.findById(itemId);
+    if (found) {
+      return res.status(200).json({ oke: true, result: found });
+    }
+    return res.status(410).json({ oke: false, message: "Object not found" });
+  } catch (error) {
+    return res.status(500).json({ error: error.message });
+  }
+});
+
 // CREATE DATA
 router.post("/", validateSchema(customerBodySchema), async (req, res, next) => {
   try {
-    const { email, password } = req.body;
+    const { email, phoneNumber } = req.body;
 
-    const customerExists = await Customer.findOne({ email });
+    const customerExists = await Customer.findOne({
+      $or: [{ email }, { phoneNumber }],
+    });
 
     if (customerExists) {
       return res
         .status(400)
-        .send({ oke: false, message: "Email already exists" });
+        .send({ oke: false, message: "Email or Phone Number already exists" });
     } else {
       const newItem = req.body;
       const data = new Customer(newItem);
@@ -201,7 +217,7 @@ router.patch(
 router.post(
   "/login",
 
-  // validateSchema(loginSchema),
+  validateSchema(loginSchema),
 
   async (req, res, next) => {
     try {

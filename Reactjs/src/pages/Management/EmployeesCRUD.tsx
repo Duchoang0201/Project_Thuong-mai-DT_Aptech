@@ -32,6 +32,8 @@ import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
 function EmployeeCRUD() {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   //Set File avatar
 
   const [file, setFile] = useState<any>(null);
@@ -48,7 +50,7 @@ function EmployeeCRUD() {
   const dateFormat = "DD/MM/YYYY";
 
   // API OF COLLECTIOn
-  let API_URL = "http://localhost:9000/employees";
+  let API_URL = `${URL_ENV}/employees`;
 
   // MODAL:
   // Modal open Create:
@@ -58,7 +60,6 @@ function EmployeeCRUD() {
   const [open, setOpen] = useState(false);
 
   //Model open Confirm Delete
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
@@ -106,7 +107,7 @@ function EmployeeCRUD() {
         formData.append("file", file);
 
         axios
-          .post(`http://localhost:9000/upload/employees/${_id}/image`, formData)
+          .post(`${URL_ENV}/upload/employees/${_id}/image`, formData)
           .then((respose) => {
             message.success("Thêm mới thành công!");
             createForm.resetFields();
@@ -125,7 +126,6 @@ function EmployeeCRUD() {
       .delete(API_URL + "/" + record._id)
       .then((res) => {
         message.success(" Delete item sucessfully!!", 1.5);
-        setOpenDeleteConfirm(false);
         setRefresh((f) => f + 1);
       })
       .catch((err) => {
@@ -586,7 +586,7 @@ function EmployeeCRUD() {
           <Upload
             showUploadList={false}
             name="file"
-            action={`http://localhost:9000/upload/employees/${record._id}/image`}
+            action={`${URL_ENV}p://localhost:9000/upload/employees/${record._id}/image`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {

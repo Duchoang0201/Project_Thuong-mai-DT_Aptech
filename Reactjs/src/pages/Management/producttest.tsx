@@ -50,7 +50,11 @@ export default function ProductsCRUD() {
       width: "1%",
       render: (text: any, record: any, index: any) => {
         return (
-          <img src={"http://localhost:9000" + text} style={{ height: 60 }} />
+          <img
+            src={"http://localhost:9000" + text}
+            style={{ height: 60 }}
+            alt="imag"
+          />
         );
       },
     },

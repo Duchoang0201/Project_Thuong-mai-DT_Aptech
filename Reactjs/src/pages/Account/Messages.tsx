@@ -25,6 +25,9 @@ import { format } from "timeago.js";
 import { io } from "socket.io-client";
 
 const Messages: React.FC<any> = () => {
+  const URL_ENV: any =
+    process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   const formRef = useRef<any>(null);
   const [createForm] = Form.useForm();
   const [createConversationForm] = Form.useForm();
@@ -57,8 +60,8 @@ const Messages: React.FC<any> = () => {
   const socket = useRef<any>();
 
   useEffect(() => {
-    socket.current = io("http://localhost:8888");
-  }, []);
+    socket.current = io(URL_ENV);
+  }, [URL_ENV]);
 
   useEffect(() => {
     socket.current.on("getMessage", (data: any) => {
@@ -80,7 +83,7 @@ const Messages: React.FC<any> = () => {
     arrivalMessage &&
       conversationInfor?.friends._id.includes(arrivalMessage.senderId);
     setMessages((prev: any) => [...prev, arrivalMessage]);
-  }, [arrivalMessage, conversations]);
+  }, [arrivalMessage, conversations, conversationInfor?.friends._id]);
 
   //Add user for socket.io
   useEffect(() => {
@@ -106,7 +109,7 @@ const Messages: React.FC<any> = () => {
   useEffect(() => {
     const getAllUsers = async () => {
       try {
-        const res = await axios.get(`http://localhost:9000/employees`);
+        const res = await axios.get(`${URL_ENV}/employees`);
         const dataIn = res.data.results.filter(
           (item: any) => item._id !== auth.payload._id
         );
@@ -121,7 +124,7 @@ const Messages: React.FC<any> = () => {
     const getConversations = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:9000/conversations/${auth.payload._id}`
+          `${URL_ENV}/conversations/${auth.payload._id}`
         );
 
         setConversations(res.data);
@@ -129,7 +132,7 @@ const Messages: React.FC<any> = () => {
       } catch (err) {}
     };
     getConversations();
-  }, [auth.payload._id, refresh]);
+  }, [URL_ENV, auth.payload._id, refresh]);
 
   //Create a conversation
 
@@ -141,10 +144,12 @@ const Messages: React.FC<any> = () => {
       };
       try {
         const res = await axios.post(
-          `http://localhost:9000/conversations`,
+          `${URL_ENV}/conversations`,
           conversationCreate
         );
-        setRefresh((f) => f + 1);
+        if (res) {
+          setRefresh((f) => f + 1);
+        }
       } catch (error) {
         console.log("««««« error »»»»»", error);
       }
@@ -170,10 +175,7 @@ const Messages: React.FC<any> = () => {
     });
 
     try {
-      const res = await axios.post(
-        "http://localhost:9000/messages",
-        messageSend
-      );
+      const res = await axios.post(`${URL_ENV}/messages`, messageSend);
       setRefresh((f) => f + 1);
       setMessages([...messages, res.data]);
       createForm.resetFields();
@@ -230,7 +232,7 @@ const Messages: React.FC<any> = () => {
 
           try {
             const response = await axios.get(
-              `http://localhost:9000/employees/${otherMembers}`
+              `${URL_ENV}/employees/${otherMembers}`
             );
             const friendData = response.data.result; // Assuming the friend data is in the 'result' property
             const friendInfo = {
@@ -259,7 +261,7 @@ const Messages: React.FC<any> = () => {
     };
 
     fetchData();
-  }, [conversations]);
+  }, [conversations, auth.payload._id, URL_ENV]);
 
   return (
     <>

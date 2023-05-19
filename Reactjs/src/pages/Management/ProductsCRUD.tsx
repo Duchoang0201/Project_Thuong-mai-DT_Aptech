@@ -58,6 +58,8 @@ interface Product {
   total: number;
 }
 const ProductsCRUD = () => {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   const [refresh, setRefresh] = useState(0);
   const { auth } = useAuthStore((state: any) => state);
 
@@ -65,7 +67,7 @@ const ProductsCRUD = () => {
   const [file, setFile] = useState<any>();
 
   //API_URL
-  const API_URL = "http://localhost:9000/products";
+  const API_URL = `${URL_ENV}/products`;
   const [categories, setCategories] = useState<Array<any>>([]);
   const [suppliers, setSuppliers] = useState([]);
 
@@ -154,7 +156,7 @@ const ProductsCRUD = () => {
       (product: any) => product._id === updateId?._id
     );
     setUpdateId(updatedSelectedOrder || null);
-  }, [productsTEST]);
+  }, [productsTEST, updateId]);
 
   //Columns of TABLE ANT_DESIGN
   const columns = [
@@ -257,7 +259,7 @@ const ProductsCRUD = () => {
             {record.imageUrl && (
               <div className="d-flex justify-content-between">
                 <img
-                  src={"http://localhost:9000" + record.imageUrl}
+                  src={`${URL_ENV}${record.imageUrl}`}
                   style={{ height: 60 }}
                   alt="record.imageUrl"
                 />
@@ -647,7 +649,7 @@ const ProductsCRUD = () => {
           <Upload
             showUploadList={false}
             name="file"
-            action={`http://localhost:9000/upload/products/${record._id}/images`}
+            action={`${URL_ENV}/upload/products/${record._id}/images`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {
@@ -699,22 +701,22 @@ const ProductsCRUD = () => {
   //CALL API CATEGORY
   useEffect(() => {
     axios
-      .get("http://localhost:9000/categories")
+      .get(`${URL_ENV}/categories`)
       .then((res) => {
         setCategories(res.data.results);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [URL_ENV]);
 
   //CALL API SUPPLIER
   useEffect(() => {
     axios
-      .get("http://localhost:9000/suppliers")
+      .get(`${URL_ENV}/suppliers`)
       .then((res) => {
         setSuppliers(res.data.results);
       })
       .catch((err) => console.log(err));
-  }, []);
+  }, [URL_ENV]);
 
   //Handle Create a Data
   const handleCreate = (record: any) => {
@@ -728,39 +730,44 @@ const ProductsCRUD = () => {
       .post(API_URL, record)
       .then((res) => {
         // UPLOAD FILE
-        const { _id } = res.data.results;
+        const { _id } = res.data.result;
 
         const formData = new FormData();
         formData.append("file", file);
 
         axios
-          .post(API_URL + "/upload/products/" + _id, formData)
+          .post(`${URL_ENV}/upload/products/${_id}/image`, formData)
           .then((respose) => {
             message.success("Create a product successFully!!", 1.5);
             createForm.resetFields();
             setRefresh((f) => f + 1);
+            setOpen(false);
+            setFile(null);
           })
           .catch((err) => {
             message.error("Upload file bị lỗi!");
           });
       })
-      .catch((err) => {
-        console.log(err.response.data.message);
+      .catch((err: any) => {
+        console.log(err);
       });
   };
 
   //handle Delete Data
-  const handleDelete = useCallback((record: any) => {
-    axios
-      .delete(API_URL + "/" + record._id)
-      .then((res) => {
-        setRefresh((f) => f + 1);
-        message.success("Delete a product successFully!!", 3);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, []);
+  const handleDelete = useCallback(
+    (record: any) => {
+      axios
+        .delete(API_URL + "/" + record._id)
+        .then((res) => {
+          setRefresh((f) => f + 1);
+          message.success("Delete a product successFully!!", 3);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    [API_URL]
+  );
 
   //Update a data
   const handleUpdate = (record: any) => {
@@ -863,6 +870,8 @@ const ProductsCRUD = () => {
     setFromStock("");
     setToStock("");
     inforStock.resetFields();
+    setIsActive("");
+    setIsDelete("");
   };
   //CALL API PRODUCT FILLTER
   const queryParams = [
@@ -882,7 +891,7 @@ const ProductsCRUD = () => {
     .filter(Boolean)
     .join("&");
 
-  let URL_FILTER = `http://localhost:9000/products?${queryParams}&limit=10`;
+  let URL_FILTER = `${URL_ENV}/products?${queryParams}&limit=10`;
   // CALL API FILTER PRODUCT DEPEND ON QUERY
   useEffect(() => {
     axios
@@ -1073,10 +1082,31 @@ const ProductsCRUD = () => {
               span: 16,
             }}
             hasFeedback
-            label="sortOder"
-            name="sortOder"
+            label="PromotionPosition"
+            name="promotionPosition"
           >
-            <InputNumber min={1} />
+            <Select
+              mode="multiple"
+              allowClear
+              showSearch
+              placeholder="Select promotion"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={[
+                {
+                  value: "TOP-MONTH",
+                  label: "TOP-MONTH",
+                },
+                {
+                  value: "DEAL",
+                  label: "DEAL",
+                },
+              ]}
+            />
           </Form.Item>
           <Form.Item
             labelCol={{
@@ -1290,7 +1320,7 @@ const ProductsCRUD = () => {
           </Form.Item>{" "}
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1304,20 +1334,41 @@ const ProductsCRUD = () => {
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
             }}
             hasFeedback
-            label="sortOder"
-            name="sortOder"
+            label="PromotionPosition"
+            name="promotionPosition"
           >
-            <InputNumber min={1} />
+            <Select
+              mode="multiple"
+              allowClear
+              showSearch
+              placeholder="Select promotion"
+              optionFilterProp="children"
+              filterOption={(input, option) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .includes(input.toLowerCase())
+              }
+              options={[
+                {
+                  value: "TOP-MONTH",
+                  label: "TOP-MONTH",
+                },
+                {
+                  value: "DEAL",
+                  label: "DEAL",
+                },
+              ]}
+            />
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1331,7 +1382,7 @@ const ProductsCRUD = () => {
           </Form.Item>
           <Form.Item
             labelCol={{
-              span: 7,
+              span: 8,
             }}
             wrapperCol={{
               span: 16,
@@ -1358,12 +1409,12 @@ const ProductsCRUD = () => {
             <Image
               width={200}
               height={200}
-              src={`http://localhost:9000${updateId?.imageUrl}`}
+              src={`${URL_ENV}${updateId?.imageUrl}`}
             />
             <Upload
               showUploadList={false}
               name="file"
-              action={`http://localhost:9000/upload/products/${updateId?._id}/image`}
+              action={`${URL_ENV}/upload/products/${updateId?._id}/image`}
               headers={{ authorization: "authorization-text" }}
               onChange={(info) => {
                 if (info.file.status !== "uploading") {
@@ -1389,26 +1440,16 @@ const ProductsCRUD = () => {
         )}
         <div className="listofproduct">
           <Space>
-            {/* {updateId &&
-              updateId?.images?.map((item: any, index: any) => (
-                <Image
-                
-                  key={index}
-                  width={200}
-                  height={200}
-                  src={`http://localhost:9000${item}`}
-                />
-              ))} */}
             {updateId && (
               <Upload
                 name="file"
-                action={`http://localhost:9000/upload/products/${updateId?._id}/images`}
+                action={`${URL_ENV}/upload/products/${updateId?._id}/images`}
                 listType="picture-card"
                 fileList={updateId?.images?.map((item: any, index: any) => ({
                   uid: `${-index}`,
                   name: `image${index}.png`,
                   status: "done",
-                  url: `http://localhost:9000${item}`,
+                  url: `${URL_ENV}${item}`,
                 }))}
                 onChange={(record: any) => {
                   if (record.file.status !== "uploading") {
@@ -1416,8 +1457,7 @@ const ProductsCRUD = () => {
                   }
                   if (record.file.status === "removed") {
                     const newlistPicture = updateId?.images?.filter(
-                      (item: any) =>
-                        `http://localhost:9000${item}` !== record.file.url
+                      (item: any) => `${URL_ENV}${item}` !== record.file.url
                     );
                     console.log("««««« newlistPicture »»»»»", newlistPicture);
                     axios

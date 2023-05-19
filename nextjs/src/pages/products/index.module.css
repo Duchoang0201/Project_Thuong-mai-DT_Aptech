@@ -1,0 +1,10 @@
+.rating{
+    position: relative;
+}
+
+.ratingNumber{
+    margin-left: 5%;
+    position: absolute;
+    top: 8%;
+    font-size: larger;
+}

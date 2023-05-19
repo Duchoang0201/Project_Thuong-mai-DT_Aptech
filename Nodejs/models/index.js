@@ -7,6 +7,8 @@ const Order = require("./Order");
 const Media = require("./Media");
 const Conversation = require("./Conversation");
 const Message = require("./Message");
+const Slide = require("./Slide");
+const Feature = require("./Feature");
 
 module.exports = {
   Category,
@@ -18,4 +20,6 @@ module.exports = {
   Media,
   Conversation,
   Message,
+  Slide,
+  Feature,
 };

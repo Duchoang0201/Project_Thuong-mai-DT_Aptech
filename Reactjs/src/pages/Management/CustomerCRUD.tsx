@@ -34,6 +34,7 @@ import moment from "moment";
 moment().format();
 function CustomerCRUD() {
   //Set File avatar
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
   const [file, setFile] = useState<any>(null);
 
@@ -49,7 +50,7 @@ function CustomerCRUD() {
   const dateFormat = "DD/MM/YYYY";
 
   // API OF COLLECTIOn
-  let API_URL = "http://localhost:9000/customers";
+  let API_URL = `${URL_ENV}/customers`;
 
   // MODAL:
   // Modal open Create:
@@ -58,8 +59,6 @@ function CustomerCRUD() {
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
-  //Model open Confirm Delete
-  const [openDeleteConfirm, setOpenDeleteConfirm] = useState(false);
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
@@ -106,12 +105,13 @@ function CustomerCRUD() {
         formData.append("file", file);
 
         axios
-          .post(`http://localhost:9000/upload/customers/${_id}/image`, formData)
+          .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
           .then((respose) => {
             message.success("Thêm mới thành công!");
             createForm.resetFields();
             setRefresh((f) => f + 1);
             setOpenCreate(false);
+            setFile(null);
           });
       })
       .catch((err) => {
@@ -125,7 +125,6 @@ function CustomerCRUD() {
       .delete(API_URL + "/" + record._id)
       .then((res) => {
         message.success(" Delete item sucessfully!!", 1.5);
-        setOpenDeleteConfirm(false);
         setRefresh((f) => f + 1);
       })
       .catch((err) => {
@@ -356,7 +355,7 @@ function CustomerCRUD() {
           <div>
             {record.imageUrl && (
               <img
-                src={"http://localhost:9000" + record.imageUrl}
+                src={`${URL_ENV}${record.imageUrl}`}
                 style={{ height: 60 }}
                 alt="record.imageUrl"
               />
@@ -582,7 +581,7 @@ function CustomerCRUD() {
           <Upload
             showUploadList={false}
             name="file"
-            action={`http://localhost:9000/upload/customers/${record._id}/image`}
+            action={`${URL_ENV}/upload/customers/${record._id}/image`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {

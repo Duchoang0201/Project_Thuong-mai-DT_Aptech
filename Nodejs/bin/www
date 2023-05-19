@@ -22,21 +22,15 @@ app.set("port", port);
  */
 
 var server = http.createServer(app);
-// const io = socketIO(server, {
+
+// const io = require("socket.io")(8888, {
 //   cors: {
-//     origin: "http://localhost:8888",
+//     origin: "http://localhost:3000",
 //     methods: ["GET", "POST"],
 //   },
 // });
 
-const io = require("socket.io")(8888, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"],
-  },
-});
-
-// io.listen(3000);
+// const io = socketIO(server);
 
 let users = []; //Get list of users are active (  login successfully)
 
@@ -53,6 +47,14 @@ const removeUser = (socketId) => {
 const getUser = (userId) => {
   return users.find((user) => user.userId === userId);
 };
+
+var server = http.createServer(app);
+const io = socketIO(server, {
+  cors: {
+    origin: process.env.WEB_ADMIN_URL || "http://localhost:3000",
+    methods: ["GET", "POST"],
+  },
+});
 
 io.on("connection", (socket) => {
   // when connect
@@ -101,7 +103,7 @@ io.on("connection", (socket) => {
   });
 });
 
-//send and get messages
+// send and get messages
 
 /**
  * Listen on provided port, on all network interfaces.
