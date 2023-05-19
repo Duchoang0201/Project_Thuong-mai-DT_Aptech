@@ -24,11 +24,14 @@ function Products({ products, categories, supplier }: Props) {
   const [open, setOpen] = useState<boolean>(false);
   const [fetchData, setFetchData] = useState<number>(0);
   const [data, setData] = useState<Array<any>>([]);
-  const [productName, setProductName] = useState<any>();
+
   const [categoryId, setCategoryId] = useState<any>();
   const [supplierId, setSupplierId] = useState<any>();
   const [fromPrice, setFromPrice] = useState<any>();
   const [toPrice, setToPrice] = useState<any>("");
+  const [fromDiscount, setFromDiscount] = useState<any>("");
+  const [toDiscount, setToDiscount] = useState<any>("");
+
   const router = useRouter();
 
   //CALL API PRODUCT FILLTER
@@ -38,8 +41,8 @@ function Products({ products, categories, supplier }: Props) {
     categoryId && `categoryId=${categoryId}`,
     fromPrice && `fromPrice=${fromPrice}`,
     toPrice && `toPrice=${toPrice}`,
-    // fromDiscount && `fromDiscount=${fromDiscount}`,
-    // toDiscount && `toDiscount=${toDiscount}`,
+    fromDiscount && `fromDiscount=${fromDiscount}`,
+    toDiscount && `toDiscount=${toDiscount}`,
     // fromStock && `fromStock=${fromStock}`,
     // toStock && `toStock=${toStock}`,
     // skip && `skip=${skip}`,
@@ -94,6 +97,17 @@ function Products({ products, categories, supplier }: Props) {
   };
   const handleFromPrice = (value: any) => {
     setFromPrice(value);
+    setFetchData((pre) => pre + 1);
+  };
+
+  const handleFromDiscount = (value: any) => {
+    console.log(value);
+    setFromDiscount(value);
+    setFetchData((pre) => pre + 1);
+  };
+
+  const handleToDiscount = (value: any) => {
+    setToDiscount(value);
     setFetchData((pre) => pre + 1);
   };
   console.log("data: ", data);
@@ -187,6 +201,21 @@ function Products({ products, categories, supplier }: Props) {
                     onChange={handleToPrice}
                   />
                 </div>
+                <h5>Mức giảm giá</h5>
+                <div className="d-flex">
+                  <InputNumber
+                    placeholder="Enter From"
+                    min={0}
+                    onChange={handleFromDiscount}
+                    style={{ margin: "0 5px" }}
+                  />
+
+                  <InputNumber
+                    placeholder="Enter to"
+                    max={90}
+                    onChange={handleToDiscount}
+                  />
+                </div>
               </Drawer>
             </div>
 
@@ -226,6 +255,21 @@ function Products({ products, categories, supplier }: Props) {
                     placeholder="Enter to"
                     max={1000}
                     onChange={handleToPrice}
+                  />
+                </div>
+                <h5>Mức giảm giá</h5>
+                <div className="d-flex">
+                  <InputNumber
+                    placeholder="Enter From"
+                    min={0}
+                    onChange={handleFromDiscount}
+                    style={{ margin: "0 5px" }}
+                  />
+
+                  <InputNumber
+                    placeholder="Enter to"
+                    max={90}
+                    onChange={handleToDiscount}
                   />
                 </div>
               </Space>

@@ -2,30 +2,40 @@ import React, { useEffect, useState } from "react";
 import { Badge, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input } from "antd";
 import Style from "./Navbar.module.css";
+// import { useRouter } from "next/router";
 import { useRouter } from "next/router";
 import {} from "react-icons/ai";
 import { useAuthStore } from "@/hook/useAuthStore";
+
 import {
-  HomeOutlined,
+  UserAddOutlined,
+  LoginOutlined,
   LogoutOutlined,
   PhoneOutlined,
   ShoppingCartOutlined,
   UserOutlined,
+  BranchesOutlined,
 } from "@ant-design/icons";
 import Link from "next/link";
 import axios from "axios";
-import { useCartStore } from "@/hook/useCountStore";
+import { useCartStore } from "../../hook/useCountStore";
 
 const { Search } = Input;
 type Props = {};
 
 function NavBar({}: Props) {
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
-  const E_URL = `http://localhost:9000/customers/${auth?.payload?._id}`;
-
+  const E_URL = `${URL_ENV}/customers/${auth?.payload?._id}`;
+  //Em config LInk thành như ri hết
   const [user, setUser] = useState<any>();
+  const [current, setCurrent] = useState<any>();
+  const [productName, setProductName] = useState<any>();
+  const [link, setLink] = useState<any>();
 
+  console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
@@ -42,88 +52,16 @@ function NavBar({}: Props) {
   const handleNavigation = (path: any) => {
     router.push(path);
   };
-  const items: MenuProps["items"] = [
-    {
-      label: "Trang sức",
-      key: "Trangsuc",
-      children: [
-        {
-          type: "group",
-          label: "Vàng",
-          children: [
-            {
-              label: "Nhẫn vàng",
-              key: "setting:1",
-            },
-            {
-              label: "Vòng vàng",
-              key: "setting:2",
-            },
-            {
-              label: "Dây chuyền vàng",
-              key: "setting:3",
-            },
-          ],
-        },
-        {
-          type: "group",
-          label: "Bạc",
-          children: [
-            {
-              label: "Nhẫn bạc",
-              key: "setting:4",
-            },
-            {
-              label: "Vòng bạc",
-              key: "setting:5",
-            },
-            {
-              label: "Dây chuyền bạc",
-              key: "setting:6",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "Đồng hồ",
-      key: "app",
-      children: [
-        {
-          type: "group",
-          label: "Vàng",
-          children: [
-            {
-              label: "Đồng hồ vàng",
-              key: "setting:1",
-            },
-          ],
-        },
-        {
-          type: "group",
-          label: "Bạc",
-          children: [
-            {
-              label: "Đồng hồ bạc",
-              key: "setting:2",
-            },
-          ],
-        },
-      ],
-    },
-    {
-      label: "Hot trong tháng",
-      key: "Hot",
-    },
-    {
-      label: "Khuyến mãi",
-      key: "Discount",
-    },
-    {
-      label: "Thương hiệu",
-      key: "Us",
-    },
-  ];
+
+  const onSearch = (value: any) => {
+    console.log("click");
+    axios
+      .get(`http://localhost:9000/products?productName=${value}`)
+      .then((response) => {
+        console.log(response.data.results[0]._id);
+        router.push(`products/${response.data.results[0]._id}`);
+      });
+  };
 
   const itemsAccount = [
     {
@@ -163,19 +101,17 @@ function NavBar({}: Props) {
     <>
       <div>
         <div className={` ${Style.container}`}>
-          <ul className={`nav justify-content-center`}>
+          <ul className={`${Style.listTop}`}>
             <li
               className={Style.listTopItem2}
               onClick={() => {
                 handleNavigation("/phone");
               }}
             >
-              <div className={Style.icon}>
-                <div>
-                  <PhoneOutlined />
-                  <span className={Style.icon}>Điện Thoại</span>
-                </div>
+              <div className="mb-2 ">
+                <PhoneOutlined />
               </div>
+              <div className={Style.items}>Điện Thoại</div>
             </li>
             <li
               className={Style.listTopItem2}
@@ -183,12 +119,10 @@ function NavBar({}: Props) {
                 handleNavigation("/Branch");
               }}
             >
-              <div className={Style.icon}>
-                <div>
-                  <HomeOutlined />
-                  <span className={`style.icon`}>Chi nhánh</span>
-                </div>
+              <div className="mb-2">
+                <BranchesOutlined />
               </div>
+              <span className={Style.items}>Chi nhánh</span>
             </li>
             <li
               className={`${Style.listTopIcon}`}
@@ -198,7 +132,7 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {user && (
+            {auth && (
               <>
                 <li
                   className={Style.listTopItem2}
@@ -237,17 +171,29 @@ function NavBar({}: Props) {
                 </li>
               </>
             )}
-            {user === null && (
+            {auth === null && (
               <>
-                <li className={Style.listTopItem2}>
-                  <Link className="nav-link" href="/login">
-                    Đăng nhập
-                  </Link>
+                <li
+                  className={Style.listTopItem1}
+                  onClick={() => {
+                    handleNavigation("/login");
+                  }}
+                >
+                  <div className="mb-2">
+                    <LoginOutlined />
+                  </div>
+                  <div className={Style.items}>Đăng nhập</div>
                 </li>
-                <li className={Style.listTopItem2}>
-                  <Link className="nav-link" href="/register">
-                    Đăng ký
-                  </Link>
+                <li
+                  className={Style.listTopItem1}
+                  onClick={() => {
+                    handleNavigation("/register");
+                  }}
+                >
+                  <div className="mb-2">
+                    <UserAddOutlined />
+                  </div>
+                  <div className={Style.items}>Đăng ký</div>
                 </li>
               </>
             )}
@@ -255,10 +201,25 @@ function NavBar({}: Props) {
         </div>
 
         <div className={Style.menuAnt}>
-          <Menu style={{ width: "35%" }} mode="horizontal" items={items} />
+          <Menu
+            mode="horizontal"
+            className={Style.length}
+            selectedKeys={[current]}
+          >
+            <Menu.Item
+              key="products"
+              onClick={() => handleNavigation("/products")}
+            >
+              Sản phẩm
+            </Menu.Item>
+            <Menu.Item key="collection">Bộ sưu tập </Menu.Item>
+            <Menu.Item key="brand">Thương hiệu</Menu.Item>
+            <Menu.Item key="contact">Liên hệ</Menu.Item>
+          </Menu>
           <Search
             placeholder="input search text"
-            style={{ margin: "10px", width: 200 }}
+            style={{ margin: "10px 0px", width: 150 }}
+            onSearch={onSearch}
           />
         </div>
       </div>
