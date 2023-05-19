@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const yup = require("yup");
-const { Supplier } = require("../models");
+const { Supplier, Employee } = require("../models");
 const ObjectId = require("mongodb").ObjectId;
 const {
   validateSchema,
@@ -66,18 +66,30 @@ router.get("/", validateSchema(getSuppliersSchema), async (req, res, next) => {
 //Create
 router.post("/", validateSchema(supplierBodySchema), async (req, res, next) => {
   try {
-    const newItem = req.body;
-    let data = new Supplier(newItem);
-    let result = data.save();
-    return res.status(200).json({
-      oke: true,
-      message: "Created successfully!",
-      result: result,
+    const { email, phoneNumber } = req.body;
+
+    const supplierExists = await Supplier.findOne({
+      $or: [{ email }, { phoneNumber }],
     });
+
+    if (supplierExists) {
+      return res
+        .status(400)
+        .send({ oke: false, message: "Email or Phone Number already exists" });
+    } else {
+      const newItem = req.body;
+      const data = new Supplier(newItem);
+      let result = await data.save();
+      return res
+        .status(200)
+        .send({ oke: true, message: "Created succesfully", result: result });
+    }
   } catch (error) {
-    res.status(500).json({ error: error });
+    return res.status(500).json({ error: error.message });
   }
 });
+
+//DELETE
 router.delete(
   "/:id",
   validateSchema(supplierIdSchema),

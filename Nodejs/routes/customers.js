@@ -151,7 +151,9 @@ router.post("/", validateSchema(customerBodySchema), async (req, res, next) => {
   try {
     const { email, phoneNumber } = req.body;
 
-    const customerExists = await Customer.findOne({ email, phoneNumber });
+    const customerExists = await Customer.findOne({
+      $or: [{ email }, { phoneNumber }],
+    });
 
     if (customerExists) {
       return res

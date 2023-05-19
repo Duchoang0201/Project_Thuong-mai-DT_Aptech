@@ -39,6 +39,7 @@ const Information = (props: Props) => {
     console.log(key);
   };
   const { auth } = useAuthStore((state: any) => state);
+  const { login } = useAuthStore((state: any) => state);
 
   const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
   const E_URL = `${URL_ENV}/employees/${auth.payload._id}`;
@@ -60,7 +61,6 @@ const Information = (props: Props) => {
     axios
       .patch(`${URL_ENV}/employees/${auth.payload._id}`, confirmData)
       .then((res) => {
-        console.log(res);
         setRefresh((f) => f + 1);
         message.success("Update a data successFully!!", 1.5);
       })

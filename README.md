@@ -12,7 +12,7 @@ Thành viên nhóm 2:
 
 ///WEB_REATJS_ADMIN:
 
-    https://online-web-serveronline.netlify.app/
+    https://online-web-serveronline.netlify.app
 
 // MOMO CHECK ACCOUNT:
 

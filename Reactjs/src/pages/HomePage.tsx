@@ -3,6 +3,7 @@ import io from "socket.io-client";
 import DBinformation from "../components/Dashboad/YearInformation";
 import DBinformation2 from "../components/Dashboad/GeneralInformation";
 import DBinformation3 from "../components/Dashboad/Numberofgoods";
+import Address from "../components/Dashboad/GoogleMap";
 
 const HomePage = () => {
   const socket = useRef<any>();
@@ -19,6 +20,7 @@ const HomePage = () => {
       <DBinformation />
       <DBinformation2 />
       <DBinformation3 />
+      <Address />
     </div>
   );
 };

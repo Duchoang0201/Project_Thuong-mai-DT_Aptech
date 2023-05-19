@@ -24,10 +24,13 @@ import SearchOrdersByStatus from "./pages/Order/SearchOrdersByStatus";
 import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 import SlidesCRUD from "./pages/Management/SlideCRUD";
 import FeaturesCRUD from "./pages/Management/FeaturesCRUD";
+import axios from "axios";
 numeral.locale("vi");
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   useEffect(() => {
@@ -46,9 +49,14 @@ const App: React.FC = () => {
   }, []); // Empty dependency array ensures that the effect runs only once
 
   const { auth } = useAuthStore((state: any) => state);
+  const [user, setUser] = useState<any>();
 
+  useEffect(() => {
+    axios.get(`${URL_ENV}/employees/${auth.payload._id}`).then((res) => {
+      setUser(res.data.result);
+    });
+  }, [URL_ENV, auth]);
   const socket = useRef<any>();
-  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
   useEffect(() => {
     socket.current = io(URL_ENV);
@@ -133,12 +141,15 @@ const App: React.FC = () => {
                         }}
                       />
                     </div>
-                    <div className="MID d-flex flex-row justify-content-between">
-                      <h1 style={{ color: "black" }}> ONLINE SHOP </h1>
+                    <div>
+                      <h1 className="py-2" style={{ color: "black" }}>
+                        {" "}
+                        MANAGEMENT
+                      </h1>
                     </div>
                     <div className="RIGHT " style={{ width: "110px" }}>
                       <strong>
-                        {/* {user?.firstName} {user?.lastName} */}
+                        {user?.firstName} {user?.lastName}
                       </strong>
                     </div>
                   </div>

@@ -731,6 +731,16 @@ router.get("/23", function (req, res, next) {
 
     Order.aggregate()
       .unwind("orderDetails")
+      .lookup({
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "product",
+      })
+      .addFields({
+        "orderDetails.price": { $arrayElemAt: ["$product.price", 0] },
+        "orderDetails.discount": { $arrayElemAt: ["$product.discount", 0] },
+      })
       .addFields({
         originalPrice: {
           $divide: [
@@ -749,12 +759,9 @@ router.get("/23", function (req, res, next) {
           $sum: { $multiply: ["$originalPrice", "$orderDetails.quantity"] },
         },
       })
-      // .group({
-      //   _id: "$_id",
-      //   total_sales: {
-      //     $sum: "$totalPay",
-      //   },
-      // })
+      .project({
+        product: 0,
+      })
       .then((result) => {
         res.send({
           result: result,
@@ -762,11 +769,116 @@ router.get("/23", function (req, res, next) {
             .map((item) => item.totalPay)
             .reduce((total, current) => total + current, 0),
         });
-      })
-      .catch((err) => {
-        res.status(400).send({ message: err.message });
       });
   } catch (err) {
+    res.sendStatus(500);
+  }
+});
+
+router.get("/23b", function (req, res, next) {
+  try {
+    Order.aggregate([
+      {
+        $match: {
+          createdDate: {
+            $gte: new Date("2023-01-01"),
+            $lt: new Date("2024-01-01"),
+          },
+        },
+      },
+      {
+        $unwind: "$orderDetails",
+      },
+      {
+        $lookup: {
+          from: "products",
+          localField: "orderDetails.productId",
+          foreignField: "_id",
+          as: "product",
+        },
+      },
+      {
+        $addFields: {
+          "orderDetails.price": { $arrayElemAt: ["$product.price", 0] },
+          "orderDetails.discount": { $arrayElemAt: ["$product.discount", 0] },
+        },
+      },
+      {
+        $addFields: {
+          originalPrice: {
+            $divide: [
+              {
+                $multiply: [
+                  "$orderDetails.price",
+                  { $subtract: [100, "$orderDetails.discount"] },
+                ],
+              },
+              100,
+            ],
+          },
+        },
+      },
+      {
+        $addFields: {
+          totalPay: {
+            $multiply: ["$originalPrice", "$orderDetails.quantity"],
+          },
+          month: {
+            $dateToString: {
+              format: "%m",
+              date: { $toDate: "$createdDate" },
+            },
+          },
+        },
+      },
+      {
+        $group: {
+          _id: "$month",
+          orders: {
+            $push: {
+              orderId: "$_id",
+              customerId: "$customerId",
+              createdDate: "$createdDate",
+              orderDetails: "$orderDetails",
+              originalPrice: "$originalPrice",
+              totalPay: "$totalPay",
+            },
+          },
+          revenue: {
+            $sum: "$totalPay",
+          },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          month: { $toInt: "$_id" },
+          orders: 1,
+          revenue: 1,
+        },
+      },
+      {
+        $sort: {
+          month: 1,
+        },
+      },
+    ])
+      .then((result) => {
+        const orderList = [];
+        for (let i = 1; i <= 12; i++) {
+          const monthData = result.find((item) => item.month === i);
+          orderList.push(
+            monthData ? monthData : { month: i, orders: [], revenue: 0 }
+          );
+        }
+        res.send(orderList);
+      })
+      .catch((error) => {
+        console.error(error);
+        res.sendStatus(500);
+      });
+  } catch (err) {
+    console.error(err);
     res.sendStatus(500);
   }
 });
@@ -804,16 +916,6 @@ router.get("/24", function (req, res, next) {
           ],
         },
       })
-      // .group({
-      //   _id: "$_id",
-      //   paymentType: { $first: "$paymentType" },
-      //   status: { $first: "$status" },
-      //   customerId: { $first: "$customerId" },
-      //   employeeId: { $first: "$employeeId" },
-      //   createdDate: { $first: "$createdDate" },
-      //   employee: { $first: "$employee" },
-      //   orderDetails: { $push: "$orderDetails" },
-      // })
       .group({
         _id: "$employee._id",
         firstName: { $first: "$employee.firstName" },
@@ -1075,6 +1177,71 @@ router.get("/27", function (req, res, next) {
       })
       .catch((err) => {
         res.status(400).send({ message: err.message });
+      });
+  } catch (err) {
+    res.sendStatus(500);
+  }
+});
+router.get("/27b", function (req, res, next) {
+  try {
+    Order.aggregate()
+      .unwind("orderDetails")
+      .lookup({
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "product",
+      })
+      .addFields({
+        "orderDetails.price": { $arrayElemAt: ["$product.price", 0] },
+        "orderDetails.discount": { $arrayElemAt: ["$product.discount", 0] },
+      })
+      .addFields({
+        originalPrice: {
+          $divide: [
+            {
+              $multiply: [
+                "$orderDetails.price",
+                { $subtract: [100, "$orderDetails.discount"] },
+              ],
+            },
+            100,
+          ],
+        },
+      })
+      .addFields({
+        totalPay: {
+          $sum: { $multiply: ["$originalPrice", "$orderDetails.quantity"] },
+        },
+      })
+      .lookup({
+        from: "employees",
+        localField: "employeeId",
+        foreignField: "_id",
+        as: "employee",
+      })
+      .addFields({
+        firstName: { $arrayElemAt: ["$employee.firstName", 0] },
+        lastName: { $arrayElemAt: ["$employee.lastName", 0] },
+      })
+      .addFields({
+        month: {
+          $dateToString: {
+            format: "%m",
+            date: { $toDate: "$createdDate" },
+          },
+        },
+      })
+      .group({
+        _id: "$employeeId",
+        firstName: { $first: "$firstName" },
+        lastName: { $first: "$lastName" },
+        month: { $first: "$month" },
+        orders: { $push: "$$ROOT" },
+        total: { $sum: "$totalPay" },
+      })
+      .then((result) => {
+        res.send(result);
       });
   } catch (err) {
     res.sendStatus(500);

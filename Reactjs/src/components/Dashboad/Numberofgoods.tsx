@@ -95,6 +95,7 @@ const Numberofgoods = (props: Props) => {
         <Row>
           <Col xs={24} xl={12}>
             <Card
+              type="inner"
               style={{ width: "90%" }}
               title={"Số lượng hàng hóa trên mỗi danh mục"}
               bordered={false}
@@ -104,6 +105,7 @@ const Numberofgoods = (props: Props) => {
           </Col>
           <Col xs={24} xl={12}>
             <Card
+              type="inner"
               style={{ width: "90%" }}
               title={"Số lượng hàng hóa trên mỗi nhà cung cấp"}
             >
