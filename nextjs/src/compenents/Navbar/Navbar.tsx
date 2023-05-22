@@ -1,12 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Badge, Dropdown, Space } from "antd";
-import { Menu, Input } from "antd";
+import axios from "axios";
+import React, { useEffect, useState, useCallback } from "react";
+import { Badge, Dropdown, MenuProps, Space } from "antd";
+import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
-// import { useRouter } from "next/router";
+import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import { useRouter } from "next/router";
-import {} from "react-icons/ai";
 import { useAuthStore } from "@/hook/useAuthStore";
-import Image from "next/image";
 
 import {
   UserAddOutlined,
@@ -17,30 +16,36 @@ import {
   UserOutlined,
   BranchesOutlined,
 } from "@ant-design/icons";
-import Link from "next/link";
-import axios from "axios";
+import Image from "next/image";
 import { useCartStore } from "../../hook/useCountStore";
 
 const { Search } = Input;
 type Props = {};
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 function NavBar({}: Props) {
-  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-
-  const [refresh, setRefresh] = useState<any>();
-
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
-
-  console.log("««««« itemsCart »»»»»", itemsCart);
-
   const E_URL = `${URL_ENV}/customers/${auth?.payload?._id}`;
+
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
+  const [findProduct, setFindProduct] = useState<Array<any>>([]);
+  const [fresh, setFresh] = useState<number>(0);
 
+  console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
+
+  useEffect(() => {
+    axios
+      .get(`${URL_ENV}/products`)
+      .then((res) => {
+        setFindProduct(res.data.results);
+      })
+      .catch((err) => console.log(err));
+  }, [fresh]);
 
   useEffect(() => {
     axios
@@ -49,20 +54,33 @@ function NavBar({}: Props) {
         setUser(res.data.result);
       })
       .catch((err) => console.log(err));
-  }, [E_URL, auth]);
-
-  useEffect(() => {
-    setUser(null);
-  }, [refresh]);
+  }, [E_URL]);
 
   const handleNavigation = (path: any) => {
+    // router.reload();
     router.push(path);
   };
 
-  const onSearch = (value: any) => {
-    axios.get(`${URL_ENV}/products?productName=${value}`).then((response) => {
-      router.push(`products/${response.data.results[0]._id}`);
+  const onSearch = async (value: any) => {
+    console.log("value: ", value);
+    const data = await axios
+      .get(`${URL_ENV}/products?productName=${value}`)
+      .then((response) => {
+        return response.data.results;
+      });
+
+    if (typeof value !== "undefined") {
+      setFindProduct(data);
+      router.push(`/products/${value}`);
+      setFresh((pre) => pre + 1);
+    }
+  };
+
+  const hanldeClear = async () => {
+    const data = await axios.get(`${URL_ENV}/products`).then((response) => {
+      return response.data.results;
     });
+    setFindProduct(data);
   };
   const itemsCartList = itemsCart?.map((item: any) => ({
     key: item?.product?._id,
@@ -100,7 +118,6 @@ function NavBar({}: Props) {
         <div
           onClick={() => {
             logout();
-            setRefresh((f: any) => f + 1);
             router.push("/");
           }}
         >
@@ -116,14 +133,7 @@ function NavBar({}: Props) {
   return (
     <>
       <div>
-        <div
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(27,57,99,1) 19%, rgba(157,164,167,1) 51%, rgba(27,57,99,1) 78%)",
-          }}
-          // className={` ${Style.container}`}
-          className="text-white"
-        >
+        <div className={` ${Style.container}`}>
           <ul className={`${Style.listTop}`}>
             <li
               className={Style.listTopItem2}
@@ -155,15 +165,15 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {user ? (
+            {auth && (
               <>
                 <li
-                  className={Style.listTopItem2}
+                  className={Style.listTopItem1}
                   onClick={() => {
                     handleNavigation("/cart");
                   }}
                 >
-                  <div className={Style.icon}>
+                  <div className={`${Style.icon}`}>
                     <Dropdown
                       overlay={
                         <Menu>
@@ -176,34 +186,42 @@ function NavBar({}: Props) {
                       <Badge className="" count={itemsCart.length}>
                         <ShoppingCartOutlined
                           style={{ fontSize: 20, cursor: "pointer" }}
-                        />
+                        />{" "}
+                        <span style={{ fontSize: 20 }} className={Style.items}>
+                          Giỏ hàng
+                        </span>
                       </Badge>
                     </Dropdown>
                   </div>
                 </li>
-                <li className={Style.listTopItem2}>
+                <li className={Style.listTopItem1}>
                   {" "}
                   <div className={Style.icon}>
                     {" "}
                     <Dropdown
                       overlay={
                         <Menu>
-                          {itemsAccount.map((item, index) => (
-                            <Menu.Item key={index}>{item.label}</Menu.Item>
+                          {itemsAccount.map((item) => (
+                            <Menu.Item key={item.key}>{item.label}</Menu.Item>
                           ))}
                         </Menu>
                       }
+                      className="d-flex"
                     >
                       <Badge>
                         <UserOutlined
                           style={{ fontSize: 20, cursor: "pointer" }}
                         />
+                        <span style={{ fontSize: 20 }} className={Style.items}>
+                          Cá nhân
+                        </span>
                       </Badge>
                     </Dropdown>
                   </div>
                 </li>
               </>
-            ) : (
+            )}
+            {auth === null && (
               <>
                 <li
                   className={Style.listTopItem1}
@@ -232,10 +250,10 @@ function NavBar({}: Props) {
           </ul>
         </div>
 
-        <div className={`${Style.menuAnt}`}>
+        <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
-            className={`${Style.length} `}
+            className={Style.length}
             selectedKeys={[current]}
           >
             <Menu.Item
@@ -248,10 +266,23 @@ function NavBar({}: Props) {
             <Menu.Item key="brand">Thương hiệu</Menu.Item>
             <Menu.Item key="contact">Liên hệ</Menu.Item>
           </Menu>
-          <Search
-            placeholder="Tìm kiếm sản phẩm"
-            style={{ margin: "10px 0px", width: 150 }}
-            onSearch={onSearch}
+
+          <Select
+            allowClear
+            style={{ width: "125px", marginTop: "5px" }}
+            placeholder="Search"
+            optionFilterProp="children"
+            onChange={onSearch}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={findProduct.map((item: any, index: any) => {
+              return {
+                label: `${item.name}`,
+                value: item._id,
+              };
+            })}
           />
         </div>
       </div>

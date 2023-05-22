@@ -438,6 +438,7 @@ router.get("/18", async (req, res, next) => {
             {
               $match: {
                 $expr: { $eq: ["$$id", "$categoryId"] },
+                active: true, // Add the condition here
               },
             },
           ],
@@ -448,13 +449,8 @@ router.get("/18", async (req, res, next) => {
         $addFields: { numberOfProducts: { $sum: "$products.stock" } },
       },
     ];
+
     Category.aggregate(aggregate)
-      // .group({
-      //   _id: "$_id",
-      //   name: "$name",
-      //   description: "$description",
-      //   numberOfProducts: "$numberOfProducts",
-      // })
       .project({
         _id: 1,
         name: 1,
@@ -483,6 +479,7 @@ router.get("/19", async (req, res, next) => {
             {
               $match: {
                 $expr: { $eq: ["$$id", "$supplierId"] },
+                active: true, // Add the condition here
               },
             },
           ],

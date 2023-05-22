@@ -1,8 +1,8 @@
 import React, { useEffect, useRef } from "react";
 import io from "socket.io-client";
-import DBinformation from "../components/Dashboad/YearInformation";
-import DBinformation2 from "../components/Dashboad/GeneralInformation";
-import DBinformation3 from "../components/Dashboad/Numberofgoods";
+import YearInformation from "../components/Dashboad/YearInformation";
+import GeneralInformation from "../components/Dashboad/GeneralInformation";
+import Numberofgoods from "../components/Dashboad/Numberofgoods";
 import Address from "../components/Dashboad/GoogleMap";
 
 const HomePage = () => {
@@ -16,9 +16,9 @@ const HomePage = () => {
 
   return (
     <div style={{ height: "auto", width: "auto" }}>
-      <DBinformation />
-      <DBinformation2 />
-      <DBinformation3 />
+      <YearInformation />
+      <GeneralInformation />
+      <Numberofgoods />
       <Address />
     </div>
   );

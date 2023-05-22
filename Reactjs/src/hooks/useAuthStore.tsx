@@ -19,13 +19,10 @@ export const useAuthStore = create(
           auth: null,
           login: async ({ email, password }: isLogin) => {
             try {
-              const response = await axios.post(
-                `${URL_ENV}http://localhost:9000/employees/login`,
-                {
-                  email: email,
-                  password: password,
-                }
-              );
+              const response = await axios.post(`${URL_ENV}/employees/login`, {
+                email: email,
+                password: password,
+              });
               loginData = response.data; // Store the response data
 
               set({ auth: response.data }, false, {

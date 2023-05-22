@@ -1,4 +1,3 @@
-import React from "react";
 import {
   CommentOutlined,
   EllipsisOutlined,
@@ -12,10 +11,11 @@ import {
 import { Menu } from "antd";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../hooks/useAuthStore";
+import { useBreadcrumb } from "../hooks/useBreadcrumb";
 
 const MainMenu = () => {
   const { auth } = useAuthStore((state: any) => state);
-
+  const { addBread } = useBreadcrumb((state: any) => state);
   const items = [
     {
       label: "Dashboard",
@@ -118,6 +118,8 @@ const MainMenu = () => {
 
   //   const [current, setCurrent] = useState("category");
   const onMenuClick = (value: any) => {
+    console.log("««««« value »»»»»", value);
+    addBread(value.key);
     if (value.key === "account/logout") {
       logout();
       navigate("/");

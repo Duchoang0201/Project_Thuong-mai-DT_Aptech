@@ -117,7 +117,7 @@ const Messages: React.FC<any> = () => {
       } catch (err) {}
     };
     getAllUsers();
-  }, [auth.payload._id]);
+  }, [URL_ENV, auth.payload._id]);
 
   //Get conversation
   useEffect(() => {
