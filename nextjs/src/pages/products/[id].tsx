@@ -23,7 +23,10 @@ type Props = {
   allProduct: any;
 };
 
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
 export default function ProductDetails({ product, allProduct }: Props) {
+  // console.log("product tim thay: ", product);
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
   // const [rating, setRating] = useState<number>();
@@ -54,44 +57,14 @@ export default function ProductDetails({ product, allProduct }: Props) {
             >
               <div>
                 <Image
-                  src={`http://localhost:9000/${product.imageUrl}`}
+                  src={`${URL_ENV}/${product.imageUrl}`}
                   alt="Description of the image"
                   width={200}
                   height={200}
                   className="w-100 img-fluid"
                 ></Image>
               </div>
-              {/* <div className="d-flex flex-row ">
-                {product?.images?.map((items: any) => {
-                  return (
-                    <>
-                      <div className="pt-3 m-1">
-                        <Image
-                          src={`http://localhost:9000/${items}`}
-                          alt="Description of the image"
-                          onClick={() => handleImageClick(items)}
-                          width={100}
-                          height={100}
-                          className="w-100 h-75 border border-dark"
-                        ></Image>
-                        <Modal
-                          visible={visible}
-                          onCancel={handleModalClose}
-                          footer={null}
-                        >
-                          <Image
-                            src={`http://localhost:9000/${picture}`}
-                            alt="Image"
-                            width={500}
-                            height={500}
-                            style={{ width: "100%" }}
-                          />
-                        </Modal>
-                      </div>
-                    </>
-                  );
-                })}
-              </div> */}
+
               <div
                 className="d-flex flex-row  mt-2"
                 style={{ width: "200px", height: "100px" }}
@@ -110,7 +83,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                         <>
                           <SwiperSlide className="m-3 w-25">
                             <Image
-                              src={`http://localhost:9000/${items}`}
+                              src={`${URL_ENV}/${items}`}
                               alt="Description of the image"
                               width={80}
                               height={80}
@@ -124,7 +97,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                               footer={null}
                             >
                               <Image
-                                src={`http://localhost:9000/${picture}`}
+                                src={`${URL_ENV}/${picture}`}
                                 alt="Image"
                                 width={500}
                                 height={500}
@@ -144,7 +117,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 {" "}
                 <Rate allowHalf defaultValue={product.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product.rateInfor.length})
+                  ({product?.rateInfor?.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
@@ -221,7 +194,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                   >
                     <div className="">
                       <Image
-                        src={`http://localhost:9000/${items.imageUrl}`}
+                        src={`${URL_ENV}/${items.imageUrl}`}
                         alt="Description of the image"
                         width={200}
                         height={200}
@@ -265,7 +238,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                     <>
                       <SwiperSlide className="m-3 w-25">
                         <Image
-                          src={`http://localhost:9000/${items.imageUrl}`}
+                          src={`${URL_ENV}/${items.imageUrl}`}
                           alt="Description of the image"
                           width={200}
                           height={200}
@@ -300,14 +273,14 @@ export async function getStaticPaths() {
       return response.data;
     });
 
-  console.log(products);
+  // console.log(products);
 
   const paths = products?.results?.map((items: any) => ({
     params: { id: `${items._id}` },
   }));
 
   // { fallback: false } means other routes should 404
-  console.log("listpaths:", paths);
+  // console.log("listpaths:", paths);
   return { paths, fallback: false };
 }
 
@@ -316,15 +289,14 @@ export async function getStaticProps({ params }: any) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
   const product = await axios
-    .get(`http://localhost:9000/products/${params.id}`)
+    .get(`${URL_ENV}/products/${params.id}`)
     .then((response) => {
       return response.data;
     });
-  const allProduct = await axios
-    .get("http://localhost:9000/products")
-    .then((response) => {
-      return response.data;
-    });
+
+  const allProduct = await axios.get(`${URL_ENV}/products`).then((response) => {
+    return response.data;
+  });
 
   // Pass post data to the page via props
   return { props: { product: product, allProduct: allProduct } };

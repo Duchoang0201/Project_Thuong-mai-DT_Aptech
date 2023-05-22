@@ -8,8 +8,6 @@ export default function CreateOrder() {
 
   const router = useRouter();
 
-  console.log("««««« items »»»»»", items);
-
   const handleCheckout = () => {
     if (items.length > 0) {
       router.push("/checkout");

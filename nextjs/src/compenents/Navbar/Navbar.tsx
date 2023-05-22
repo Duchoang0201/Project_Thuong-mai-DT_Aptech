@@ -33,7 +33,6 @@ function NavBar({}: Props) {
   const [findProduct, setFindProduct] = useState<Array<any>>([]);
   const [fresh, setFresh] = useState<number>(0);
 
-  console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
@@ -165,7 +164,7 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {auth && (
+            {user && (
               <>
                 <li
                   className={Style.listTopItem1}
@@ -201,9 +200,10 @@ function NavBar({}: Props) {
                     <Dropdown
                       overlay={
                         <Menu>
-                          {itemsAccount.map((item) => (
-                            <Menu.Item key={item.key}>{item.label}</Menu.Item>
-                          ))}
+                          {itemsAccount.length > 0 &&
+                            itemsAccount.map((item) => (
+                              <Menu.Item key={item.key}>{item.label}</Menu.Item>
+                            ))}
                         </Menu>
                       }
                       className="d-flex"
@@ -221,7 +221,7 @@ function NavBar({}: Props) {
                 </li>
               </>
             )}
-            {auth === null && (
+            {user === null && (
               <>
                 <li
                   className={Style.listTopItem1}
