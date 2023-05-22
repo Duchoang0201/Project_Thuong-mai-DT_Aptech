@@ -1,12 +1,12 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { Badge, Dropdown, MenuProps, Space } from "antd";
-import { Menu, Input } from "antd";
+import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
-// import { useRouter } from "next/router";
+import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import { useRouter } from "next/router";
-import {} from "react-icons/ai";
 import { useAuthStore } from "@/hook/useAuthStore";
-
+import findItems from "../../pages/products/findItems";
 import {
   UserAddOutlined,
   LoginOutlined,
@@ -16,29 +16,33 @@ import {
   UserOutlined,
   BranchesOutlined,
 } from "@ant-design/icons";
-import Link from "next/link";
-import axios from "axios";
+
 import { useCartStore } from "../../hook/useCountStore";
 
 const { Search } = Input;
-type Props = {};
+type Props = {
+  productsItems: any;
+};
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+const API_URL_Product = `${URL_ENV}/products`;
 
-function NavBar({}: Props) {
-  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-
+function NavBar({ productsItems }: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
   const E_URL = `${URL_ENV}/customers/${auth?.payload?._id}`;
-  //Em config LInk thành như ri hết
+
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
-  const [productName, setProductName] = useState<any>();
-  const [link, setLink] = useState<any>();
+  const [option, setOption] = useState<Array<any>>([]);
+
+  const [items, setItems] = useState<Array<any>>([]);
 
   console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
+  const addData = findItems((state) => state.addData);
+  const curdata = findItems((state) => state.data);
 
   useEffect(() => {
     axios
@@ -50,18 +54,22 @@ function NavBar({}: Props) {
   }, [E_URL]);
 
   const handleNavigation = (path: any) => {
+    // router.reload();
     router.push(path);
   };
 
-  const onSearch = (value: any) => {
+  const onSearch = async (value: any) => {
     console.log("click");
-    axios
+    const data = await axios
       .get(`http://localhost:9000/products?productName=${value}`)
       .then((response) => {
-        console.log(response.data.results[0]._id);
-        router.push(`products/${response.data.results[0]._id}`);
+        return response.data.results;
       });
+
+    addData(data);
+    console.log(curdata);
   };
+  console.log(option);
 
   const itemsAccount = [
     {

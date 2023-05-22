@@ -10,15 +10,18 @@ import Style from "./product.module.css";
 
 import { MoreOutlined } from "@ant-design/icons";
 import { Select, Space, Button, Drawer, InputNumber, Form } from "antd";
+import findItems from "./findItems";
 
 type Props = {
   products: any;
   categories: any;
   supplier: any;
 };
-const API_URL_Product = "http://localhost:9000/products";
-const API_URL_Categories = "http://localhost:9000/categories";
-const API_URL_Supplier = "http://localhost:9000/suppliers";
+
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+const API_URL_Product = `${URL_ENV}/products`;
+const API_URL_Categories = `${URL_ENV}/categories`;
+const API_URL_Supplier = `${URL_ENV}/suppliers`;
 
 function Products({ products, categories, supplier }: Props) {
   const [open, setOpen] = useState<boolean>(false);
@@ -31,6 +34,9 @@ function Products({ products, categories, supplier }: Props) {
   const [toPrice, setToPrice] = useState<any>("");
   const [fromDiscount, setFromDiscount] = useState<any>("");
   const [toDiscount, setToDiscount] = useState<any>("");
+
+  const dataFind = findItems((state) => state.data);
+  console.log("data Find: ", dataFind);
 
   const router = useRouter();
 
@@ -65,7 +71,7 @@ function Products({ products, categories, supplier }: Props) {
 
   useEffect(() => {
     axios.get(`${API_URL_Product}?${queryParams}`).then((respones: any) => {
-      console.log(respones.data.results);
+      // console.log(respones.data.results);
       setData(respones.data.results);
     });
   }, [fetchData]);
@@ -101,7 +107,7 @@ function Products({ products, categories, supplier }: Props) {
   };
 
   const handleFromDiscount = (value: any) => {
-    console.log(value);
+    // console.log(value);
     setFromDiscount(value);
     setFetchData((pre) => pre + 1);
   };
@@ -110,7 +116,7 @@ function Products({ products, categories, supplier }: Props) {
     setToDiscount(value);
     setFetchData((pre) => pre + 1);
   };
-  console.log("data: ", data);
+  // console.log("data: ", data);
   return (
     <>
       {/* ////////////////////////////////////// */}
@@ -126,7 +132,7 @@ function Products({ products, categories, supplier }: Props) {
                         <div key={index2} className={` ${Style.items}`}>
                           <div>
                             <Image
-                              src={`http://localhost:9000/${items2.imageUrl}`}
+                              src={`${URL_ENV}/${items2.imageUrl}`}
                               alt="Description of the image"
                               width={200}
                               height={200}

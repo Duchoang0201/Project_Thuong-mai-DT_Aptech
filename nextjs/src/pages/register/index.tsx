@@ -37,6 +37,8 @@ const normFile = (e: any) => {
   return e?.fileList;
 };
 
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
 type customertype = {
   firstname: string;
   lastname: string;
@@ -52,7 +54,7 @@ function Register({}: customertype) {
   const [file, setFile] = useState<any>(null);
   const { login } = useAuthStore((state: any) => state);
 
-  const API_URL = "http://localhost:9000/customers";
+  const API_URL = `${URL_ENV}/customers`;
   const [registerForm] = Form.useForm();
 
   const handleCreate = (value: any) => {
@@ -70,7 +72,7 @@ function Register({}: customertype) {
         const formData = new FormData();
         formData.append("file", file);
         axios
-          .post(`http://localhost:9000/upload/customers/${_id}/image`, formData)
+          .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
           .then((response) => {
             login({ email, password });
           })
@@ -107,37 +109,35 @@ function Register({}: customertype) {
                 >
                   <div className="row ">
                     <Form.Item
-                      label="name"
-                      name="name"
-                      style={{ marginBottom: 0, width: "100%" }}
+                      label="first name"
+                      name="firstName"
                       hasFeedback
-                      rules={[{ required: true, message: "Enter password" }]}
+                      rules={[{ required: true, message: "Enter first name" }]}
+                      style={{
+                        width: "calc(100% - 0px)",
+                      }}
                     >
-                      <Form.Item
-                        name="firstName"
-                        hasFeedback
-                        rules={[{ required: true, message: "Enter password" }]}
-                        style={{
-                          display: "inline-block",
-                          width: "calc(50% - 8px)",
-                        }}
-                      >
-                        <Input placeholder="First name" />
-                      </Form.Item>
-                      <Form.Item
-                        name="LastName"
-                        hasFeedback
-                        rules={[{ required: true, message: "Enter password" }]}
-                        style={{
-                          display: "inline-block",
-                          width: "calc(50% - 8px)",
-                          margin: "0 8px",
-                        }}
-                      >
-                        <Input placeholder="Last name" />
-                      </Form.Item>
+                      <Input placeholder="First name" />
+                    </Form.Item>
+                    <Form.Item
+                      name="LastName"
+                      label="Last name"
+                      hasFeedback
+                      rules={[{ required: true, message: "Enter last name" }]}
+                    >
+                      <Input placeholder="Last name" />
                     </Form.Item>
 
+                    <Form.Item
+                      hasFeedback
+                      label="Email"
+                      name="email"
+                      rules={[
+                        { required: true, message: "Please enter your email" },
+                      ]}
+                    >
+                      <Input />
+                    </Form.Item>
                     <Form.Item
                       hasFeedback
                       label="Password"
@@ -148,16 +148,6 @@ function Register({}: customertype) {
 
                           message: "Enter password",
                         },
-                      ]}
-                    >
-                      <Input />
-                    </Form.Item>
-                    <Form.Item
-                      hasFeedback
-                      label="Email"
-                      name="email"
-                      rules={[
-                        { required: true, message: "Please enter your email" },
                       ]}
                     >
                       <Input />

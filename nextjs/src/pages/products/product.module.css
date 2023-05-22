@@ -10,6 +10,10 @@
     height: 300px;
    
 }
+.items:hover{
+    cursor: pointer;
+    border: 1px solid lightblue;
+}
 .splitRow{
     display: none;
 }

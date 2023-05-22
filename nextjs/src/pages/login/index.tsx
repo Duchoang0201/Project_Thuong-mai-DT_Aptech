@@ -1,6 +1,15 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { Button, Checkbox, Form, Input, Typography, message } from "antd";
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  Typography,
+  message,
+  Select,
+} from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import style from "./index.module.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
 import { useAuthStore } from "@/hook/useAuthStore";
@@ -31,9 +40,8 @@ const Login = () => {
       </div>
       <div>
         <Form
-          className={`${style.form__border}`}
           name="basic"
-          labelCol={{ span: 8 }}
+          className={` login-form ${style.form__border}`}
           initialValues={{ remember: true }}
           onFinish={onLogin}
           onFinishFailed={(errorInfo: any) => {
@@ -41,9 +49,6 @@ const Login = () => {
           }}
           autoComplete="off"
         >
-          <Typography.Title className="text-center">
-            Login Form
-          </Typography.Title>
           <Form.Item
             label="Email"
             name="email"
@@ -52,31 +57,48 @@ const Login = () => {
               { required: true, message: "Please input your username!" },
             ]}
           >
-            <Input />
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Username"
+            />
           </Form.Item>
-
           <Form.Item
             label="Password"
             name="password"
             rules={[{ required: true, message: "Please input your password!" }]}
           >
-            <Input.Password />
+            <Input
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              placeholder="Password"
+            />
           </Form.Item>
+          {/* <Form.Item>
+            <Form.Item name="remember" valuePropName="checked" noStyle>
+              <Checkbox>Remember me</Checkbox>
+            </Form.Item>
 
-          <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          </Form.Item>
+            <a className="login-form-forgot" href="">
+              Forgot password
+            </a>
+          </Form.Item> */}
+
           <Form.Item>
-            <span className="ms-5">
-              Chưa có tài khoản?{" "}
-              <span className={style.link} onClick={handleRegister}>
-                Đăng ký
-              </span>
-            </span>
+            <Button
+              style={{ width: "100%" }}
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+            >
+              Log in
+            </Button>
+            Or{" "}
+            <a href="" onClick={handleRegister}>
+              register now!
+            </a>
           </Form.Item>
         </Form>
+        {/* //////////////////////// */}
       </div>
     </div>
   );
