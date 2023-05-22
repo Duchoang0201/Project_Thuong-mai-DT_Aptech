@@ -73,7 +73,7 @@ function Products({ products, categories, supplier }: Props) {
   }, [fetchData, queryParams]);
 
   ///RESPONSIVE
-  const [windowWidth, setWindowWidth] = useState<any>(0);
+  const [windowWidth, setWindowWidth] = useState<any>(1800);
 
   useEffect(() => {
     const handleResize = () => {
@@ -147,13 +147,20 @@ function Products({ products, categories, supplier }: Props) {
       {/* ////////////////////////////////////// */}
       <Row className="">
         {windowWidth < 800 && (
-          <FloatButton
-            icon={<QuestionCircleOutlined />}
-            onClick={() => {
-              setOpen(true);
-            }}
-            type="primary"
-          />
+          <div className="scrollable-container">
+            <div className="background">
+              <Affix>
+                <Button
+                  onClick={() => {
+                    setOpen(true);
+                  }}
+                  type="primary"
+                >
+                  Bộ lọc
+                </Button>
+              </Affix>
+            </div>
+          </div>
         )}
         <Col span={12} push={4}>
           <div>

@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useAuthStore } from "../../../../hook/useAuthStore";
 import { useCartStore } from "../../../../hook/useCountStore";
 import axios from "axios";
-import { message, Dropdown, Menu, Button } from "antd";
+import { message, Dropdown, Menu, Button, Divider } from "antd";
+import Image from "next/image";
 
 export default function Carts() {
   const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
@@ -31,14 +32,16 @@ export default function Carts() {
   return (
     <>
       <div className="container">
+        <Divider>Giỏ hàng của bạn</Divider>
         {getUser && (
           <table className="table">
             <thead>
               <tr>
                 <th>STT</th>
+                <th>Hình minh họa </th>
                 <th>Tên sản phẩm</th>
                 <th className="text-end">Đơn giá</th>
-                <th className="text-end">Số lượng</th>
+                <th className="text-center">Số lượng</th>
                 <th className="text-center"> Chức năng</th>
               </tr>
             </thead>
@@ -47,26 +50,43 @@ export default function Carts() {
                 items.map((i: any, index: any) => (
                   <tr key={i.product._id}>
                     <td>{index + 1}</td>
+                    <td>
+                      <Image
+                        width={50}
+                        height={50}
+                        alt=""
+                        src={`${URL_ENV}${i.product.imageUrl}`}
+                      />
+                    </td>
                     <td>{i.product.name}</td>
                     <td className="text-end">{i.product.price}</td>
-                    <td className="text-end">{i.quantity}</td>
-                    <td className="d-flex justify-content-evenly">
-                      <button
-                        className="btn btn-outline-primary"
-                        onClick={() => {
-                          increase(i.product._id);
-                        }}
-                      >
-                        +
-                      </button>
-                      <button
-                        className="btn btn-outline-danger"
-                        onClick={() => {
-                          decrease(i.product._id);
-                        }}
-                      >
-                        -
-                      </button>
+                    <td>
+                      {" "}
+                      <div className="d-flex justify-content-center">
+                        <button
+                          type="button"
+                          className="btn btn-outline-primary"
+                          onClick={() => {
+                            increase(i.product._id);
+                          }}
+                        >
+                          +
+                        </button>
+                        <div className="border px-4 py-2 text-center align-self-center justify-content-center">
+                          {i.quantity}
+                        </div>
+                        <button
+                          type="button"
+                          className="btn btn-outline-danger"
+                          onClick={() => {
+                            decrease(i.product._id);
+                          }}
+                        >
+                          -
+                        </button>
+                      </div>
+                    </td>
+                    <td className="text-end ">
                       <button
                         className="btn btn-outline-dark"
                         onClick={() => {
