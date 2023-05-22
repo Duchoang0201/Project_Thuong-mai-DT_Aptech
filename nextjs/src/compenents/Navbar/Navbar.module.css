@@ -9,6 +9,7 @@
   list-style-type: none;
   display: flex;
   justify-content: center;
+  margin-right: 32px;
 }
 
 .listTopItem1 {
@@ -94,11 +95,11 @@
   justify-content: center;
 }
 .icon{
-  display: inline-block; /* Hiển thị trên cùng một hàng */
+  display: inline-block; 
   vertical-align: middle; /* Căn giữa dọc */
 }
 .length{
-  width: 40%;
+  width: 35%;
 }
 
 @media screen and (min-width: 300px) and (max-width: 768px) {
@@ -118,13 +119,13 @@
   .listTopItem1 {
     margin-left: 12%;
     display: flex;
-    font-size: 12px;
+    font-size: 20px;
   }
 
   .listTopItem2 {
     margin-right: 12%;
     display: flex;
-    font-size: 12px;
+    font-size: 20px;
   }
 
   .listTopIcon {
@@ -132,13 +133,14 @@
     margin-left: 3%;
     font-style: oblique;
     color: blue;
-    font-size: 20px;
+    font-size: 25px;
   }
 
   .items{
     display: none;
   }
   .length{
-    width: 80%;
+    width: 70%;
   }
+  
 }

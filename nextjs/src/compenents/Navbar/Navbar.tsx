@@ -1,12 +1,12 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Badge, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
 import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useAuthStore } from "@/hook/useAuthStore";
-import findItems from "../../pages/products/findItems";
+
 import {
   UserAddOutlined,
   LoginOutlined,
@@ -20,29 +20,32 @@ import {
 import { useCartStore } from "../../hook/useCountStore";
 
 const { Search } = Input;
-type Props = {
-  productsItems: any;
-};
+type Props = {};
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-const API_URL_Product = `${URL_ENV}/products`;
 
-function NavBar({ productsItems }: Props) {
+function NavBar({}: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
   const E_URL = `${URL_ENV}/customers/${auth?.payload?._id}`;
 
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
-  const [option, setOption] = useState<Array<any>>([]);
-
-  const [items, setItems] = useState<Array<any>>([]);
+  const [findProduct, setFindProduct] = useState<Array<any>>([]);
+  const [fresh, setFresh] = useState<number>(0);
 
   console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
-  const addData = findItems((state) => state.addData);
-  const curdata = findItems((state) => state.data);
+
+  useEffect(() => {
+    axios
+      .get(`${URL_ENV}/products`)
+      .then((res) => {
+        setFindProduct(res.data.results);
+      })
+      .catch((err) => console.log(err));
+  }, [URL_ENV, fresh]);
 
   useEffect(() => {
     axios
@@ -59,17 +62,26 @@ function NavBar({ productsItems }: Props) {
   };
 
   const onSearch = async (value: any) => {
-    console.log("click");
+    console.log("value: ", value);
     const data = await axios
-      .get(`http://localhost:9000/products?productName=${value}`)
+      .get(`${URL_ENV}/products?productName=${value}`)
       .then((response) => {
         return response.data.results;
       });
 
-    addData(data);
-    console.log(curdata);
+    if (typeof value !== "undefined") {
+      setFindProduct(data);
+      router.push(`/products/${value}`);
+      setFresh((pre) => pre + 1);
+    }
   };
-  console.log(option);
+
+  const hanldeClear = async () => {
+    const data = await axios.get(`${URL_ENV}/products`).then((response) => {
+      return response.data.results;
+    });
+    setFindProduct(data);
+  };
 
   const itemsAccount = [
     {
@@ -143,20 +155,23 @@ function NavBar({ productsItems }: Props) {
             {auth && (
               <>
                 <li
-                  className={Style.listTopItem2}
+                  className={Style.listTopItem1}
                   onClick={() => {
                     handleNavigation("/cart");
                   }}
                 >
-                  <div className={Style.icon}>
-                    <Badge count={itemsCart.length}>
+                  <div className={`${Style.icon}`}>
+                    <Badge count={itemsCart.length} className="d-flex">
                       <ShoppingCartOutlined
                         style={{ fontSize: 20, cursor: "pointer" }}
                       />
+                      <span style={{ fontSize: 20 }} className={Style.items}>
+                        Giỏ hàng
+                      </span>
                     </Badge>
                   </div>
                 </li>
-                <li className={Style.listTopItem2}>
+                <li className={Style.listTopItem1}>
                   {" "}
                   <div className={Style.icon}>
                     {" "}
@@ -168,11 +183,15 @@ function NavBar({ productsItems }: Props) {
                           ))}
                         </Menu>
                       }
+                      className="d-flex"
                     >
                       <Badge>
                         <UserOutlined
                           style={{ fontSize: 20, cursor: "pointer" }}
                         />
+                        <span style={{ fontSize: 20 }} className={Style.items}>
+                          Cá nhân
+                        </span>
                       </Badge>
                     </Dropdown>
                   </div>
@@ -224,10 +243,23 @@ function NavBar({ productsItems }: Props) {
             <Menu.Item key="brand">Thương hiệu</Menu.Item>
             <Menu.Item key="contact">Liên hệ</Menu.Item>
           </Menu>
-          <Search
-            placeholder="input search text"
-            style={{ margin: "10px 0px", width: 150 }}
-            onSearch={onSearch}
+
+          <Select
+            allowClear
+            style={{ width: "125px", marginTop: "5px" }}
+            placeholder="Search"
+            optionFilterProp="children"
+            onChange={onSearch}
+            showSearch
+            filterOption={(input, option) =>
+              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
+            }
+            options={findProduct.map((item: any, index: any) => {
+              return {
+                label: `${item.name}`,
+                value: item._id,
+              };
+            })}
           />
         </div>
       </div>

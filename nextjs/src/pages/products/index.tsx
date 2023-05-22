@@ -1,5 +1,5 @@
 import axios from "axios";
-import React from "react";
+import React, { useCallback } from "react";
 
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
@@ -10,7 +10,6 @@ import Style from "./product.module.css";
 
 import { MoreOutlined } from "@ant-design/icons";
 import { Select, Space, Button, Drawer, InputNumber, Form } from "antd";
-import findItems from "./findItems";
 
 type Props = {
   products: any;
@@ -34,9 +33,6 @@ function Products({ products, categories, supplier }: Props) {
   const [toPrice, setToPrice] = useState<any>("");
   const [fromDiscount, setFromDiscount] = useState<any>("");
   const [toDiscount, setToDiscount] = useState<any>("");
-
-  const dataFind = findItems((state) => state.data);
-  console.log("data Find: ", dataFind);
 
   const router = useRouter();
 
@@ -89,34 +85,48 @@ function Products({ products, categories, supplier }: Props) {
   };
   const handleDataChange = (value: any) => {
     setCategoryId(value);
-    setFetchData((pre) => pre + 1);
+    // setFetchData((pre) => pre + 1);
   };
 
   const handleChangeSupplier = (value: any) => {
     setSupplierId(value);
-    setFetchData((pre) => pre + 1);
+    // setFetchData((pre) => pre + 1);
   };
 
   const handleToPrice = (value: any) => {
     setToPrice(value);
-    setFetchData((pre) => pre + 1);
+    // setFetchData((pre) => pre + 1);
   };
   const handleFromPrice = (value: any) => {
     setFromPrice(value);
-    setFetchData((pre) => pre + 1);
+    // setFetchData((pre) => pre + 1);
   };
 
   const handleFromDiscount = (value: any) => {
     // console.log(value);
     setFromDiscount(value);
-    setFetchData((pre) => pre + 1);
+    // setFetchData((pre) => pre + 1);
   };
 
   const handleToDiscount = (value: any) => {
     setToDiscount(value);
-    setFetchData((pre) => pre + 1);
+    // setFetchData((pre) => pre + 1);
   };
   // console.log("data: ", data);
+  const handleSubmit = useCallback((value: any) => {
+    setFetchData((pre) => pre + 1);
+  }, []);
+
+  const handleClearSubmit = useCallback(() => {
+    setCategoryId("");
+    setFromDiscount("");
+    setFromPrice("");
+    setToDiscount("");
+    setToPrice("");
+    setSupplierId("");
+
+    setFetchData((pre) => pre + 1);
+  }, []);
   return (
     <>
       {/* ////////////////////////////////////// */}
@@ -196,7 +206,7 @@ function Products({ products, categories, supplier }: Props) {
                 <div className="d-flex mt-3">
                   <InputNumber
                     placeholder="Enter From"
-                    min={1}
+                    min={0}
                     onChange={handleFromPrice}
                     style={{ margin: "0 5px" }}
                   />
@@ -229,6 +239,8 @@ function Products({ products, categories, supplier }: Props) {
               <Space wrap className="d-flex flex-column ">
                 <h5>Danh mục sản phẩm</h5>
                 <Select
+                  allowClear
+                  autoClearSearchValue={!categoryId ? true : false}
                   defaultValue="None"
                   style={{ width: 220 }}
                   onChange={handleDataChange}
@@ -240,7 +252,9 @@ function Products({ products, categories, supplier }: Props) {
 
                 <h5>Hãng sản phẩm</h5>
                 <Select
-                  defaultValue="None"
+                  allowClear
+                  autoClearSearchValue={!supplierId ? true : false}
+                  defaultValue={null}
                   style={{ width: 220 }}
                   onChange={handleChangeSupplier}
                   options={supplier?.results?.map((items: any) => ({
@@ -251,6 +265,8 @@ function Products({ products, categories, supplier }: Props) {
                 <h5>Lọc giá</h5>
                 <div className="d-flex">
                   <InputNumber
+                    // allowClear
+                    // autoClearSearchValue={!categoryId ? true : false}
                     placeholder="Enter From"
                     min={1}
                     onChange={handleFromPrice}
@@ -277,6 +293,18 @@ function Products({ products, categories, supplier }: Props) {
                     max={90}
                     onChange={handleToDiscount}
                   />
+                </div>
+                <div className="d-flex ">
+                  <Button type="primary" onClick={handleSubmit}>
+                    Lọc sản phẩm
+                  </Button>
+                  <Button
+                    type="primary"
+                    onClick={handleClearSubmit}
+                    className="ms-1"
+                  >
+                    Xóa lọc
+                  </Button>
                 </div>
               </Space>
             </div>
