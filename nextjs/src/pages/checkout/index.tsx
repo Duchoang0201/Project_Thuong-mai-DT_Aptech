@@ -18,11 +18,14 @@ import { useCartStore } from "@/hook/useCountStore";
 import { useAuthStore } from "@/hook/useAuthStore";
 import router from "next/router";
 import Image from "next/image";
+import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 
 const { Option } = Select;
 type Props = {};
 
 const CheckoutPayment = (props: Props) => {
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
   const [cities, setCities] = useState<any>([]);
   const [districts, setDistricts] = useState<any>([]);
   const [wards, setWards] = useState<any>([]);
@@ -154,10 +157,7 @@ const CheckoutPayment = (props: Props) => {
       orderData.paymentType = "CASH";
 
       const payPost = async () => {
-        const found = await axios.post(
-          "http://localhost:9000/orders",
-          orderData
-        );
+        const found = await axios.post(`${URL_ENV}/orders`, orderData);
         if (found) {
           router.push("/success-payment");
         }
@@ -173,13 +173,10 @@ const CheckoutPayment = (props: Props) => {
 
       const payPost = async () => {
         try {
-          const postOder = await axios.post(
-            "http://localhost:9000/orders",
-            orderData
-          );
+          const postOder = await axios.post(`${URL_ENV}/orders`, orderData);
           if (postOder) {
             const found = await axios.post(
-              "http://localhost:9000/orders/pay/create_momo_url",
+              `${URL_ENV}/orders/pay/create_momo_url`,
               { amount: amount }
             );
 
@@ -243,15 +240,15 @@ const CheckoutPayment = (props: Props) => {
   return (
     <>
       <div className="container ">
+        <CheckoutMethod />
         <Row>
-          <Col
-            xs={24}
-            xl={8}
-            className="px-3 py-2 rounded-start "
-            style={{ backgroundColor: "#7ea0d0" }}
-          >
+          <Col xs={24} xl={10} className="px-3 py-2 rounded-start ">
             {" "}
-            <Card title="Thông tin thanh toán" style={{ width: "100%" }}>
+            <Card
+              className="border border-primary"
+              title="Thông tin thanh toán"
+              style={{ width: "100%" }}
+            >
               <div className="d-flex justify-content-between border-bottom">
                 <strong>Sản phẩm</strong>
                 <strong>Tạm tính</strong>
@@ -323,22 +320,19 @@ const CheckoutPayment = (props: Props) => {
             </Card>
           </Col>
 
-          <Col
-            xs={24}
-            xl={14}
-            className="py-2 px-3 rounded-end "
-            style={{ backgroundColor: "#7ea0d0" }}
-          >
+          <Col xs={24} xl={14} className="py-2 px-3 rounded-end ">
             {" "}
-            <Card title="Đơn hàng của bạn" style={{ width: "100%" }}>
+            <Card
+              className="border border-primary"
+              title="Đơn hàng của bạn"
+              style={{ width: "100%" }}
+            >
               <Form
                 layout="vertical"
                 name="payForm"
                 onFinish={handlePaySubmit}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
-                // action={payMethod}
-                // method="POST"
               >
                 <Row>
                   <Col xs={24} xl={12}>
@@ -442,9 +436,9 @@ const CheckoutPayment = (props: Props) => {
                 <Form.Item label="Ghi chú" name="description">
                   <Input />
                 </Form.Item>
-                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                <Form.Item wrapperCol={{ offset: 16, span: 16 }}>
                   <Button type="primary" htmlType="submit">
-                    Submit
+                    Thanh toán
                   </Button>
                 </Form.Item>
               </Form>

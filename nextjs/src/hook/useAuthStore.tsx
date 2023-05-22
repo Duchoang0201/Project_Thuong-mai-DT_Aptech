@@ -7,6 +7,7 @@ interface isLogin {
   email: string;
   password: string;
 }
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export const useAuthStore = create(
   devtools(
@@ -18,25 +19,19 @@ export const useAuthStore = create(
           auth: null,
           login: async ({ email, password }: isLogin) => {
             try {
-              const response = await axios.post(
-                "http://localhost:9000/customers/login",
-                {
-                  email: email,
-                  password: password,
-                }
-              );
+              const response = await axios.post(`${URL_ENV}/customers/login`, {
+                email: email,
+                password: password,
+              });
               loginData = response.data; // Store the response data
 
               set({ auth: response.data }, false, {
                 type: "auth/login-success",
               });
               if (loginData && loginData.payload && loginData.payload._id) {
-                axios.patch(
-                  `http://localhost:9000/customers/${loginData.payload._id}`,
-                  {
-                    LastActivity: new Date(),
-                  }
-                );
+                axios.patch(`${URL_ENV}/customers/${loginData.payload._id}`, {
+                  LastActivity: new Date(),
+                });
               }
             } catch (err: any) {
               set({ auth: null }, false, { type: "auth/login-error" });
@@ -48,12 +43,9 @@ export const useAuthStore = create(
             // Use the loginData in the logout function
 
             if (loginData && loginData.payload && loginData.payload._id) {
-              axios.patch(
-                `http://localhost:9000/customers/${loginData.payload._id}`,
-                {
-                  LastActivity: new Date(),
-                }
-              );
+              axios.patch(`${URL_ENV}/customers/${loginData.payload._id}`, {
+                LastActivity: new Date(),
+              });
             }
             localStorage.clear();
 

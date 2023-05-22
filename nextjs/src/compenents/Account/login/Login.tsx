@@ -1,10 +1,19 @@
 import React from "react";
-import { Button, Checkbox, Form, Input, Typography, message } from "antd";
+import { useRouter } from "next/router";
+import {
+  Button,
+  Checkbox,
+  Form,
+  Input,
+  Typography,
+  message,
+  Select,
+} from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import style from "./index.module.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
 import { useAuthStore } from "@/hook/useAuthStore";
-import { useRouter } from "next/router";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 const Login = () => {
   const { login } = useAuthStore((state: any) => state);
@@ -15,57 +24,81 @@ const Login = () => {
     const { email, password } = values;
     login({ email, password });
 
-    if (auth) {
+    if (auth?.payload) {
       router.push("/"); // Replace '/page' with the actual path to your desired page
-    } else {
-      router.push("/login");
     }
   };
 
+  const handleRegister = () => {
+    router.push("/register");
+  };
+
   return (
-    <div className={`${style.root}`}>
-      <Form
-        className={`${style.form__border}`}
-        name="normal_login"
-        labelCol={{ span: 8 }}
-        initialValues={{ remember: true }}
-        onFinish={onLogin}
-        onFinishFailed={(errorInfo: any) => {
-          console.log("Failed:", errorInfo);
-        }}
-        autoComplete="off"
-      >
-        <Typography.Title className="text-center">Login Form</Typography.Title>
-        <Form.Item
-          name="email"
-          rules={[
-            { type: "email" },
-            { required: true, message: "Please input your username!" },
-          ]}
+    <div className={`${style.root} `}>
+      <div className={style.brand}>
+        <div className={style.title}>JewelShop</div>
+        <div className={style.slogan}>Nâng Tầm thời trang của bạn</div>
+      </div>
+      <div>
+        <Form
+          name="basic"
+          className={` login-form ${style.form__border}`}
+          initialValues={{ remember: true }}
+          onFinish={onLogin}
+          onFinishFailed={(errorInfo: any) => {
+            console.log("Failed:", errorInfo);
+          }}
+          autoComplete="off"
         >
-          <Input
-            prefix={<UserOutlined className="site-form-item-icon" />}
-            placeholder="Email"
-          />
-        </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            label="Email"
+            name="email"
+            rules={[
+              { type: "email" },
+              { required: true, message: "Please input your username!" },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Username"
+            />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              placeholder="Password"
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input
-            prefix={<LockOutlined className="site-form-item-icon" />}
-            type="password"
-            placeholder="Password"
-          />
-        </Form.Item>
-
-        <Form.Item shouldUpdate wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+          <Form.Item className="text-end py-3">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+            >
+              Log in
+            </Button>
+            Or <Link href="/register">register now!</Link>
+          </Form.Item>
+        </Form>
+      </div>
     </div>
   );
 };

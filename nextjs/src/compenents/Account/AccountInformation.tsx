@@ -40,10 +40,8 @@ const AccountInformation = (props: Props) => {
   setTimeout(() => {
     setLoadingDate(false);
   }, 1000);
-  const onChange = (key: string | string[]) => {
-    console.log(key);
-  };
-  const E_URL = `http://localhost:9000/customers/${auth.payload._id}`;
+
+  const E_URL = `http://localhost:9000/customers/${auth?.payload._id}`;
 
   useEffect(() => {
     axios
@@ -144,7 +142,7 @@ const AccountInformation = (props: Props) => {
           <Card loading={loadingData} bordered={true}>
             <Form form={updateForm} name="updateForm" onFinish={setUpdateData}>
               <div>
-                <Collapse accordion onChange={onChange}>
+                <Collapse accordion>
                   <Collapse.Panel header="First Name" key="1">
                     <Form.Item
                       name="firstName"

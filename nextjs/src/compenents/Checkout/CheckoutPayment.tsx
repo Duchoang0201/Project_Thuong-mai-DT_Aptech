@@ -24,12 +24,11 @@ const { Option } = Select;
 type Props = {};
 
 const CheckoutPayment = (props: Props) => {
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
   const [cities, setCities] = useState<any>([]);
   const [districts, setDistricts] = useState<any>([]);
   const [wards, setWards] = useState<any>([]);
-
-  const [fromAction, setFormAction] = useState<any>();
-  //setPayMethod
 
   const [payMethod, setPayMethod] = useState<any>("shipCod");
 
@@ -139,10 +138,7 @@ const CheckoutPayment = (props: Props) => {
       orderData.paymentType = "CASH";
 
       const payPost = async () => {
-        const found = await axios.post(
-          "http://localhost:9000/orders",
-          orderData
-        );
+        const found = await axios.post(`${URL_ENV}/orders`, orderData);
         if (found) {
           router.push("/success-payment");
         }
@@ -158,13 +154,10 @@ const CheckoutPayment = (props: Props) => {
 
       const payPost = async () => {
         try {
-          const postCheck = await axios.post(
-            "http://localhost:9000/orders",
-            orderData
-          );
+          const postCheck = await axios.post(`${URL_ENV}/orders`, orderData);
           if (postCheck) {
             const found = await axios.post(
-              "http://localhost:9000/orders/pay/create_momo_url",
+              `${URL_ENV}/orders/pay/create_momo_url`,
               { amount: amount }
             );
             window.location.href = found.data.urlPay;
@@ -184,13 +177,10 @@ const CheckoutPayment = (props: Props) => {
 
       const payPost = async () => {
         try {
-          const postCheck = await axios.post(
-            "http://localhost:9000/orders",
-            orderData
-          );
+          const postCheck = await axios.post(`${URL_ENV}/orders`, orderData);
           if (postCheck) {
             const found = await axios.post(
-              "http://localhost:9000/orders/pay/create_vnpay_url",
+              `${URL_ENV}/orders/pay/create_vnpay_url`,
               { amount: amount }
             );
             window.location.href = found.data.urlPay;

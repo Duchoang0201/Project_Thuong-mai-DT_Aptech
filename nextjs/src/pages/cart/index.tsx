@@ -1,15 +1,21 @@
 import { useCartStore } from "@/hook/useCountStore";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import ShopApp from "@/compenents/ShopApp";
+import { Card } from "antd";
 
 export default function CounterApp() {
-  const { decrease } = useCartStore((state: any) => state);
-  const { count } = useCartStore((state: any) => state);
+  const [loading, setLoading] = useState(true);
 
-  const { increase } = useCartStore((state: any) => state);
+  useEffect(() => {
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, []);
   return (
     <div>
-      <ShopApp />
+      <Card className="container" loading={loading}>
+        <ShopApp />
+      </Card>
     </div>
   );
 }

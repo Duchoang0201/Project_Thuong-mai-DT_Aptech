@@ -3,16 +3,20 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Rate } from "antd";
+import { Modal, Rate, Collapse, Mentions, Input, Button } from "antd";
 import Style from "./index.module.css";
 import { PhoneFilled, PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-import "swiper/swiper.min.css";
+const { Panel } = Collapse;
+const { getMentions } = Mentions;
+const { TextArea } = Input;
+import "swiper/swiper-bundle.css";
 import "swiper/css/pagination";
 
 import { Pagination } from "swiper";
-import { Route } from "react-router-dom";
+import { Navigation } from "swiper";
+// import { Route } from "react-router-dom";
 
 type Props = {
   product: any;
@@ -22,10 +26,11 @@ type Props = {
 export default function ProductDetails({ product, allProduct }: Props) {
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
-  const [rating, setRating] = useState<number>();
+  // const [rating, setRating] = useState<number>();
   const router = useRouter();
 
   const handleImageClick = (items: any) => {
+    console.log("click");
     setVisible(true);
     setPicture(items);
   };
@@ -56,7 +61,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                   className="w-100 img-fluid"
                 ></Image>
               </div>
-              <div className="d-flex flex-row ">
+              {/* <div className="d-flex flex-row ">
                 {product?.images?.map((items: any) => {
                   return (
                     <>
@@ -86,6 +91,51 @@ export default function ProductDetails({ product, allProduct }: Props) {
                     </>
                   );
                 })}
+              </div> */}
+              <div
+                className="d-flex flex-row  mt-2"
+                style={{ width: "200px", height: "100px" }}
+              >
+                <Swiper
+                  modules={[Navigation]}
+                  className="mySwiper"
+                  navigation={true}
+                  slidesPerView={2}
+                  spaceBetween={30}
+                  // modules={[Pagination]}
+                >
+                  {product?.images?.map((items: any, index: any) => {
+                    if (index <= 20)
+                      return (
+                        <>
+                          <SwiperSlide className="m-3 w-25">
+                            <Image
+                              src={`http://localhost:9000/${items}`}
+                              alt="Description of the image"
+                              width={80}
+                              height={80}
+                              className="border"
+                              onClick={() => handleImageClick(items)}
+                              // style={{ maxHeight: "180px", minHeight: "80px" }}
+                            ></Image>
+                            <Modal
+                              visible={visible}
+                              onCancel={handleModalClose}
+                              footer={null}
+                            >
+                              <Image
+                                src={`http://localhost:9000/${picture}`}
+                                alt="Image"
+                                width={500}
+                                height={500}
+                                style={{ width: "100%" }}
+                              />
+                            </Modal>
+                          </SwiperSlide>
+                        </>
+                      );
+                  })}
+                </Swiper>
               </div>
             </div>
             <div className="p-2 bd-highlight ">
@@ -141,6 +191,23 @@ export default function ProductDetails({ product, allProduct }: Props) {
           </div>
         </div>
         <br />
+        <div>
+          <Collapse size="large">
+            <Panel header="Thông số và mô tả sản phẩm" key="1">
+              <p>{product.description}</p>
+            </Panel>
+          </Collapse>
+        </div>
+        <div>
+          <Collapse size="large">
+            <Panel header="Bình luận" key="1">
+              <TextArea showCount maxLength={100} />
+              <Button className="m-2" type="primary">
+                Submit
+              </Button>
+            </Panel>
+          </Collapse>
+        </div>
 
         <div className="d-none d-sm-block">
           <p className="fs-4 "> Sản phẩm được yêu thích</p>
@@ -183,13 +250,14 @@ export default function ProductDetails({ product, allProduct }: Props) {
           <p className="fs-4">Các sản phẩm khác</p>
           <div className="h-50">
             <Swiper
+              modules={[Navigation]}
+              className="mySwiper"
+              navigation={true}
               slidesPerView={3}
               spaceBetween={30}
-              pagination={{
-                clickable: true,
-              }}
-              modules={[Pagination]}
-              className=" w-100"
+              // modules={[Pagination]}
+              // className=" w-100"
+              pagination={{ clickable: true }}
             >
               {allProduct?.results?.map((items: any, index: any) => {
                 if (index <= 20)
@@ -212,6 +280,8 @@ export default function ProductDetails({ product, allProduct }: Props) {
                         ></Image>
                         <p className="fs-6">{items.name}</p>
                       </SwiperSlide>
+                      <div className="swiper-button-prev">k</div>
+                      <div className="swiper-button-next">d</div>
                     </>
                   );
               })}
