@@ -5,37 +5,11 @@ import style from "./index.module.css";
 import { Col, Row, Card } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
 
-import {
-  Button,
-  Cascader,
-  Checkbox,
-  DatePicker,
-  Form,
-  Input,
-  InputNumber,
-  Radio,
-  Select,
-  Switch,
-  TreeSelect,
-  Upload,
-  message,
-} from "antd";
-import { relative } from "path";
+import { Button, DatePicker, Form, Input, Upload } from "antd";
 
 import { PlusOutlined } from "@ant-design/icons";
 
-import login from "../login";
 import { useAuthStore } from "@/hook/useAuthStore";
-
-const { RangePicker } = DatePicker;
-const { TextArea } = Input;
-
-const normFile = (e: any) => {
-  if (Array.isArray(e)) {
-    return e;
-  }
-  return e?.fileList;
-};
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 

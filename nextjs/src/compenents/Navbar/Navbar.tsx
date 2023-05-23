@@ -86,8 +86,8 @@ function NavBar({}: Props) {
     label: (
       <Space>
         <Image
-          src={`${URL_ENV}${item.product?.imageUrl}`}
-          alt={item.product?.name}
+          src={`${URL_ENV}${item?.product?.imageUrl}`}
+          alt={item?.product?.name}
           width={50}
           height={50}
         />

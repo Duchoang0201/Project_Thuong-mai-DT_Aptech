@@ -33,15 +33,11 @@ const Slides = () => {
         <div className="col-md-8 slide w-75 flex-grow-1">
           <Swiper
             loop={true}
-            autoplay={{
-              delay: 1000,
-              disableOnInteraction: false,
-            }}
             pagination={{
               clickable: true,
             }}
             modules={[Pagination, Navigation, HashNavigation]}
-            className="mySwiper"
+            initialSlide={2}
           >
             {slides.length > 0 &&
               slides.map((item: any, index: any) => (

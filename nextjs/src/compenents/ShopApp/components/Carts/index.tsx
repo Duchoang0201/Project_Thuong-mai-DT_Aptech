@@ -14,6 +14,7 @@ export default function Carts() {
   const { auth } = useAuthStore((state: any) => state);
   const [getUser, setGetUser] = useState<any>(null);
 
+  console.log("««««« items »»»»»", items);
   useEffect(() => {
     axios
       .get(`${URL_ENV}/customers/${auth?.payload._id}`)
@@ -48,18 +49,18 @@ export default function Carts() {
             <tbody>
               {items &&
                 items.map((i: any, index: any) => (
-                  <tr key={i.product._id}>
+                  <tr key={i.product?._id}>
                     <td>{index + 1}</td>
                     <td>
                       <Image
                         width={50}
                         height={50}
                         alt=""
-                        src={`${URL_ENV}${i.product.imageUrl}`}
+                        src={`${URL_ENV}/${i.product?.imageUrl}`}
                       />
                     </td>
-                    <td>{i.product.name}</td>
-                    <td className="text-end">{i.product.price}</td>
+                    <td>{i.product?.name}</td>
+                    <td className="text-end">{i.product?.price}</td>
                     <td>
                       {" "}
                       <div className="d-flex justify-content-center">
@@ -67,7 +68,7 @@ export default function Carts() {
                           type="button"
                           className="btn btn-outline-primary"
                           onClick={() => {
-                            increase(i.product._id);
+                            increase(i.product?._id);
                           }}
                         >
                           +

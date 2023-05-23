@@ -14,22 +14,23 @@ import { Pagination } from "swiper";
 import Slides from "@/compenents/Mainpage/Slides/Slides";
 import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
 import { Divider } from "antd";
+import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
 
-// import { img } from "../imgBanner";
-
-type Props = {
-  allProduct: any;
-  // product: any;
-};
-
-const imgBanner = [
-  "31-trangchu-tskc-1175x375.jpg",
-  "32-trangchu-tscuoi-471x675.jpg",
-  "33-trangchu-dojiwatch-580x350.jpg",
-  "/Upload/banner/2023/02/bannerweb/32-trangchu-tscuoi-471x675.jpg",
-];
-
+import Backgroundmonth from "../compenents/Mainpage/Topmonth/diamond-city-demo-image-2.png";
+import Backgroundhot from "../compenents/Mainpage/Hotdeal/jewelrybanner.jpg";
 export default function Home() {
+  const monthStyle = {
+    backgroundImage: `url(${Backgroundmonth.src})`,
+    width: "100%",
+    height: "100%",
+    size: "cover",
+  };
+  const hotStyle = {
+    backgroundSize: "cover",
+    backgroundImage: `url(${Backgroundhot.src})`,
+    width: "100%",
+    height: "100%",
+  };
   return (
     <>
       <Head>
@@ -42,11 +43,19 @@ export default function Home() {
       <main>
         <Slides />
         <Divider>
-          <h3>Nổi bật trong tháng</h3>
+          <h3>Ưu đãi hấp dẫn</h3>
         </Divider>
-        <div style={{ backgroundColor: "rgb(245,245,245)" }}>
+        <div style={hotStyle}>
           <div className="container">
             <Hotdeal />
+          </div>
+        </div>
+        <Divider>
+          <h3>Số lượng mua nhiều nhất trong tháng</h3>
+        </Divider>
+        <div style={monthStyle}>
+          <div className="container">
+            <Topmoth />
           </div>
         </div>
         <div className="container">

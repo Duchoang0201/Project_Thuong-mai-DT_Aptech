@@ -216,7 +216,7 @@ const CheckoutPayment = (props: Props) => {
                     <span>{i.product.name}</span> x{" "}
                     <span className="text-danger">{i.quantity}</span>
                   </div>
-                  <span>{i.product.price}</span>
+                  <span>{i.product.price * i.quantity}</span>
                 </div>
                 <Divider key={i.product.id}></Divider>
               </React.Fragment>
@@ -227,8 +227,12 @@ const CheckoutPayment = (props: Props) => {
             <strong>
               {items.length > 0
                 ? items
-                    .map((item: any) => item.product.price)
-                    .reduce((acc: any, curr: any) => acc + curr, 0)
+                    .map((item: any) => item.product.price * item.quantity)
+                    .reduce(
+                      (accumulator: any, subtotal: any) =>
+                        accumulator + subtotal,
+                      0
+                    )
                 : 0}
             </strong>
           </div>

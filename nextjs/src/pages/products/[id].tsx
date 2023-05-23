@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Rate, Collapse, Mentions, Input, Button } from "antd";
+import { Modal, Rate, Collapse, Mentions, Input, Button, message } from "antd";
 import Style from "./index.module.css";
 import { PhoneFilled, PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
@@ -16,6 +16,7 @@ import "swiper/css/pagination";
 
 import { Pagination } from "swiper";
 import { Navigation } from "swiper";
+import { useCartStore } from "@/hook/useCountStore";
 // import { Route } from "react-router-dom";
 
 type Props = {
@@ -26,6 +27,8 @@ type Props = {
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function ProductDetails({ product, allProduct }: Props) {
+  const { add, items, increase } = useCartStore((state: any) => state);
+
   // console.log("product tim thay: ", product);
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
@@ -117,7 +120,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 {" "}
                 <Rate allowHalf defaultValue={product.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product.rateInfor.length})
+                  ({product?.rateInfor?.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
@@ -147,7 +150,26 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 </ul>
               </div>
               <div className="mt-1 ">
-                <button className="w-100  border-bottom border-dark  rounded bg-danger bg-gradient text-light">
+                <button
+                  onClick={() => {
+                    if (
+                      !items.some((i: any) => i.product._id === product._id)
+                    ) {
+                      add({ product: product, quantity: 1 });
+                      message.success(
+                        "Thêm sản phẩm vào giỏ hàng thành công",
+                        1.5
+                      );
+                    } else {
+                      increase(product._id);
+                      message.success(
+                        "Đã thêm 1 sản phẩm vào giỏ hàng thành công, ",
+                        1.5
+                      );
+                    }
+                  }}
+                  className="w-100  border-bottom border-dark  rounded bg-danger bg-gradient text-light"
+                >
                   <b>Đặt hàng ngay</b>
                 </button>
               </div>
