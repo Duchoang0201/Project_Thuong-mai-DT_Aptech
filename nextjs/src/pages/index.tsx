@@ -11,6 +11,9 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper.min.css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper";
+import Slides from "@/compenents/Mainpage/Slides/Slides";
+import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
+import { Divider } from "antd";
 
 // import { img } from "../imgBanner";
 
@@ -26,17 +29,7 @@ const imgBanner = [
   "/Upload/banner/2023/02/bannerweb/32-trangchu-tscuoi-471x675.jpg",
 ];
 
-export default function Home({ allProduct }: Props) {
-  const imageLoader = (src: any) => {
-    return `localhost:9000${src}}`;
-  };
-  imageLoader(
-    `/uploads/products/641b0dfdb5b1ca7f1713e8ea/img-1682533076800-1682568987131--1-.jpg`
-  );
-  const router = useRouter();
-  const handlePageId = (path: any) => {
-    // router.push(`products/${product._id}`);
-  };
+export default function Home() {
   return (
     <>
       <Head>
@@ -47,62 +40,21 @@ export default function Home({ allProduct }: Props) {
       </Head>
 
       <main>
-        hello shop Index
-        {/* <Image
-          src="http://localhost:9000/uploads/products/641b0dfdb5b1ca7f1713e8f0/9g4z1sbr-wallha-com.png"
-          alt="Picture of the author"
-          width={500}
-          height={500}
-        /> */}
-        <div className="container">
-          <div className="p-4 " style={{ height: "300px" }}>
-            <Swiper
-              slidesPerView={3}
-              spaceBetween={30}
-              pagination={{
-                clickable: true,
-              }}
-              modules={[Pagination]}
-              className=" w-100"
-            >
-              {imgBanner?.map((items: any, index: any) => {
-                if (index <= 20)
-                  return (
-                    <>
-                      <SwiperSlide className="m-3 w-25 ">
-                        <Image
-                          src={`http://localhost:9000/${items.imageUrl}`}
-                          // src={items}
-                          alt="Description of the image"
-                          width={200}
-                          height={200}
-                          className="w-100 h-25"
-                          onClick={() => handlePageId(`/products/${items._id}`)}
-                          style={{ maxHeight: "180px", minHeight: "80px" }}
-                        ></Image>
-                        <p className="fs-6 ">{items.name}</p>
-                      </SwiperSlide>
-                    </>
-                  );
-              })}
-            </Swiper>
+        <Slides />
+        <Divider>
+          <h3>Nổi bật trong tháng</h3>
+        </Divider>
+        <div style={{ backgroundColor: "rgb(245,245,245)" }}>
+          <div className="container">
+            <Hotdeal />
           </div>
+        </div>
+        <div className="container">
+          <div className="p-4 " style={{ height: "300px" }}></div>
           <div></div>
           <div></div>
         </div>
       </main>
     </>
   );
-}
-
-export async function getStaticProps({ params }: any) {
-  // const product = await axios.get(`http://localhost:9000/products/${params}`);
-  const allProduct = await axios
-    .get("http://localhost:9000/products")
-    .then((response) => {
-      return response.data;
-    });
-  return {
-    props: { allProduct: allProduct }, // will be passed to the page component as props
-  };
 }

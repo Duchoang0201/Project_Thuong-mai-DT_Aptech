@@ -8,6 +8,7 @@ export default function Products() {
 
   const { add } = useCartStore((state: any) => state);
 
+  console.log("««««« products »»»»»", products);
   return (
     <div style={{ display: "flex", flexDirection: "row", padding: 24 }}>
       {products.length > 0 &&

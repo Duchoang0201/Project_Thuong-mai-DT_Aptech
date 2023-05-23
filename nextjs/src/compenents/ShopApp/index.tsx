@@ -6,8 +6,8 @@ import { useCartStore } from "@/hook/useCountStore";
 
 export default function ShopApp() {
   return (
-    <div>
-      <Products />
+    <div className="container">
+      {/* <Products /> */}
       <Carts />
       <hr />
       <CreateOrder />

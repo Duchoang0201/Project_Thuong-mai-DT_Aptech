@@ -117,7 +117,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 {" "}
                 <Rate allowHalf defaultValue={product.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product?.rateInfor?.length})
+                  ({product.rateInfor.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
@@ -190,7 +190,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 return (
                   <div
                     key={index}
-                    className="m-2 d-flex-column justify-content-center w-25 "
+                    className={`m-2 d-flex-column justify-content-center w-25 ${Style.items}`}
                   >
                     <div className="">
                       <Image
@@ -208,18 +208,20 @@ export default function ProductDetails({ product, allProduct }: Props) {
                       ></Image>
                     </div>
                     <div>
-                      <p style={{ color: "blue" }} className="fs-6 primary">
+                      <p
+                        style={{ color: "blue" }}
+                        className="fs-6 primary ps-1"
+                      >
                         {" "}
                         {items.name}
                       </p>
                     </div>
-                    <div>{items.price}đ</div>
                   </div>
                 );
             })}
           </div>
         </div>
-        <div className=" ms-3 ">
+        <div className=" ms-3 pt-5 ">
           <p className="fs-4">Các sản phẩm khác</p>
           <div className="h-50">
             <Swiper
@@ -228,8 +230,6 @@ export default function ProductDetails({ product, allProduct }: Props) {
               navigation={true}
               slidesPerView={3}
               spaceBetween={30}
-              // modules={[Pagination]}
-              // className=" w-100"
               pagination={{ clickable: true }}
             >
               {allProduct?.results?.map((items: any, index: any) => {

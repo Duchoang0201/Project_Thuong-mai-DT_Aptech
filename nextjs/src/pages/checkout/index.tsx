@@ -239,8 +239,11 @@ const CheckoutPayment = (props: Props) => {
 
   return (
     <>
-      <div className="container ">
+      <div style={{ background: "rgb(245,245,245)" }}>
         <CheckoutMethod />
+      </div>
+
+      <div className="container ">
         <Row>
           <Col xs={24} xl={10} className="px-3 py-2 rounded-start ">
             {" "}
@@ -446,7 +449,6 @@ const CheckoutPayment = (props: Props) => {
           </Col>
         </Row>
       </div>
-      <div></div>
     </>
   );
 };

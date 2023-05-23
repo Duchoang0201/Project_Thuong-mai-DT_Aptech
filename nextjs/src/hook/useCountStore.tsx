@@ -9,7 +9,9 @@ export const useCartStore = create(
         items: [],
         add: ({ product, quantity }: any) => {
           const items = get().items;
-          const found = items.find((x: any) => x.product._id === product._id);
+          const found = items.find(
+            (x: any) => x?.product?._id === product?._id
+          );
           if (found) {
             found.quantity++;
           } else {

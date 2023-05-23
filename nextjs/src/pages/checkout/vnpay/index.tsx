@@ -6,15 +6,13 @@ const PaymentForm = () => {
     // Handle form submission
     // You can access form data using e.target.elements
   };
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
   return (
     <div>
       <h3>123</h3>
       <div className="table-responsive">
-        <form
-          action="http://localhost:9000/orders/pay/create_vnpay_url"
-          method="POST"
-        >
+        <form action={`${URL_ENV}/orders/pay/create_vnpay_url`} method="POST">
           <div className="form-group">
             <label htmlFor="amount">Số tiền</label>
             <input

@@ -32,7 +32,7 @@ export default function Carts() {
   return (
     <>
       <div className="container">
-        <Divider>Giỏ hàng của bạn</Divider>
+        <Divider orientation="left">Danh sách các đơn hàng</Divider>
         {getUser && (
           <table className="table">
             <thead>

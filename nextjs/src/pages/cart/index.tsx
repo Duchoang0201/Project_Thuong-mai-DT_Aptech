@@ -13,7 +13,11 @@ export default function CounterApp() {
   }, []);
   return (
     <div>
-      <Card className="container" loading={loading}>
+      <div style={{ background: "rgb(245,245,245)" }}>
+        <h4 className="text-center py-4">Giỏ hàng của bạn</h4>
+      </div>
+
+      <Card loading={loading}>
         <ShopApp />
       </Card>
     </div>

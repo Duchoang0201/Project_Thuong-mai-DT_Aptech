@@ -19,6 +19,8 @@ import "bootstrap/dist/css/bootstrap.min.css";
 type Props = {};
 
 const AccountOrders = (props: Props) => {
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
   const { auth }: any = useAuthStore((state: any) => state);
   const [userOrders, setUserOrders] = useState<any>();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
@@ -43,11 +45,11 @@ const AccountOrders = (props: Props) => {
 
   useEffect(() => {
     axios
-      .get(`http://localhost:9000/orders/personal/${auth?.payload?._id}`)
+      .get(`${URL_ENV}/orders/personal/${auth?.payload?._id}`)
       .then((res) => {
         setUserOrders(res.data.results);
       });
-  }, [auth]);
+  }, [URL_ENV, auth]);
 
   const ordersColumn = [
     {

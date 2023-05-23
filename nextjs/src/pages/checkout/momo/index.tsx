@@ -3,6 +3,8 @@ import React from "react";
 type Props = {};
 
 const momoCheckout = (props: Props) => {
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
   return (
     <>
       <div className="container">
@@ -19,7 +21,7 @@ const momoCheckout = (props: Props) => {
                   method="POST"
                   target="_blank"
                   encType="application/x-www-form-urlencoded"
-                  action="http://localhost:9000/orders/pay/create_momo_url"
+                  action={`${URL_ENV}:9000/orders/pay/create_momo_url`}
                 >
                   <div className="row">
                     <div className="col-md-4">

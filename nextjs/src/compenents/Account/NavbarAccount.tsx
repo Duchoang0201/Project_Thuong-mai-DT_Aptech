@@ -44,10 +44,6 @@ const NavbarAccount: React.FC = () => {
     }
   }, [windowWidth]);
 
-  if (!auth) {
-    return null; // or a loading state if needed
-  }
-
   return (
     <Card className="container">
       <Layout className="container">
