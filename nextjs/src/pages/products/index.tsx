@@ -9,7 +9,18 @@ import { Col, Row } from "antd";
 import Style from "./product.module.css";
 
 import { MoreOutlined } from "@ant-design/icons";
-import { Select, Space, Button, Drawer, InputNumber, Form } from "antd";
+import {
+  Select,
+  Space,
+  Button,
+  Drawer,
+  InputNumber,
+  Affix,
+  FloatButton,
+} from "antd";
+
+import { useAuthStore } from "../../hook/useAuthStore";
+import { useCartStore } from "@/hook/useCountStore";
 
 type Props = {
   products: any;
@@ -23,6 +34,9 @@ const API_URL_Categories = `${URL_ENV}/categories`;
 const API_URL_Supplier = `${URL_ENV}/suppliers`;
 
 function Products({ products, categories, supplier }: Props) {
+  const { items } = useCartStore((state: any) => state);
+  const { add } = useCartStore((state: any) => state);
+  const { auth } = useAuthStore((state: any) => state);
   const [open, setOpen] = useState<boolean>(false);
   const [fetchData, setFetchData] = useState<number>(0);
   const [data, setData] = useState<Array<any>>([]);
@@ -33,8 +47,10 @@ function Products({ products, categories, supplier }: Props) {
   const [toPrice, setToPrice] = useState<any>("");
   const [fromDiscount, setFromDiscount] = useState<any>("");
   const [toDiscount, setToDiscount] = useState<any>("");
+  const [isActive, setIsActive] = useState<boolean>(true);
 
   const router = useRouter();
+  const [top, setTop] = useState(30);
 
   //CALL API PRODUCT FILLTER
   const queryParams = [
@@ -44,12 +60,7 @@ function Products({ products, categories, supplier }: Props) {
     fromPrice && `fromPrice=${fromPrice}`,
     toPrice && `toPrice=${toPrice}`,
     fromDiscount && `fromDiscount=${fromDiscount}`,
-    toDiscount && `toDiscount=${toDiscount}`,
-    // fromStock && `fromStock=${fromStock}`,
-    // toStock && `toStock=${toStock}`,
-    // skip && `skip=${skip}`,
-    // isActive && `active=${isActive}`,
-    // isDelete && `isDeleted=${isDelete}`,
+    isActive && `active=${isActive}`,
   ]
     .filter(Boolean)
     .join("&");
@@ -112,6 +123,16 @@ function Products({ products, categories, supplier }: Props) {
     setToDiscount(value);
     // setFetchData((pre) => pre + 1);
   };
+
+  const handleAddCart = (value: any) => {
+    console.log("value add cart: ", value);
+    if (auth === null) {
+      router.push("/login");
+    } else {
+      add(value, 1);
+    }
+  };
+
   // console.log("data: ", data);
   const handleSubmit = useCallback((value: any) => {
     setFetchData((pre) => pre + 1);
@@ -124,14 +145,14 @@ function Products({ products, categories, supplier }: Props) {
     setToDiscount("");
     setToPrice("");
     setSupplierId("");
-
     setFetchData((pre) => pre + 1);
   }, []);
   return (
     <>
       {/* ////////////////////////////////////// */}
+
       <Row className="">
-        <Col span={18} push={6}>
+        <Col span={18} push={4}>
           <div className={`${Style.container1}`}>
             {row &&
               row?.map((items: any, index: any) => {
@@ -155,8 +176,11 @@ function Products({ products, categories, supplier }: Props) {
                           <div className="d-flex justify-content-center">
                             <div>{items2.name}</div>
                           </div>
-                          <div style={{ padding: "0 40%" }}>
-                            {items2.price}đ
+                          <div className={Style.price}>{items2.price}đ</div>
+                          <div className={Style.button}>
+                            <Button onClick={() => handleAddCart(items2)}>
+                              Thêm vào giỏ hàng
+                            </Button>
                           </div>
                         </div>
                       );
@@ -166,83 +190,16 @@ function Products({ products, categories, supplier }: Props) {
               })}
           </div>
         </Col>
-        <Col span={6} pull={18} className={`${Style.col2}`}>
+        <Col span={4} pull={18} className={`${Style.col2} `}>
           <div>
-            {/* //responsive */}
-            <div className={Style.splitRow}>
-              <Button type="primary" onClick={showDrawer} className="w-75">
-                <MoreOutlined />
-              </Button>
-              <Drawer
-                width={250}
-                title="Lọc sản phẩm"
-                placement="left"
-                onClose={onClose}
-                open={open}
-              >
-                <Space wrap>
-                  <h5>Danh mục sản phẩm</h5>
-                  <Select
-                    defaultValue="None"
-                    style={{ width: 220 }}
-                    onChange={handleDataChange}
-                    options={categories?.results?.map((items: any) => ({
-                      label: items.name,
-                      value: items._id,
-                    }))}
-                  />
-                  <h5>Hãng sản phẩm</h5>
-                  <Select
-                    defaultValue="None"
-                    style={{ width: 220 }}
-                    onChange={handleChangeSupplier}
-                    options={supplier?.results?.map((items: any) => ({
-                      label: items.name,
-                      value: items._id,
-                    }))}
-                  />
-                </Space>
-                <h5>Lọc giá</h5>
-                <div className="d-flex mt-3">
-                  <InputNumber
-                    placeholder="Enter From"
-                    min={0}
-                    onChange={handleFromPrice}
-                    style={{ margin: "0 5px" }}
-                  />
-
-                  <InputNumber
-                    placeholder="Enter to"
-                    max={1000}
-                    onChange={handleToPrice}
-                  />
-                </div>
-                <h5>Mức giảm giá</h5>
-                <div className="d-flex">
-                  <InputNumber
-                    placeholder="Enter From"
-                    min={0}
-                    onChange={handleFromDiscount}
-                    style={{ margin: "0 5px" }}
-                  />
-
-                  <InputNumber
-                    placeholder="Enter to"
-                    max={90}
-                    onChange={handleToDiscount}
-                  />
-                </div>
-              </Drawer>
-            </div>
-
             <div className={`pt-3 ${Style.splitRowPC}`}>
               <Space wrap className="d-flex flex-column ">
                 <h5>Danh mục sản phẩm</h5>
                 <Select
                   allowClear
                   autoClearSearchValue={!categoryId ? true : false}
-                  defaultValue="None"
-                  style={{ width: 220 }}
+                  defaultValue={"None"}
+                  style={{ width: 180 }}
                   onChange={handleDataChange}
                   options={categories?.results?.map((items: any) => ({
                     label: items.name,
@@ -254,8 +211,8 @@ function Products({ products, categories, supplier }: Props) {
                 <Select
                   allowClear
                   autoClearSearchValue={!supplierId ? true : false}
-                  defaultValue={null}
-                  style={{ width: 220 }}
+                  defaultValue={"None"}
+                  style={{ width: 180 }}
                   onChange={handleChangeSupplier}
                   options={supplier?.results?.map((items: any) => ({
                     label: items.name,
@@ -265,15 +222,15 @@ function Products({ products, categories, supplier }: Props) {
                 <h5>Lọc giá</h5>
                 <div className="d-flex">
                   <InputNumber
-                    // allowClear
-                    // autoClearSearchValue={!categoryId ? true : false}
+                    defaultValue={"0"}
                     placeholder="Enter From"
-                    min={1}
+                    min={0}
                     onChange={handleFromPrice}
                     style={{ margin: "0 5px" }}
                   />
 
                   <InputNumber
+                    defaultValue={"0"}
                     placeholder="Enter to"
                     max={1000}
                     onChange={handleToPrice}
@@ -283,6 +240,7 @@ function Products({ products, categories, supplier }: Props) {
                 <div className="d-flex">
                   <InputNumber
                     placeholder="Enter From"
+                    defaultValue={"0"}
                     min={0}
                     onChange={handleFromDiscount}
                     style={{ margin: "0 5px" }}
@@ -290,6 +248,7 @@ function Products({ products, categories, supplier }: Props) {
 
                   <InputNumber
                     placeholder="Enter to"
+                    defaultValue={"0"}
                     max={90}
                     onChange={handleToDiscount}
                   />
@@ -310,6 +269,94 @@ function Products({ products, categories, supplier }: Props) {
             </div>
           </div>
         </Col>
+        {/* //responsive */}
+        <div className={Style.splitRow}>
+          <Affix offsetTop={top}>
+            <FloatButton
+              icon={<MoreOutlined />}
+              type="primary"
+              onClick={showDrawer}
+              style={{ right: 24 }}
+            ></FloatButton>
+          </Affix>
+
+          <Drawer
+            width={250}
+            title="Lọc sản phẩm"
+            placement="left"
+            onClose={onClose}
+            open={open}
+          >
+            <Space wrap>
+              <h5>Danh mục sản phẩm</h5>
+              <Select
+                defaultValue="None"
+                style={{ width: 220 }}
+                onChange={handleDataChange}
+                options={categories?.results?.map((items: any) => ({
+                  label: items.name,
+                  value: items._id,
+                }))}
+              />
+              <h5>Hãng sản phẩm</h5>
+              <Select
+                defaultValue="None"
+                style={{ width: 220 }}
+                onChange={handleChangeSupplier}
+                options={supplier?.results?.map((items: any) => ({
+                  label: items.name,
+                  value: items._id,
+                }))}
+              />
+            </Space>
+            <h5>Lọc giá</h5>
+            <div className="d-flex mt-3">
+              <InputNumber
+                defaultValue="0"
+                placeholder="Enter From"
+                min={0}
+                onChange={handleFromPrice}
+                style={{ margin: "0 5px" }}
+              />
+
+              <InputNumber
+                defaultValue="0"
+                placeholder="Enter to"
+                max={1000}
+                onChange={handleToPrice}
+              />
+            </div>
+            <h5>Mức giảm giá</h5>
+            <div className="d-flex">
+              <InputNumber
+                defaultValue="0"
+                placeholder="Enter From"
+                min={0}
+                onChange={handleFromDiscount}
+                style={{ margin: "0 5px" }}
+              />
+
+              <InputNumber
+                defaultValue="0"
+                placeholder="Enter to"
+                max={90}
+                onChange={handleToDiscount}
+              />
+            </div>
+            <div className="mt-3">
+              <Button type="primary" onClick={handleSubmit}>
+                Lọc sản phẩm
+              </Button>
+              <Button
+                type="primary"
+                onClick={handleClearSubmit}
+                className="ms-1"
+              >
+                Xóa lọc
+              </Button>
+            </div>
+          </Drawer>
+        </div>
       </Row>
     </>
   );

@@ -3,7 +3,6 @@ import React, { useEffect, useState, useCallback } from "react";
 import { Badge, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
-import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useAuthStore } from "@/hook/useAuthStore";
 
@@ -19,7 +18,6 @@ import {
 
 import { useCartStore } from "../../hook/useCountStore";
 
-const { Search } = Input;
 type Props = {};
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
@@ -76,12 +74,12 @@ function NavBar({}: Props) {
     }
   };
 
-  const hanldeClear = async () => {
-    const data = await axios.get(`${URL_ENV}/products`).then((response) => {
-      return response.data.results;
-    });
-    setFindProduct(data);
-  };
+  // const hanldeClear = async () => {
+  //   const data = await axios.get(`${URL_ENV}/products`).then((response) => {
+  //     return response.data.results;
+  //   });
+  //   setFindProduct(data);
+  // };
 
   const itemsAccount = [
     {

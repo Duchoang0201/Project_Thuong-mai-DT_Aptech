@@ -8,3 +8,9 @@
     top: 8%;
     font-size: larger;
 }
+.items:hover{
+    border: 1px solid blue;
+    border-radius: 2%;
+   height: 280px;
+   
+}
