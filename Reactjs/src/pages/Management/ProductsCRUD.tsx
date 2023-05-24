@@ -256,23 +256,21 @@ const ProductsCRUD = () => {
       render: (text: any, record: any, index: any) => {
         return (
           <div>
-            {record.imageUrl && (
-              <div className="d-flex justify-content-between">
-                <img
-                  src={`${URL_ENV}${record.imageUrl}`}
-                  style={{ height: 60 }}
-                  alt="record.imageUrl"
-                />
-                <Button
-                  onClick={() => {
-                    setUpdateId(record);
-                    setOpenDetailPicture(true);
-                    pictureForm.setFieldsValue(record);
-                  }}
-                  icon={<UnorderedListOutlined />}
-                />
-              </div>
-            )}
+            <div className="d-flex justify-content-between">
+              <img
+                src={`${URL_ENV}${record.imageUrl}`}
+                style={{ height: 60 }}
+                alt="record.imageUrl"
+              />
+              <Button
+                onClick={() => {
+                  setUpdateId(record);
+                  setOpenDetailPicture(true);
+                  pictureForm.setFieldsValue(record);
+                }}
+                icon={<UnorderedListOutlined />}
+              />
+            </div>
           </div>
         );
       },
@@ -419,6 +417,13 @@ const ProductsCRUD = () => {
       },
       dataIndex: "price",
       key: "price",
+      render: (text: any, record: any) => {
+        const formattedPrice = text.toLocaleString("vi-VN", {
+          style: "currency",
+          currency: "VND",
+        });
+        return <div>{formattedPrice}</div>;
+      },
       filterDropdown: () => {
         return (
           <Form
@@ -730,23 +735,27 @@ const ProductsCRUD = () => {
       .post(API_URL, record)
       .then((res) => {
         // UPLOAD FILE
-        const { _id } = res.data.result;
+        if (file) {
+          const { _id } = res.data.result;
 
-        const formData = new FormData();
-        formData.append("file", file);
+          const formData = new FormData();
+          formData.append("file", file);
 
-        axios
-          .post(`${URL_ENV}/upload/products/${_id}/image`, formData)
-          .then((respose) => {
-            message.success("Create a product successFully!!", 1.5);
-            createForm.resetFields();
-            setRefresh((f) => f + 1);
-            setOpen(false);
-            setFile(null);
-          })
-          .catch((err) => {
-            message.error("Upload file bị lỗi!");
-          });
+          axios
+            .post(`${URL_ENV}/upload/products/${_id}/image`, formData)
+            .then((respose) => {
+              message.success("Create a product successFully!!", 1.5);
+              createForm.resetFields();
+              setRefresh((f) => f + 1);
+              setOpen(false);
+              setFile(null);
+            })
+            .catch((err) => {
+              message.error("Upload file bị lỗi!");
+            });
+        } else {
+          message.success("Create a product successFully!!", 1.5);
+        }
       })
       .catch((err: any) => {
         console.log(err);
@@ -1401,6 +1410,7 @@ const ProductsCRUD = () => {
       <Modal
         open={openDetailPicture}
         onCancel={() => setOpenDetailPicture(false)}
+        onOk={() => setOpenDetailPicture(false)}
       >
         {updateId && (
           <div>

@@ -16,21 +16,23 @@ import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
 import { Divider } from "antd";
 import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
 
-import Backgroundmonth from "../compenents/Mainpage/Topmonth/diamond-city-demo-image-2.png";
 import Backgroundhot from "../compenents/Mainpage/Hotdeal/jewelrybanner.jpg";
+import Backgroundmonth from "../compenents/Mainpage/Topmonth/pexels-leah-kelley-691046.jpg";
+
 export default function Home() {
-  const monthStyle = {
-    backgroundImage: `url(${Backgroundmonth.src})`,
-    width: "100%",
-    height: "100%",
-    size: "cover",
-  };
   const hotStyle = {
     backgroundSize: "cover",
     backgroundImage: `url(${Backgroundhot.src})`,
-    width: "100%",
-    height: "100%",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   };
+  const monthStyle = {
+    backgroundSize: "cover",
+    backgroundImage: `url(${Backgroundmonth.src})`,
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  };
+
   return (
     <>
       <Head>
@@ -40,22 +42,22 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
+      <main className="container">
         <Slides />
-        <Divider>
-          <h3>Ưu đãi hấp dẫn</h3>
-        </Divider>
-        <div style={hotStyle}>
-          <div className="container">
-            <Hotdeal />
-          </div>
-        </div>
         <Divider>
           <h3>Số lượng mua nhiều nhất trong tháng</h3>
         </Divider>
         <div style={monthStyle}>
           <div className="container">
             <Topmoth />
+          </div>
+        </div>
+        <Divider>
+          <h3> Ưu đãi hấp dẫn </h3>
+        </Divider>
+        <div style={hotStyle}>
+          <div className="container">
+            <Hotdeal />
           </div>
         </div>
         <div className="container">

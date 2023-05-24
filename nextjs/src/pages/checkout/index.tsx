@@ -168,8 +168,8 @@ const CheckoutPayment = (props: Props) => {
       orderData.paymentType = "MOMO";
 
       const amount = items
-        .map((item: any) => item.product.price)
-        .reduce((acc: any, curr: any) => acc + curr, 0);
+        .map((item: any) => item.product.price * item.quantity)
+        .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
 
       const payPost = async () => {
         try {
@@ -177,6 +177,31 @@ const CheckoutPayment = (props: Props) => {
           if (postOder) {
             const found = await axios.post(
               `${URL_ENV}/orders/pay/create_momo_url`,
+              { amount: amount }
+            );
+
+            console.log("««««« found »»»»»", found.data);
+            window.location.href = found.data.urlPay;
+          }
+        } catch (error) {
+          console.log("««««« error »»»»»", error);
+        }
+      };
+      payPost();
+    }
+    if (payMethod === "vnpay") {
+      orderData.paymentType = "VNPAY";
+
+      const amount = items
+        .map((item: any) => item.product.price * item.quantity)
+        .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
+
+      const payPost = async () => {
+        try {
+          const postOder = await axios.post(`${URL_ENV}/orders`, orderData);
+          if (postOder) {
+            const found = await axios.post(
+              `${URL_ENV}/orders/pay/create_vnpay_url`,
               { amount: amount }
             );
 
@@ -216,12 +241,18 @@ const CheckoutPayment = (props: Props) => {
                     <span>{i.product.name}</span> x{" "}
                     <span className="text-danger">{i.quantity}</span>
                   </div>
-                  <span>{i.product.price * i.quantity}</span>
+                  <span>
+                    {(i.product.price * i.quantity).toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })}
+                  </span>
                 </div>
                 <Divider key={i.product.id}></Divider>
               </React.Fragment>
             );
           })}
+
           <div className="d-flex justify-content-between">
             <strong>Tổng</strong>
             <strong>
@@ -233,6 +264,10 @@ const CheckoutPayment = (props: Props) => {
                         accumulator + subtotal,
                       0
                     )
+                    .toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })
                 : 0}
             </strong>
           </div>

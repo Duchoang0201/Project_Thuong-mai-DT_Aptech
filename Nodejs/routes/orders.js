@@ -320,7 +320,7 @@ router.post("/pay/create_momo_url", (req, res) => {
   const accessKey = "klm05TvNBzhg7h7j";
   const secretKey = "at67qH6mk8w5Y1nAyMoYKMWACiEi2bsa";
   const orderInfo = "Thanh toán qua MoMo";
-  const amount = req.body.amount * 100;
+  const amount = req.body.amount;
   const orderId = `${Date.now()}`;
   const redirectUrl = "http://localhost:4444/success-payment";
   const ipnUrl = "http://localhost:4444/success-payment";
@@ -382,7 +382,7 @@ router.post("/pay/create_vnpay_url", (req, res, next) => {
   const createDate = date.format("YYYYMMDDHHmmss"); // Format the date using moment
   const orderId = date.format("HHmmss"); // Format the time using moment
 
-  const amount = req.body.amount;
+  const amount = req.body.amount * 100;
   const bankCode = req.body.bankCode;
 
   let orderInfo = req.body.orderDescription;
@@ -401,7 +401,7 @@ router.post("/pay/create_vnpay_url", (req, res, next) => {
     vnp_TxnRef: orderId,
     vnp_OrderInfo: orderInfo,
     vnp_OrderType: orderType,
-    vnp_Amount: amount * 100,
+    vnp_Amount: amount,
     vnp_ReturnUrl: returnUrl,
     vnp_IpAddr: ipAddr,
     vnp_CreateDate: createDate,

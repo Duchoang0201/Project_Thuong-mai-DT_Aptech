@@ -60,7 +60,12 @@ export default function Carts() {
                       />
                     </td>
                     <td>{i.product?.name}</td>
-                    <td className="text-end">{i.product?.price}</td>
+                    <td className="text-end">
+                      {i.product?.price.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    </td>
                     <td>
                       {" "}
                       <div className="d-flex justify-content-center">

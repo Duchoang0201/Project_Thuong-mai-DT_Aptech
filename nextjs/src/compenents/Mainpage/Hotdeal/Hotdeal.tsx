@@ -23,7 +23,7 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${URL_ENV}/products`);
+        const response = await axios.get(`${URL_ENV}/products?hotdeal=true`);
         const data = response.data.results;
         setHotDeals(data);
       } catch (error) {
@@ -61,13 +61,21 @@ export default function App() {
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
             <>
-              <SwiperSlide className="px-5 py-4">
+              <SwiperSlide className="px-4 py-4">
                 <Card
-                  className="border rounded-4"
+                  className="border rounded-4 "
                   bordered={false}
-                  style={{ width: 300, height: 500 }}
+                  style={{
+                    width: 300,
+                    height: 500,
+
+                    background: `rgba(245,245,245,0.9)`,
+                  }}
                 >
-                  <Card className="border rounded-4">
+                  <Card
+                    className="border rounded-4"
+                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                  >
                     {" "}
                     <Image
                       alt={item.name}
@@ -81,7 +89,12 @@ export default function App() {
                     {item.name}
                   </p>
                   <p className="text-center">
-                    <strong>{item.price} đ</strong>
+                    <strong>
+                      {item.price.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}{" "}
+                    </strong>
                   </p>
                   <p className="text-center">
                     <Rate disabled defaultValue={item.averageRate} />

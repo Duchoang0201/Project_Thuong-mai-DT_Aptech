@@ -25,7 +25,7 @@ export default function Topmoth() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${URL_ENV}/products`);
+        const response = await axios.get(`${URL_ENV}/products?topMonth=true`);
         const data = response.data.results;
         setHotDeals(data);
       } catch (error) {
@@ -40,28 +40,39 @@ export default function Topmoth() {
     <>
       <div>
         <Swiper
+          loop={true}
+          autoplay={{ delay: 2000 }}
           effect={"coverflow"}
           grabCursor={true}
-          centeredSlides={true}
-          slidesPerView={"auto"}
+          slidesPerView={4}
+          spaceBetween={160}
+          initialSlide={4}
           coverflowEffect={{
-            rotate: 50,
-            stretch: 0,
-            depth: 100,
+            rotate: 30,
+            stretch: 2,
+            depth: 50,
             modifier: 1,
-            slideShadows: true,
           }}
           pagination={true}
           modules={[EffectCoverflow, Pagination]}
-          className="Top_Month py-5"
-          initialSlide={6}
+          className="Top_Month py-5 px-4" // Remove any shadow styles from the className
+          breakpoints={{
+            0: {
+              slidesPerView: 1,
+            },
+            400: {
+              slidesPerView: 2,
+            },
+            900: {
+              slidesPerView: 3,
+            },
+          }}
         >
           {hotDeals.length > 0 &&
             hotDeals.map((item: any, index: any) => (
               <>
-                <SwiperSlide className=" w-25">
+                <SwiperSlide>
                   <Card
-                    className=""
                     bordered={false}
                     style={{
                       width: 300,
@@ -69,7 +80,7 @@ export default function Topmoth() {
                       background: `rgba(245,245,245,0.8)`,
                     }}
                   >
-                    <Card className="">
+                    <Card style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
                       {" "}
                       <Image
                         alt={item.name}
@@ -83,7 +94,12 @@ export default function Topmoth() {
                       {item.name}
                     </p>
                     <p className="text-center">
-                      <strong>{item.price} đ</strong>
+                      <strong>
+                        {item.price.toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        })}{" "}
+                      </strong>
                     </p>
                     <p className="text-center">
                       <Rate disabled defaultValue={item.averageRate} />

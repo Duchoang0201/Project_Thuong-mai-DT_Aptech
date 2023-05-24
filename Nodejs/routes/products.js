@@ -31,6 +31,8 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
       toDiscount,
       fromStock,
       toStock,
+      hotDeal,
+      topMonth,
       skip,
       limit,
     } = req.query;
@@ -49,6 +51,8 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
         toStock ? { stock: { $lte: Number(toStock) } } : null,
         fromDiscount ? { discount: { $gte: Number(fromDiscount) } } : null,
         toDiscount ? { discount: { $lte: Number(toDiscount) } } : null,
+        hotDeal ? { promotionPosition: "DEAL" } : null,
+        topMonth ? { promotionPosition: "TOP-MONTH" } : null,
       ].filter(Boolean),
     };
     let results = await Product.find(query)

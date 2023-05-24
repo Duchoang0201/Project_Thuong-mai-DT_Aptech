@@ -31,6 +31,23 @@ const GeneralInformation = (props: Props) => {
     seriesField: "month",
     color: `white`,
 
+    tooltip: {
+      customContent: (title: any, items: any) => {
+        const formattedItems = items.map((item: any) => {
+          const formattedValue = item.value
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          let name = item.name;
+          if (name) {
+            name = name.split(":")[1]?.trim(); // Extract the text after the colon and remove leading/trailing spaces
+          }
+          return ` ${formattedValue}`;
+        });
+        return `<div> Tháng ${title} :</div><div>${formattedItems.join(
+          "<br/>"
+        )} VND</div>`;
+      },
+    },
     xAxis: {
       title: {
         text: "Tháng",
@@ -42,8 +59,8 @@ const GeneralInformation = (props: Props) => {
         autoHide: true,
         autoRotate: false,
         style: {
-          fill: "white", // Change the color of xField label to red
-          line: [4, 4], // This creates a dashed line effect
+          fill: "white",
+          line: [4, 4],
         },
       },
       grid: {
@@ -68,6 +85,13 @@ const GeneralInformation = (props: Props) => {
         autoRotate: false,
         style: {
           fill: "white", // Change the color of yField label to blue
+        },
+        formatter: (value: any) => {
+          const formattedPrice = value
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          const data = `${formattedPrice}đ`;
+          return data;
         },
       },
       grid: {
@@ -113,6 +137,13 @@ const GeneralInformation = (props: Props) => {
           fill: "white", // Change the color of xField label to red
           line: [4, 4], // This creates a dashed line effect
         },
+        formatter: (value: any) => {
+          const formattedPrice = value
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          const data = `${formattedPrice}đ`;
+          return data;
+        },
       },
       grid: {
         line: {
@@ -122,6 +153,23 @@ const GeneralInformation = (props: Props) => {
           },
         },
         alternateColor: "rgba(0,0,0,0.05)",
+      },
+    },
+    tooltip: {
+      customContent: (title: any, items: any) => {
+        const formattedItems = items.map((item: any) => {
+          const formattedValue = item.value
+            .toString()
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+          let name = item.name;
+          if (name) {
+            name = name.split(":")[1]?.trim(); // Extract the text after the colon and remove leading/trailing spaces
+          }
+          return ` ${formattedValue}`;
+        });
+        return `<div> Tháng ${title} :</div><div>${formattedItems.join(
+          "<br/>"
+        )} VND</div>`;
       },
     },
     yAxis: {
