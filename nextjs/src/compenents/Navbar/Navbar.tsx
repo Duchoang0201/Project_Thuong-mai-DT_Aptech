@@ -24,7 +24,6 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 function NavBar({}: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
-  const E_URL = `${URL_ENV}/customers/${auth?.payload?._id}`;
 
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
@@ -58,6 +57,15 @@ function NavBar({}: Props) {
       .catch((err) => console.log(err));
   }, [fresh]);
 
+  useEffect(() => {
+    axios
+      .get(`${URL_ENV}/customers/${auth?.payload?._id}`)
+      .then((res: any) => {
+        setUser(res.data.result);
+      })
+      .catch((err) => console.log(err));
+  }, [auth?.payload?._id]);
+
   const handleNavigation = (path: any) => {
     // router.reload();
     router.push(path);
@@ -77,13 +85,6 @@ function NavBar({}: Props) {
       setFresh((pre) => pre + 1);
     }
   };
-
-  // const hanldeClear = async () => {
-  //   const data = await axios.get(`${URL_ENV}/products`).then((response) => {
-  //     return response.data.results;
-  //   });
-  //   setFindProduct(data);
-  // };
 
   const itemsAccount = [
     {
@@ -108,6 +109,7 @@ function NavBar({}: Props) {
           onClick={() => {
             logout();
             router.push("/");
+            setUser(null);
           }}
         >
           <Space>
@@ -154,7 +156,7 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {auth && (
+            {user && (
               <>
                 <li
                   className={Style.listTopItem1}
@@ -200,7 +202,7 @@ function NavBar({}: Props) {
                 </li>
               </>
             )}
-            {auth === null && (
+            {!user && (
               <>
                 <li
                   className={Style.listTopItem1}
@@ -232,6 +234,7 @@ function NavBar({}: Props) {
         <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
+            style={{ width: "35%" }}
             className={scroll > 80 ? Style.lengths : Style.length__Scroll}
             selectedKeys={[current]}
           >

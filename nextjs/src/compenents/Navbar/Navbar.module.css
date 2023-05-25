@@ -141,7 +141,7 @@
   width: 35%;
   background-color: #070707; /* Màu nền */
   color: azure;
-  transition: background 0.2s ease-in-out;
+  transition: 0.2s ease-in-out;
 }
 
 .length__Scroll{

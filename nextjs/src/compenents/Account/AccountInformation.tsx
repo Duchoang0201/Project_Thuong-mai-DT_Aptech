@@ -11,6 +11,7 @@ import {
   Popconfirm,
   Row,
   Typography,
+  Upload,
   message,
 } from "antd";
 import axios from "axios";
@@ -20,6 +21,7 @@ import {
   HomeOutlined,
   MailOutlined,
   PhoneOutlined,
+  UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import router from "next/router";
@@ -113,10 +115,39 @@ const AccountInformation = (props: Props) => {
           <Card loading={loading} bordered={true} style={{ width: "100%" }}>
             <div className="text-center">
               <Avatar size={64} src={`${URL_ENV}${user?.imageUrl}`} />
+              <div className="py-2">
+                <Upload
+                  showUploadList={false}
+                  name="file"
+                  action={`${URL_ENV}/upload/customers/${auth?.payload._id}/image`}
+                  headers={{ authorization: "authorization-text" }}
+                  onChange={(info) => {
+                    if (info.file.status !== "uploading") {
+                      console.log(info.file);
+                    }
+
+                    if (info.file.status === "done") {
+                      message.success(
+                        `${info.file.name} file uploaded successfully`
+                      );
+
+                      setTimeout(() => {
+                        console.log("««««« run »»»»»");
+                        setRefresh(refresh + 1);
+                      }, 1000);
+                    } else if (info.file.status === "error") {
+                      message.error(`${info.file.name} file upload failed.`);
+                    }
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} />
+                </Upload>
+              </div>
               <p className="py-2">
                 {user?.firstName} {user?.lastName}
               </p>
             </div>
+
             <div className="text-left">
               {" "}
               <p>
