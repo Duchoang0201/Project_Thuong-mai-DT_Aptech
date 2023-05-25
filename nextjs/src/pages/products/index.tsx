@@ -136,8 +136,9 @@ function Products({ products, categories, supplier }: Props) {
     setSupplierId("");
     setFetchData((pre) => pre + 1);
   }, []);
+
   return (
-    <>
+    <div>
       {/* ////////////////////////////////////// */}
 
       <Row>
@@ -183,7 +184,7 @@ function Products({ products, categories, supplier }: Props) {
           </div>
         </Col>
         <Col span={4} pull={18} className={`${Style.col2} `}>
-          <Affix offsetTop={30}>
+          <Affix offsetTop={95}>
             <div>
               <div className={`pt-3 ${Style.splitRowPC}`}>
                 <Space wrap className="d-flex flex-column ">
@@ -352,7 +353,7 @@ function Products({ products, categories, supplier }: Props) {
           </Drawer>
         </div>
       </Row>
-    </>
+    </div>
   );
 }
 

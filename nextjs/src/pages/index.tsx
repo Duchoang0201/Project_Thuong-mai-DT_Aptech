@@ -11,6 +11,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper.min.css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper";
+import NavBar from "@/compenents/Navbar/Navbar";
 
 // import { img } from "../imgBanner";
 

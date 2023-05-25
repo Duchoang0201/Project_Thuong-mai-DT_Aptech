@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
 import { Badge, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
@@ -30,11 +30,24 @@ function NavBar({}: Props) {
   const [current, setCurrent] = useState<any>();
   const [findProduct, setFindProduct] = useState<Array<any>>([]);
   const [fresh, setFresh] = useState<number>(0);
+  const [scroll, setScroll] = useState<number>(10);
 
-  console.log("««««« user »»»»»", user);
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScroll(window.scrollY);
+    };
+
+    handleResize(); // Set initial window width
+    window.addEventListener("scroll", handleResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     axios
@@ -44,15 +57,6 @@ function NavBar({}: Props) {
       })
       .catch((err) => console.log(err));
   }, [URL_ENV, fresh]);
-
-  useEffect(() => {
-    axios
-      .get(E_URL)
-      .then((res: any) => {
-        setUser(res.data.result);
-      })
-      .catch((err) => console.log(err));
-  }, [E_URL]);
 
   const handleNavigation = (path: any) => {
     // router.reload();
@@ -117,7 +121,7 @@ function NavBar({}: Props) {
 
   return (
     <>
-      <div className={Style.container}>
+      <div className={scroll > 60 ? Style.container : Style.contaier__Scroll}>
         <div>
           <ul className={`${Style.listTop}`}>
             <li
@@ -228,7 +232,7 @@ function NavBar({}: Props) {
         <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
-            className={Style.length}
+            className={scroll > 60 ? Style.length : Style.length__Scroll}
             selectedKeys={[current]}
           >
             <Menu.Item
@@ -244,7 +248,8 @@ function NavBar({}: Props) {
 
           <Select
             allowClear
-            style={{ width: "125px", marginTop: "5px" }}
+            // style={{ width: "125px", marginTop: "5px" }}
+            className={scroll > 60 ? Style.input : Style.input__Scroll}
             placeholder="Search"
             optionFilterProp="children"
             onChange={onSearch}
