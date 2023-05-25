@@ -115,7 +115,6 @@ const App: React.FC = () => {
               </Sider>
 
               <Layout
-                // className="container"
                 style={{
                   marginLeft: collapsed ? (windowWidth <= 768 ? 0 : 60) : 200,
                 }}
@@ -159,7 +158,7 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 </Header>
-                <div className="mx-5 my-2 text-danger">
+                <div className="mx-4 my-2 text-danger">
                   {" "}
                   {breadCrumb === "Account/Logout" || breadCrumb === null ? (
                     <Divider>Dashboard/Home</Divider>
@@ -167,7 +166,7 @@ const App: React.FC = () => {
                     <Divider>{breadCrumb}</Divider>
                   )}
                 </div>
-                <Content className="mx-5 my-2">
+                <Content className="mx-4 my-2">
                   {/* Register routes */}
 
                   <Routes>

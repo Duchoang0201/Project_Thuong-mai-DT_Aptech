@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const mongooseLeanVirtuals = require("mongoose-lean-virtuals");
+const Order = require("./Order");
 
 const rateSchema = Schema({
   customer: { type: Object },

@@ -7,6 +7,7 @@ import { Pagination, Navigation, HashNavigation, EffectCards } from "swiper";
 import axios from "axios";
 import Image from "next/image";
 import "./style.module.css";
+import router from "next/router";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
@@ -51,10 +52,17 @@ const Slides = () => {
             autoplay={{
               delay: 1000,
             }}
+            initialSlide={3}
           >
             {slides.length > 0 &&
               slides.map((item: any, index: any) => (
-                <SwiperSlide className="w-100" key={`${index + 1}`}>
+                <SwiperSlide
+                  onClick={() => {
+                    router.push(`${item.url}`);
+                  }}
+                  className="w-100"
+                  key={`${index + 1}`}
+                >
                   <Image
                     width={0}
                     height={0}

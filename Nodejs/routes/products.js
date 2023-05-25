@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const yup = require("yup");
-const { Product } = require("../models");
+const { Product, Order } = require("../models");
 const mongooseLeanVirtuals = require("mongoose-lean-virtuals");
 const ObjectId = require("mongodb").ObjectId;
 const { validateSchema, getProductsSchema } = require("../validation/product");
@@ -55,6 +55,7 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
         topMonth ? { promotionPosition: "TOP-MONTH" } : null,
       ].filter(Boolean),
     };
+
     let results = await Product.find(query)
       .populate("category")
       .populate("supplier")
@@ -64,10 +65,54 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
       .sort({ isDeleted: 1 })
       .limit(limit);
 
+    let amountSold = await Order.aggregate([
+      { $unwind: "$orderDetails" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "orderDetails.productId",
+          foreignField: "_id",
+          as: "productSold",
+        },
+      },
+      { $unwind: "$productSold" },
+      {
+        $group: {
+          _id: "$productSold._id",
+          productName: { $first: "$productSold.name" },
+          price: { $first: "$productSold.price" },
+          totalQuantity: { $sum: "$orderDetails.quantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: 1,
+          price: 1,
+          totalQuantity: 1,
+        },
+      },
+    ]);
+
+    // Map the amountSold array to create a dictionary of ID-quantity pairs
+    const amountSoldDict = amountSold.reduce((dict, item) => {
+      dict[item._id.toString()] = item.totalQuantity;
+      return dict;
+    }, {});
+
+    // Add the "amountSold" field to each item in the "results" array
+    results = results.map((item) => {
+      const amountSoldQuantity = amountSoldDict[item._id.toString()] || 0;
+      return {
+        ...item,
+        amountSold: amountSoldQuantity,
+      };
+    });
+
     let amountResults = await Product.countDocuments(query);
     res.json({ results: results, amountResults: amountResults });
   } catch (error) {
-    res.status(500).json({ ok: false, error });
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 

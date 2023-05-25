@@ -17,13 +17,11 @@ const CheckoutMethod = (props: Props) => {
   return (
     <div className="container">
       {" "}
-      <h3 className=" py-2 text-center">Thủ tục thanh toán</h3>
-      <Divider orientation="left"> Phương thức thanh toán cho phép</Divider>
       <Row className="py-3 ">
         {methodPay?.map((item: any) => (
           <Col style={{ width: "90%" }} key={item._id} xs={24} xl={8}>
             {" "}
-            <Card className="border " style={{ width: "90%" }}>
+            <Card className="border mx-4 ">
               <div className="d-flex justify-content-between">
                 <div className="content">
                   {" "}

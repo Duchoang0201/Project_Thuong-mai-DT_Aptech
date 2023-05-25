@@ -23,7 +23,7 @@ export default function App() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${URL_ENV}/products?hotdeal=true`);
+        const response = await axios.get(`${URL_ENV}/categories`);
         const data = response.data.results;
         setHotDeals(data);
       } catch (error) {
@@ -40,6 +40,7 @@ export default function App() {
         slidesPerView={2}
         centeredSlides={true}
         loop={true}
+        grabCursor={true}
         navigation={true}
         modules={[Pagination, Navigation]}
         className="hotDeals"
@@ -47,14 +48,15 @@ export default function App() {
         breakpoints={{
           0: {
             slidesPerView: 1,
-            spaceBetween: 100,
+            spaceBetween: 10,
           },
           400: {
             slidesPerView: 2,
-            spaceBetween: 100,
+            spaceBetween: 10,
           },
           900: {
             slidesPerView: 3,
+            spaceBetween: 10,
           },
         }}
       >
@@ -63,18 +65,18 @@ export default function App() {
             <>
               <SwiperSlide className="px-4 py-4">
                 <Card
-                  className="border rounded-4 "
+                  className=" rounded-4 "
                   bordered={false}
                   style={{
                     width: 300,
-                    height: 500,
+                    height: 350,
 
-                    background: `rgba(245,245,245,0.9)`,
+                    background: `rgba(245,245,245,0.1)`,
                   }}
                 >
                   <Card
-                    className="border rounded-4"
-                    style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                    className="border  rounded-circle"
+                    style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
                   >
                     {" "}
                     <Image
@@ -84,32 +86,9 @@ export default function App() {
                       height={200}
                     />
                   </Card>
-                  <p style={{ height: 40 }} className="text-center">
+                  <h6 style={{ height: 40 }} className="text-center  py-2">
                     {item.name}
-                  </p>
-                  <p className="text-center">
-                    <strong>
-                      {item.price.toLocaleString("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      })}{" "}
-                    </strong>
-                  </p>
-                  <p className="text-center">Đã bán: {item.amountSold} cái</p>
-                  <p className="text-center">
-                    <Rate disabled defaultValue={item.averageRate} />
-                  </p>
-
-                  <Divider>
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        router.push(`/products/${item._id}`);
-                      }}
-                    >
-                      Chi tiết
-                    </Button>
-                  </Divider>
+                  </h6>
                 </Card>
               </SwiperSlide>
             </>

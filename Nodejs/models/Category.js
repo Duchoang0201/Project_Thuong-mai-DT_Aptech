@@ -19,6 +19,7 @@ const CategorySchema = Schema(
     },
     updatedBy: { type: Object },
     note: { type: String },
+    imageUrl: { type: String },
   },
   {
     versionKey: false,

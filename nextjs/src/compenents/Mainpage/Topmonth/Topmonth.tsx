@@ -89,7 +89,7 @@ export default function Topmoth() {
                         height={200}
                       />
                     </Card>
-                    <Divider>Thông tin sản phẩm</Divider>
+
                     <p style={{ height: 40 }} className="text-center">
                       {item.name}
                     </p>
@@ -101,6 +101,8 @@ export default function Topmoth() {
                         })}{" "}
                       </strong>
                     </p>
+                    <p className="text-center">Đã bán: {item.amountSold} cái</p>
+
                     <p className="text-center">
                       <Rate disabled defaultValue={item.averageRate} />
                     </p>

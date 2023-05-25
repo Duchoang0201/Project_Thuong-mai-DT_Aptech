@@ -13,6 +13,7 @@ var express = require("express");
 
 var router = express.Router();
 
+var WEBSHOP_URL = process.env.WEB_SHOP_URL || `http://localhost:4444`;
 // GET
 router.get("/", function (req, res, next) {
   try {
@@ -322,8 +323,8 @@ router.post("/pay/create_momo_url", (req, res) => {
   const orderInfo = "Thanh toán qua MoMo";
   const amount = req.body.amount;
   const orderId = `${Date.now()}`;
-  const redirectUrl = "http://localhost:4444/success-payment";
-  const ipnUrl = "http://localhost:4444/success-payment";
+  const redirectUrl = `${WEBSHOP_URL}/success-payment`;
+  const ipnUrl = `${WEBSHOP_URL}/success-payment`;
   const extraData = "";
 
   const requestBody = {
@@ -375,7 +376,7 @@ router.post("/pay/create_vnpay_url", (req, res, next) => {
   const tmnCode = config.vnp_TmnCode;
   const secretKey = config.vnp_HashSecret;
   const vnpUrl = config.vnp_Url;
-  const returnUrl = "http://localhost:4444/success-payment";
+  const returnUrl = `${WEBSHOP_URL}/success-payment`;
 
   const date = moment(); // Use moment to get the current date and time
 
@@ -502,7 +503,7 @@ router.get("/vnpay_ipn", function (req, res, next) {
             //that bai
             //paymentStatus = '2'
             // Ở đây cập nhật trạng thái giao dịch thanh toán thất bại vào CSDL của bạn
-            res.redirect("http://localhost:4444/checkout");
+            res.redirect(`${WEBSHOP_URL}/checkout`);
           }
         } else {
           res.status(200).json({

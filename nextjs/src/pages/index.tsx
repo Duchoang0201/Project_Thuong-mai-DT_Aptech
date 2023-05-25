@@ -16,8 +16,10 @@ import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
 import { Divider } from "antd";
 import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
 
-import Backgroundhot from "../compenents/Mainpage/Hotdeal/jewelrybanner.jpg";
+import Backgroundhot from "../compenents/Mainpage/Hotdeal/top_img_01_pc_watch_191226.jpg";
 import Backgroundmonth from "../compenents/Mainpage/Topmonth/pexels-leah-kelley-691046.jpg";
+import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
+import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 
 export default function Home() {
   const hotStyle = {
@@ -44,6 +46,19 @@ export default function Home() {
 
       <main className="container">
         <Slides />
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
+          <h3 className=" py-2 text-center">Phương thức thanh toán</h3>
+
+          <CheckoutMethod />
+        </div>
+        <Divider>
+          <h3>Danh mục yêu thích</h3>
+        </Divider>
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
+          <div className="container">
+            <Searchtrend />
+          </div>
+        </div>
         <Divider>
           <h3>Số lượng mua nhiều nhất trong tháng</h3>
         </Divider>

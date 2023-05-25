@@ -279,6 +279,11 @@ const CheckoutPayment = (props: Props) => {
   return (
     <>
       <div style={{ background: "rgb(245,245,245)" }}>
+        <div className="container">
+          <h3 className=" py-2 text-center">Thủ tục thanh toán</h3>
+          <Divider orientation="left"> Phương thức thanh toán cho phép</Divider>
+        </div>
+
         <CheckoutMethod />
       </div>
 
