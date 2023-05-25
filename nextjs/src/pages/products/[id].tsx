@@ -9,7 +9,6 @@ import { PhoneFilled, PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const { Panel } = Collapse;
-const { getMentions } = Mentions;
 const { TextArea } = Input;
 import "swiper/swiper-bundle.css";
 import "swiper/css/pagination";
@@ -164,22 +163,26 @@ export default function ProductDetails({ product, allProduct }: Props) {
           </div>
         </div>
         <br />
-        <div>
-          <Collapse size="large">
-            <Panel header="Thông số và mô tả sản phẩm" key="1">
-              <p>{product.description}</p>
-            </Panel>
-          </Collapse>
+        <div className="  d-flex justify-content-center">
+          <div className="w-75">
+            <Collapse size="small">
+              <Panel header="Thông số và mô tả sản phẩm" key="1">
+                <p>{product.description}</p>
+              </Panel>
+            </Collapse>
+          </div>
         </div>
-        <div>
-          <Collapse size="large">
-            <Panel header="Bình luận" key="1">
-              <TextArea showCount maxLength={100} />
-              <Button className="m-2" type="primary">
-                Submit
-              </Button>
-            </Panel>
-          </Collapse>
+        <div className="d-flex justify-content-center">
+          <div className="w-75">
+            <Collapse size="small">
+              <Panel header="Bình luận" key="1">
+                <TextArea showCount maxLength={100} />
+                <Button className="m-2" type="primary">
+                  Submit
+                </Button>
+              </Panel>
+            </Collapse>
+          </div>
         </div>
 
         <div className="d-none d-sm-block">

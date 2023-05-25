@@ -144,10 +144,9 @@ function Products({ products, categories, supplier }: Props) {
       <Row>
         <Col span={18} push={4}>
           <div
-            // style={{ height: "3%", background: "#d2d0d4" }}
             className={`d-flex justify-content-center align-items-center ${Style.title}`}
           >
-            <h2 style={{ color: "#6508fa" }}>Sản Phẩm</h2>
+            {/* <h2 style={{ color: "#6508fa" }}>Sản Phẩm</h2> */}
           </div>
           <div className={`${Style.container1}`}>
             <ul className={Style.list}>

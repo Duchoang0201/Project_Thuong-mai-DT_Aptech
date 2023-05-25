@@ -27,13 +27,16 @@
     height: 450px;
     display: block;
     position: relative;
+    background: rgb(235, 235, 235);
+    background: linear-gradient(to bottom,#fff 0%,#f7f7f7 100%);
+    transition: background 0.5s ease-in-out;
 }
 
 
 
 .items:hover{
     cursor: pointer;
-    background-color: rgb(239, 246, 250);
+    background: rgb(241, 246, 248);
 }
 .name{
     position: absolute;
@@ -52,6 +55,11 @@
     
 }
 
+.title{
+    background-image: url(banner-20230307T065108Z-001_1200x450-cta.jpg);
+    background-size: cover;
+    height: 230px;
+}
 @media screen and (max-width: 720px){
     .title{
         display: none;

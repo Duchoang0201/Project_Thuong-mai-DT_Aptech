@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Badge, Dropdown, MenuProps, Space } from "antd";
+import { Badge, Divider, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
 import { useRouter } from "next/router";
@@ -121,7 +121,7 @@ function NavBar({}: Props) {
 
   return (
     <>
-      <div className={scroll > 60 ? Style.container : Style.contaier__Scroll}>
+      <div className={scroll > 150 ? Style.container : Style.contaier__Scroll}>
         <div>
           <ul className={`${Style.listTop}`}>
             <li
@@ -232,7 +232,7 @@ function NavBar({}: Props) {
         <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
-            className={scroll > 60 ? Style.length : Style.length__Scroll}
+            className={scroll > 150 ? Style.lengths : Style.length__Scroll}
             selectedKeys={[current]}
           >
             <Menu.Item
@@ -249,7 +249,7 @@ function NavBar({}: Props) {
           <Select
             allowClear
             // style={{ width: "125px", marginTop: "5px" }}
-            className={scroll > 60 ? Style.input : Style.input__Scroll}
+            className={scroll > 150 ? Style.input : Style.input__Scroll}
             placeholder="Search"
             optionFilterProp="children"
             onChange={onSearch}
