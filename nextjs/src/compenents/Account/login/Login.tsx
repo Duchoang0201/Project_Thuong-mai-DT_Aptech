@@ -1,14 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
-import {
-  Button,
-  Checkbox,
-  Form,
-  Input,
-  Typography,
-  message,
-  Select,
-} from "antd";
+import { Button, Form, Input } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import style from "./index.module.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
@@ -23,14 +15,7 @@ const Login = () => {
   const onLogin = async (values: any) => {
     const { email, password } = values;
     login({ email, password });
-
-    if (auth?.payload) {
-      router.push("/"); // Replace '/page' with the actual path to your desired page
-    }
-  };
-
-  const handleRegister = () => {
-    router.push("/register");
+    router.push("/");
   };
 
   return (

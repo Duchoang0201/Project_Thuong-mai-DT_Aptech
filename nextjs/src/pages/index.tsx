@@ -20,8 +20,12 @@ import Backgroundhot from "../compenents/Mainpage/Hotdeal/top_img_01_pc_watch_19
 import Backgroundmonth from "../compenents/Mainpage/Topmonth/pexels-leah-kelley-691046.jpg";
 import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function Home() {
+export default function Home(props: any) {
+  const { topMonth } = props;
+  const { hotTrend } = props;
+  const { hotDeal } = props;
   const hotStyle = {
     backgroundSize: "cover",
     backgroundImage: `url(${Backgroundhot.src})`,
@@ -56,7 +60,7 @@ export default function Home() {
         </Divider>
         <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
           <div className="container">
-            <Searchtrend />
+            <Searchtrend hotTrend={hotTrend} />
           </div>
         </div>
         <Divider>
@@ -64,7 +68,7 @@ export default function Home() {
         </Divider>
         <div style={monthStyle}>
           <div className="container">
-            <Topmoth />
+            <Topmoth topMonth={topMonth} />
           </div>
         </div>
         <Divider>
@@ -72,7 +76,7 @@ export default function Home() {
         </Divider>
         <div style={hotStyle}>
           <div className="container">
-            <Hotdeal />
+            <Hotdeal hotDeal={hotDeal} />
           </div>
         </div>
         <div className="container">
@@ -83,4 +87,30 @@ export default function Home() {
       </main>
     </>
   );
+}
+
+export async function getStaticProps(content: any) {
+  try {
+    //GET HOTTREND
+    const dataHottrend = await axios.get(`${URL_ENV}/categories?topMonth=true`);
+
+    //GET TOPMONTH
+    const dataTopMonth = await axios.get(`${URL_ENV}/products?topMonth=true`);
+
+    //GET HOTDEAL
+    const dataHotDeal = await axios.get(`${URL_ENV}/products?hotDeal=true`);
+
+    return {
+      props: {
+        topMonth: dataTopMonth.data.results,
+        hotTrend: dataHottrend.data.results,
+        hotDeal: dataHotDeal.data.results,
+      },
+      revalidate: 24 * 60 * 60,
+    };
+  } catch (error) {
+    return {
+      notFound: true,
+    };
+  }
 }

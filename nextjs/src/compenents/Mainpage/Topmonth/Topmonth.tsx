@@ -8,7 +8,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 
 // import required modules
-import { EffectCoverflow, Pagination } from "swiper";
+import { Autoplay, EffectCoverflow, Pagination } from "swiper";
 
 import axios from "axios";
 import { Button, Card, Divider, Rate } from "antd";
@@ -19,8 +19,9 @@ import router from "next/router";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function Topmoth() {
+export default function Topmoth({ topMonth }: any) {
   const [hotDeals, setHotDeals] = useState([]);
+  const swiperRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -34,19 +35,29 @@ export default function Topmoth() {
     };
 
     fetchData();
-  }, []);
+  }, [topMonth]);
 
+  useEffect(() => {
+    const autoplayTimeout = setTimeout(() => {
+      if (swiperRef.current) {
+        swiperRef.current.autoplay.start();
+      }
+    }, 1000);
+
+    return () => {
+      clearTimeout(autoplayTimeout);
+    };
+  }, []);
   return (
     <>
       <div>
         <Swiper
-          loop={true}
-          autoplay={{ delay: 2000 }}
+          autoplay={{ delay: 3000, disableOnInteraction: false }}
           effect={"coverflow"}
           grabCursor={true}
           slidesPerView={4}
           spaceBetween={160}
-          initialSlide={4}
+          initialSlide={3}
           coverflowEffect={{
             rotate: 30,
             stretch: 2,
@@ -54,7 +65,7 @@ export default function Topmoth() {
             modifier: 1,
           }}
           pagination={true}
-          modules={[EffectCoverflow, Pagination]}
+          modules={[Autoplay, EffectCoverflow, Pagination]}
           className="Top_Month py-5 px-4" // Remove any shadow styles from the className
           breakpoints={{
             0: {
@@ -67,11 +78,12 @@ export default function Topmoth() {
               slidesPerView: 3,
             },
           }}
+          onSwiper={(swiper) => (swiperRef.current = swiper)}
         >
           {hotDeals.length > 0 &&
             hotDeals.map((item: any, index: any) => (
               <>
-                <SwiperSlide>
+                <SwiperSlide key={index}>
                   <Card
                     bordered={false}
                     style={{
@@ -93,7 +105,7 @@ export default function Topmoth() {
                     <p style={{ height: 40 }} className="text-center">
                       {item.name}
                     </p>
-                    <p className="text-center">
+                    <p className="text-center" style={{ color: "#c48c46" }}>
                       <strong>
                         {item.price.toLocaleString("vi-VN", {
                           style: "currency",

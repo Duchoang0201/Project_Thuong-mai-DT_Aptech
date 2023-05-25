@@ -10,20 +10,18 @@ import "swiper/css/navigation";
 // import required modules
 import { Pagination, Navigation } from "swiper";
 import axios from "axios";
-import { Button, Card, Divider, Rate } from "antd";
+import { Card } from "antd";
 
 import Image from "next/image";
-import { SmallDashOutlined } from "@ant-design/icons";
-import router from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function App() {
+export default function App({ hotTrend }: any) {
   const [hotDeals, setHotDeals] = useState([]);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${URL_ENV}/categories`);
+        const response = await axios.get(`${URL_ENV}/categories?topMonth=true`);
         const data = response.data.results;
         setHotDeals(data);
       } catch (error) {
@@ -32,7 +30,7 @@ export default function App() {
     };
 
     fetchData();
-  }, []);
+  }, [hotTrend]);
 
   return (
     <>

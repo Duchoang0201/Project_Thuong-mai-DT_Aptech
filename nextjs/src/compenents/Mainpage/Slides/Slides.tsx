@@ -1,9 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import { Pagination, Navigation, HashNavigation, EffectCards } from "swiper";
+import {
+  Pagination,
+  Navigation,
+  HashNavigation,
+  EffectCards,
+  Autoplay,
+} from "swiper";
 import axios from "axios";
 import Image from "next/image";
 import "./style.module.css";
@@ -14,6 +20,7 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 const Slides = () => {
   const [slides, setSlides] = useState([]);
   const [windowWidth, setWindowWidth] = useState<number>(0);
+  const swiperRef = useRef<any>(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -41,6 +48,18 @@ const Slides = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const autoplayTimeout = setTimeout(() => {
+      if (swiperRef.current) {
+        swiperRef.current.autoplay.start();
+      }
+    }, 2000);
+
+    return () => {
+      clearTimeout(autoplayTimeout);
+    };
+  }, []);
+
   return (
     <div>
       <div className=" row slides ">
@@ -48,11 +67,10 @@ const Slides = () => {
           <Swiper
             loop={true}
             pagination={true}
-            modules={[Pagination, Navigation, HashNavigation]}
-            autoplay={{
-              delay: 1000,
-            }}
+            modules={[Autoplay, Pagination, Navigation, HashNavigation]}
+            autoplay={{ delay: 2000, disableOnInteraction: false }}
             initialSlide={3}
+            onSwiper={(swiper) => (swiperRef.current = swiper)}
           >
             {slides.length > 0 &&
               slides.map((item: any, index: any) => (

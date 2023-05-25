@@ -1,9 +1,8 @@
 import axios from "axios";
-import React, { useEffect, useState, useCallback } from "react";
-import { Badge, Dropdown, MenuProps, Space } from "antd";
+import React, { useEffect, useState, useCallback, useMemo } from "react";
+import { Badge, Divider, Dropdown, MenuProps, Space } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
-import type { InferGetStaticPropsType, GetStaticProps } from "next";
 import { useRouter } from "next/router";
 import { useAuthStore } from "@/hook/useAuthStore";
 
@@ -16,10 +15,9 @@ import {
   UserOutlined,
   BranchesOutlined,
 } from "@ant-design/icons";
-import Image from "next/image";
+
 import { useCartStore } from "../../hook/useCountStore";
 
-const { Search } = Input;
 type Props = {};
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
@@ -32,10 +30,24 @@ function NavBar({}: Props) {
   const [current, setCurrent] = useState<any>();
   const [findProduct, setFindProduct] = useState<Array<any>>([]);
   const [fresh, setFresh] = useState<number>(0);
+  const [scroll, setScroll] = useState<number>(10);
 
   const { logout } = useAuthStore((state: any) => state);
 
   const router = useRouter();
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScroll(window.scrollY);
+    };
+
+    handleResize(); // Set initial window width
+    window.addEventListener("scroll", handleResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleResize);
+    };
+  }, []);
 
   useEffect(() => {
     axios
@@ -45,15 +57,6 @@ function NavBar({}: Props) {
       })
       .catch((err) => console.log(err));
   }, [fresh]);
-
-  useEffect(() => {
-    axios
-      .get(E_URL)
-      .then((res: any) => {
-        setUser(res.data.result);
-      })
-      .catch((err) => console.log(err));
-  }, [E_URL]);
 
   const handleNavigation = (path: any) => {
     // router.reload();
@@ -75,26 +78,13 @@ function NavBar({}: Props) {
     }
   };
 
-  const hanldeClear = async () => {
-    const data = await axios.get(`${URL_ENV}/products`).then((response) => {
-      return response.data.results;
-    });
-    setFindProduct(data);
-  };
-  const itemsCartList = itemsCart?.map((item: any) => ({
-    key: item?.product?._id,
-    label: (
-      <Space>
-        <Image
-          src={`${URL_ENV}${item?.product?.imageUrl}`}
-          alt={item?.product?.name}
-          width={50}
-          height={50}
-        />
-        <span>{item?.product?.name}</span>
-      </Space>
-    ),
-  }));
+  // const hanldeClear = async () => {
+  //   const data = await axios.get(`${URL_ENV}/products`).then((response) => {
+  //     return response.data.results;
+  //   });
+  //   setFindProduct(data);
+  // };
+
   const itemsAccount = [
     {
       key: "information",
@@ -131,8 +121,8 @@ function NavBar({}: Props) {
 
   return (
     <>
-      <div>
-        <div className={` ${Style.container}`}>
+      <div className={scroll > 80 ? Style.container : Style.contaier__Scroll}>
+        <div>
           <ul className={`${Style.listTop}`}>
             <li
               className={Style.listTopItem2}
@@ -164,7 +154,7 @@ function NavBar({}: Props) {
             >
               JewelShop
             </li>
-            {user && (
+            {auth && (
               <>
                 <li
                   className={Style.listTopItem1}
@@ -173,24 +163,14 @@ function NavBar({}: Props) {
                   }}
                 >
                   <div className={`${Style.icon}`}>
-                    <Dropdown
-                      overlay={
-                        <Menu>
-                          {itemsCartList.map((item: any, index: any) => (
-                            <Menu.Item key={index}>{item.label}</Menu.Item>
-                          ))}
-                        </Menu>
-                      }
-                    >
-                      <Badge className="" count={itemsCart.length}>
-                        <ShoppingCartOutlined
-                          style={{ fontSize: 20, cursor: "pointer" }}
-                        />{" "}
-                        <span style={{ fontSize: 20 }} className={Style.items}>
-                          Giỏ hàng
-                        </span>
-                      </Badge>
-                    </Dropdown>
+                    <Badge count={itemsCart.length} className="d-flex">
+                      <ShoppingCartOutlined
+                        style={{ fontSize: 20, cursor: "pointer" }}
+                      />
+                      <span style={{ fontSize: 20 }} className={Style.items}>
+                        Giỏ hàng
+                      </span>
+                    </Badge>
                   </div>
                 </li>
                 <li className={Style.listTopItem1}>
@@ -200,10 +180,9 @@ function NavBar({}: Props) {
                     <Dropdown
                       overlay={
                         <Menu>
-                          {itemsAccount.length > 0 &&
-                            itemsAccount.map((item) => (
-                              <Menu.Item key={item.key}>{item.label}</Menu.Item>
-                            ))}
+                          {itemsAccount.map((item) => (
+                            <Menu.Item key={item.key}>{item.label}</Menu.Item>
+                          ))}
                         </Menu>
                       }
                       className="d-flex"
@@ -221,7 +200,7 @@ function NavBar({}: Props) {
                 </li>
               </>
             )}
-            {user === null && (
+            {auth === null && (
               <>
                 <li
                   className={Style.listTopItem1}
@@ -253,7 +232,7 @@ function NavBar({}: Props) {
         <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
-            className={Style.length}
+            className={scroll > 80 ? Style.lengths : Style.length__Scroll}
             selectedKeys={[current]}
           >
             <Menu.Item
@@ -270,6 +249,7 @@ function NavBar({}: Props) {
           <Select
             allowClear
             style={{ width: "125px", marginTop: "5px" }}
+            // className={scroll > 80 ? Style.input : Style.input__Scroll}
             placeholder="Search"
             optionFilterProp="children"
             onChange={onSearch}
