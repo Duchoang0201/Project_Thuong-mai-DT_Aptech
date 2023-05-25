@@ -117,8 +117,8 @@ function NavBar({}: Props) {
 
   return (
     <>
-      <div>
-        <div className={` ${Style.container}`}>
+      <div className={Style.container}>
+        <div>
           <ul className={`${Style.listTop}`}>
             <li
               className={Style.listTopItem2}

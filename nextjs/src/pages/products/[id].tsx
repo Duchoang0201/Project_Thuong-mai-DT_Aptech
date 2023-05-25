@@ -186,11 +186,11 @@ export default function ProductDetails({ product, allProduct }: Props) {
           <p className="fs-4 "> Sản phẩm được yêu thích</p>
           <div className=" m-5 d-flex justify-content-center ">
             {allProduct?.results?.map((items: any, index: any) => {
-              if (index <= 3)
+              if (index >= 13 && index <= 16)
                 return (
                   <div
                     key={index}
-                    className={`m-2 d-flex-column justify-content-center w-25 ${Style.items}`}
+                    className={`m-2 d-flex-column justify-content-center w-25 `}
                   >
                     <div className="">
                       <Image
@@ -242,7 +242,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                           alt="Description of the image"
                           width={200}
                           height={200}
-                          className="w-100 "
+                          className="w-75 "
                           onClick={() =>
                             handlePageId(
                               `/products/${items._id}`,
