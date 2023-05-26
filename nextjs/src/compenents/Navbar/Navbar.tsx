@@ -30,6 +30,7 @@ function NavBar({}: Props) {
   const [findProduct, setFindProduct] = useState<Array<any>>([]);
   const [fresh, setFresh] = useState<number>(0);
   const [scroll, setScroll] = useState<number>(10);
+  const [windowWidth, setWindowWidth] = useState<number>(0);
 
   const { logout } = useAuthStore((state: any) => state);
   const router = useRouter();
@@ -44,6 +45,19 @@ function NavBar({}: Props) {
 
     return () => {
       window.removeEventListener("scroll", handleResize);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    handleResize(); // Set initial window width
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -154,48 +168,73 @@ function NavBar({}: Props) {
             ></li>
             {user && (
               <>
-                <li
-                  className={Style.listTopItem1}
-                  onClick={() => {
-                    handleNavigation("/cart");
-                  }}
-                >
-                  <div>
-                    <Dropdown
-                      overlayStyle={{ zIndex: 10000 }}
-                      overlay={
-                        <Menu>
-                          {itemsCart.length > 0 &&
-                            itemsCart.map((item: any) => (
-                              <Menu.Item key={item.product?._id}>
-                                <div className="d-flex justify-content-between">
-                                  <div className="w-75 text-truncate py-2">
-                                    <Badge color="blue" count={item.quantity}>
-                                      <Avatar
-                                        shape="square"
-                                        size="large"
-                                        src={`${URL_ENV}${item.product?.imageUrl}`}
-                                      />
-                                    </Badge>
-                                    <span> {item.product?.name}</span>
-                                  </div>
+                {windowWidth > 900 ? (
+                  <li
+                    className={Style.listTopItem1}
+                    onClick={() => {
+                      handleNavigation("/cart");
+                    }}
+                  >
+                    <div>
+                      <Dropdown
+                        overlayStyle={{ zIndex: 10000 }}
+                        overlay={
+                          <Menu>
+                            {itemsCart.length > 0 &&
+                              itemsCart.map((item: any) => (
+                                <Menu.Item key={item.product?._id}>
+                                  <div className="d-flex justify-content-between">
+                                    <div className="w-75 text-truncate py-2">
+                                      <Badge color="blue" count={item.quantity}>
+                                        <Avatar
+                                          shape="square"
+                                          size="large"
+                                          src={`${URL_ENV}${item.product?.imageUrl}`}
+                                        />
+                                      </Badge>
+                                      <span> {item.product?.name}</span>
+                                    </div>
 
-                                  <div>
-                                    {item.product?.price.toLocaleString(
-                                      "vi-VN",
-                                      {
-                                        style: "currency",
-                                        currency: "VND",
-                                      }
-                                    )}
+                                    <div>
+                                      {item.product?.price.toLocaleString(
+                                        "vi-VN",
+                                        {
+                                          style: "currency",
+                                          currency: "VND",
+                                        }
+                                      )}
+                                    </div>
                                   </div>
-                                </div>
-                              </Menu.Item>
-                            ))}
-                        </Menu>
-                      }
-                      className="d-flex"
-                    >
+                                </Menu.Item>
+                              ))}
+                          </Menu>
+                        }
+                        className="d-flex"
+                      >
+                        <Badge
+                          count={itemsCart.length}
+                          className={
+                            scroll > 150
+                              ? `d-flex ${Style.icon__scroll}`
+                              : `d-flex ${Style.icon}`
+                          }
+                        >
+                          <ShoppingCartOutlined style={{ fontSize: 20 }} />
+                          <div style={{ fontSize: 20 }} className={Style.items}>
+                            Giỏ hàng
+                          </div>
+                        </Badge>
+                      </Dropdown>
+                    </div>
+                  </li>
+                ) : (
+                  <li
+                    className={Style.listTopItem1}
+                    onClick={() => {
+                      handleNavigation("/cart");
+                    }}
+                  >
+                    <div>
                       <Badge
                         count={itemsCart.length}
                         className={
@@ -209,14 +248,14 @@ function NavBar({}: Props) {
                           Giỏ hàng
                         </div>
                       </Badge>
-                    </Dropdown>
-                  </div>
-                </li>
+                    </div>
+                  </li>
+                )}
                 <li
                   className={Style.listTopItem1}
-                  onClick={() => {
-                    handleNavigation("/account");
-                  }}
+                  // onClick={() => {
+                  //   handleNavigation("/account");
+                  // }}
                 >
                   {" "}
                   <div>

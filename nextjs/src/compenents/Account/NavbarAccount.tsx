@@ -31,11 +31,6 @@ const NavbarAccount: React.FC = () => {
     };
   }, []);
 
-  const itemsNavbar = [
-    { key: "information", icon: <UserOutlined />, label: "Thông tin cá nhân" },
-    { key: "order", icon: <OrderedListOutlined />, label: "Đơn hàng của bạn" },
-  ];
-
   useEffect(() => {
     if (windowWidth < 900) {
       setTrigger(true);
@@ -43,6 +38,11 @@ const NavbarAccount: React.FC = () => {
       setTrigger(false);
     }
   }, [windowWidth]);
+
+  const itemsNavbar = [
+    { key: "information", icon: <UserOutlined />, label: "Thông tin cá nhân" },
+    { key: "order", icon: <OrderedListOutlined />, label: "Đơn hàng của bạn" },
+  ];
 
   return (
     <Card className="container">
