@@ -207,8 +207,8 @@ function Products({ products, categories, supplier }: Props) {
         </Col>
         <Col span={4} pull={18} className={`${Style.col2} `}>
           <Affix offsetTop={95}>
-            <div>
-              <div className={`pt-3 ${Style.splitRowPC}`}>
+            <div className="py-4">
+              <div className={`pt-3  ${Style.splitRowPC}`}>
                 <Space wrap className="d-flex flex-column ">
                   <h5>Danh mục sản phẩm</h5>
                   <Select

@@ -168,15 +168,27 @@ function NavBar({}: Props) {
                           {itemsCart.length > 0 &&
                             itemsCart.map((item: any) => (
                               <Menu.Item key={item.product?._id}>
-                                <div>
-                                  <Badge color="blue" count={item.quantity}>
-                                    <Avatar
-                                      shape="square"
-                                      size="large"
-                                      src={`${URL_ENV}${item.product?.imageUrl}`}
-                                    />
-                                  </Badge>
-                                  <span>{item.product?.name}</span>
+                                <div className="d-flex justify-content-between">
+                                  <div className="w-75 text-truncate py-2">
+                                    <Badge color="blue" count={item.quantity}>
+                                      <Avatar
+                                        shape="square"
+                                        size="large"
+                                        src={`${URL_ENV}${item.product?.imageUrl}`}
+                                      />
+                                    </Badge>
+                                    <span> {item.product?.name}</span>
+                                  </div>
+
+                                  <div>
+                                    {item.product?.price.toLocaleString(
+                                      "vi-VN",
+                                      {
+                                        style: "currency",
+                                        currency: "VND",
+                                      }
+                                    )}
+                                  </div>
                                 </div>
                               </Menu.Item>
                             ))}
