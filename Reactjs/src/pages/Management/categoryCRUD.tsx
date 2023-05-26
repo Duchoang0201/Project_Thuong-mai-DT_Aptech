@@ -133,17 +133,18 @@ function CategoryCRUD() {
     if (record.isDeleted === undefined) {
       record.isDeleted = false;
     }
-    axios
-      .patch(API_URL + "/" + updateId, record)
-      .then((res) => {
-        setOpen(false);
-        setOpenCreate(false);
-        setRefresh((f) => f + 1);
-        message.success("Updated sucessfully!!", 1.5);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    console.log("record", record);
+    // axios
+    //   .patch(API_URL + "/" + updateId, record)
+    //   .then((res) => {
+    //     setOpen(false);
+    //     setOpenCreate(false);
+    //     setRefresh((f) => f + 1);
+    //     message.success("Updated sucessfully!!", 1.5);
+    //   })
+    //   .catch((err) => {
+    //     console.log(err);
+    //   });
   };
 
   //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM

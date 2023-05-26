@@ -78,13 +78,6 @@ function NavBar({}: Props) {
     }
   };
 
-  // const hanldeClear = async () => {
-  //   const data = await axios.get(`${URL_ENV}/products`).then((response) => {
-  //     return response.data.results;
-  //   });
-  //   setFindProduct(data);
-  // };
-
   const itemsAccount = [
     {
       key: "information",
@@ -152,7 +145,7 @@ function NavBar({}: Props) {
                 handleNavigation("/");
               }}
             >
-              JewelShop
+              {/* JewelShop */}
             </li>
             {auth && (
               <>

@@ -1,12 +1,30 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const mongooseLeanVirtuals = require("mongoose-lean-virtuals");
+const Order = require("./Order");
+
+const customerRateSchema = new Schema({
+  customerId: { type: String },
+  firstName: { type: String },
+  lastName: { type: String },
+  comment: { type: String },
+});
 
 const rateSchema = Schema({
-  customer: { type: Object },
+  customer: customerRateSchema,
   rateNumber: { type: Number, min: 1, max: 5 },
 });
 
+const createdBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+const updatedBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
 const productSchema = Schema(
   {
     name: { type: String, required: true },
@@ -27,12 +45,12 @@ const productSchema = Schema(
     active: { type: Boolean },
     isDeleted: { type: Boolean },
     createdDate: { type: Date },
-    createdBy: { type: Object },
+    createdBy: createdBySchema,
     updatedDate: { type: Date },
-    updatedBy: { type: Object },
+    updatedBy: updatedBySchema,
     note: { type: String },
     images: { type: Array },
-    rateInfo: [rateSchema],
+    rateInfo: { type: Array },
     promotionPosition: { type: Array },
   },
   {

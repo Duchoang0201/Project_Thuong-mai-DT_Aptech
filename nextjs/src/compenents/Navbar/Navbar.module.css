@@ -1,7 +1,7 @@
 .container {
   /* margin: 10px 0px 0px 0px; */
   font-size: larger;
-  display: inline;
+ 
   position: fixed;
   background: rgb(8, 8, 8);
   opacity: 0.9; 
@@ -14,10 +14,9 @@
 
 
 .contaier__Scroll{
-  margin: 10px 0px 0px 0px;
+  /* margin: 10px 0px 0px 0px; */
   font-size: larger;
-  display: inline;
-  /* position: fixed; */
+ 
   width: 100%;
   z-index: 9999;
 }
@@ -65,10 +64,15 @@
 .listTopIcon {
   margin-right: 10%;
   margin-left: 10%;
-  font-style: oblique;
+  /* font-style: oblique;
   color: rgb(66, 66, 226);
-  font-size: 30px;
+  font-size: 30px; */
+  background-image: url(transparent-jewelry-icon-diamond-icon-60251ec5ca3757.4392206316130454458283.png);
+  background-size: cover;
+  height: 70px;
+  width: 65px;
 }
+
 
 .listTopIcon:hover {
   cursor: pointer;
@@ -212,6 +216,8 @@ color: #070707;
     color: blue;
     font-size: 25px;
   }
+
+ 
 
   .items{
     display: none;

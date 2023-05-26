@@ -22,15 +22,27 @@
 }
 .comment{
     width: 1210px;
+    margin-left: 7%;
+    margin-top: 2%;
 }
 
 .scroll__bar{
     overflow-y: scroll;
     height: 180px;
+   
 }
 
 @media screen and (max-width: 400px) {
     .comment{
-        width: 100%;
+        width: 86%;
     }
+    
+}
+
+@media screen and (min-width: 400px) and (max-width: 900px){
+    .comment{
+        width: 100%;
+        margin-left: 15%;
+    }
+    
 }

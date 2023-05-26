@@ -1,13 +1,21 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Rate, Collapse, Input, Button, List, Form } from "antd";
+import {
+  Modal,
+  Rate,
+  Collapse,
+  Input,
+  Button,
+  List,
+  Form,
+  message,
+} from "antd";
 import Style from "./index.module.css";
 import { PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
-import VirtualList from "rc-virtual-list";
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
@@ -32,7 +40,7 @@ export default function ProductDetails({
   allProduct,
   productParams,
 }: Props) {
-  // console.log("product tim thay: ", product);
+  const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
   const [data, setData] = useState<Array<any>>(product.rateInfor);
@@ -43,33 +51,29 @@ export default function ProductDetails({
   console.log(auth);
   //////////////////
   const onFinish = async (record: any) => {
-    try {
-      const customer = {
-        comment: record.comment,
-        customerId: auth.payload?._id,
-        firstName: auth.payload?.firstName,
-        lastName: auth.payload?.lastName,
-      };
-      product.rateInfor.push({
-        customer: customer,
-        rateNumber: record.rateNumber,
+    const customer = {
+      comment: record.comment,
+      customerId: auth.payload?._id,
+      firstName: auth.payload?.firstName,
+      lastName: auth.payload?.lastName,
+    };
+    product.rateInfor = [];
+    product.rateInfor?.push({
+      customer: customer,
+      rateNumber: record.rateNumber,
+    });
+
+    const updateData = product;
+    console.log(updateData);
+    axios
+      .patch(`${URL_ENV}/products/${product._id}`, updateData)
+      .then((res) => {
+        commentForm.resetFields();
+        message.success("Cảm ơn quý khách đã giá sản phẩm của chúng tôi", 1.5);
+      })
+      .catch((err) => {
+        console.log(err);
       });
-
-      // console.log(product);
-      console.log(product);
-      console.log(product.rateInfor);
-      console.log(product._id);
-      console.log(`${URL_ENV}/products/${product._id}`);
-
-      const response = await axios.patch(
-        `${URL_ENV}/products/${product._id}`,
-        product.rateInfor
-      );
-      console.log("Success");
-      console.log(response.data); // Dữ liệu phản hồi từ máy chủ (tuỳ chọn)
-    } catch (error) {
-      console.error(error); // Xử lý lỗi nếu có
-    }
   };
 
   const handleImageClick = (items: any) => {
@@ -157,7 +161,7 @@ export default function ProductDetails({
                 {" "}
                 <Rate allowHalf defaultValue={product.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product.rateInfor.length})
+                  ({product.rateInfor?.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
@@ -247,50 +251,43 @@ export default function ProductDetails({
                     )}
                   />
                 </div>
-
+                <hr style={{ width: "100%" }} />
                 {/* ////////////////////////////////////////// */}
                 <Form
-                  name="basic"
+                  form={commentForm}
+                  name="commentForm"
                   labelCol={{ span: 8 }}
                   wrapperCol={{ span: 16 }}
-                  initialValues={{ remember: true }}
+                  // initialValues={{ remember: true }}
                   onFinish={onFinish}
                   // onFinishFailed={onFinishFailed}
+
                   autoComplete="off"
-                  style={{
-                    // width: "100%",
-                    marginTop: "3%",
-                    // display: "flex",
-                    // justifyContent: "center",
-                    // alignItems: "center",
-                  }}
                   className={Style.comment}
                 >
                   <Form.Item
-                    name="comment"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please input your Comment!",
-                      },
-                    ]}
-                  >
-                    <TextArea
-                      showCount
-                      maxLength={100}
-                      // style={{ width: "100%" }}
-                    />
-                  </Form.Item>
-                  <Form.Item
+                    label={"Đánh giá"}
                     name="rateNumber"
                     rules={[
                       {
                         required: true,
-                        message: "Please input your Rate Number!",
+                        message: "Vui lòng nhập đánh giá!",
                       },
                     ]}
                   >
                     <Rate />
+                  </Form.Item>
+                  <Form.Item
+                    label={"Bình luận"}
+                    name="comment"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập bình luận!",
+                      },
+                    ]}
+                  >
+                    <TextArea showCount maxLength={100} />
                   </Form.Item>
 
                   <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
