@@ -24,6 +24,7 @@ import {
   Table,
   Upload,
   Image,
+  Card,
 } from "antd";
 import Search from "antd/es/input/Search";
 import axios from "axios";
@@ -921,6 +922,7 @@ const ProductsCRUD = () => {
       .catch((err) => console.log(err));
   }, [refresh, URL_FILTER]);
 
+  console.log("««««« updateId »»»»»", updateId);
   return (
     <>
       {/* Modal Create A product */}
@@ -1422,14 +1424,22 @@ const ProductsCRUD = () => {
         onOk={() => setOpenDetailPicture(false)}
       >
         {updateId && (
-          <div>
-            {" "}
-            Avatar:
-            <Image
-              width={200}
-              height={200}
-              src={`${URL_ENV}${updateId?.imageUrl}`}
-            />
+          <div className="text-center">
+            <div className="text-center  py-2 ">
+              {updateId && updateId?.name}
+            </div>{" "}
+            <div className="text-center  py-2 ">Avatar product:</div>{" "}
+            <div className="d-flex justify-content-center">
+              {" "}
+              <Card>
+                {" "}
+                <Image
+                  width={200}
+                  height={200}
+                  src={`${URL_ENV}${updateId?.imageUrl}`}
+                />
+              </Card>
+            </div>
             <Upload
               showUploadList={false}
               name="file"
@@ -1457,7 +1467,8 @@ const ProductsCRUD = () => {
             </Upload>
           </div>
         )}
-        <div className="listofproduct">
+        <div className="listofproduct py-2">
+          <div className="py-2">List of picture: </div>
           <Space>
             {updateId && (
               <Upload

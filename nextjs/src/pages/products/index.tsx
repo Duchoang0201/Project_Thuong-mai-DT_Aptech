@@ -5,7 +5,7 @@ import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Col, Row } from "antd";
+import { Col, Row, message } from "antd";
 import Style from "./product.module.css";
 
 import { MoreOutlined } from "@ant-design/icons";
@@ -18,6 +18,7 @@ import {
   Affix,
   FloatButton,
 } from "antd";
+import { useCartStore } from "@/hook/useCountStore";
 
 // import { useAuthStore } from "../../hook/useAuthStore";
 // import { useCartStore } from "@/hook/useCountStore";
@@ -51,6 +52,12 @@ function Products({ products, categories, supplier }: Props) {
 
   const router = useRouter();
   const [top, setTop] = useState(30);
+
+  const {
+    add,
+    items: itemsCart,
+    increase,
+  } = useCartStore((state: any) => state);
 
   //CALL API PRODUCT FILLTER
   const queryParams = [
@@ -113,15 +120,6 @@ function Products({ products, categories, supplier }: Props) {
     // setFetchData((pre) => pre + 1);
   };
 
-  const handleAddCart = (value: any) => {
-    // console.log("value add cart: ", value);
-    // if (auth === null) {
-    //   router.push("/login");
-    // } else {
-    //   add(value, 1);
-    // }
-  };
-
   // console.log("data: ", data);
   const handleSubmit = useCallback((value: any) => {
     setFetchData((pre) => pre + 1);
@@ -171,7 +169,32 @@ function Products({ products, categories, supplier }: Props) {
                           <div>{items.price}đ</div>
                         </div>
                         <div className={Style.button}>
-                          <Button onClick={() => handleAddCart(items)}>
+                          <Button
+                            onClick={() => {
+                              const productId = items?._id;
+
+                              const productExists = itemsCart.some(
+                                (item: any) => item.product._id === productId
+                              );
+                              console.log(
+                                "««««« productExists »»»»»",
+                                productExists
+                              );
+                              if (productExists === true) {
+                                increase(productId);
+                                message.success(
+                                  "Thêm 1 sản phẩm vào giỏ hàng!",
+                                  1.5
+                                );
+                              } else {
+                                add({ product: items, quantity: 1 });
+                                message.success(
+                                  "Đã thêm sản phẩm vào giỏ hàng!",
+                                  1.5
+                                );
+                              }
+                            }}
+                          >
                             Thêm vào giỏ hàng
                           </Button>
                         </div>

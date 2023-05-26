@@ -25,6 +25,7 @@ import "swiper/css/pagination";
 // import { Pagination } from "swiper";
 import { Navigation } from "swiper";
 import { useAuthStore } from "@/hook/useAuthStore";
+import { useCartStore } from "@/hook/useCountStore";
 // import { Route } from "react-router-dom";
 
 type Props = {
@@ -44,6 +45,8 @@ export default function ProductDetails({
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
   const [data, setData] = useState<Array<any>>(product.rateInfor);
+
+  const { add, items, increase } = useCartStore((state: any) => state);
 
   // const [rating, setRating] = useState<number>();
   const router = useRouter();
@@ -216,6 +219,22 @@ export default function ProductDetails({
               </div>
               <div className="mt-1 ">
                 <button
+                  onClick={() => {
+                    const productId = product?._id;
+
+                    console.log("««««« items »»»»»", items);
+                    const productExists = items.some(
+                      (item: any) => item.product._id === productId
+                    );
+                    console.log("««««« productExists »»»»»", productExists);
+                    if (productExists === true) {
+                      increase(productId);
+                      message.success("Thêm 1 sản phẩm vào giỏ hàng!", 1.5);
+                    } else {
+                      add({ product: product, quantity: 1 });
+                      message.success("Đã thêm sản phẩm vào giỏ hàng!", 1.5);
+                    }
+                  }}
                   className="w-100  border-bottom border-dark  rounded bg-gradient text-light"
                   style={{ background: "#AD2A36", height: "35px" }}
                 >
@@ -407,7 +426,7 @@ export default function ProductDetails({
 
 export async function getStaticPaths() {
   const products = await axios
-    .get("http://localhost:9000/products")
+    .get(`${URL_ENV}/products?active=true`)
     .then((response) => {
       return response.data;
     });
@@ -435,9 +454,11 @@ export async function getStaticProps({ params }: any) {
       return response.data;
     });
 
-  const allProduct = await axios.get(`${URL_ENV}/products`).then((response) => {
-    return response.data;
-  });
+  const allProduct = await axios
+    .get(`${URL_ENV}/products?active=true`)
+    .then((response) => {
+      return response.data;
+    });
 
   // Pass post data to the page via props
   return {

@@ -25,7 +25,6 @@ function NavBar({}: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
 
-  console.log("««««« itemsCart »»»»»", itemsCart);
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
   const [findProduct, setFindProduct] = useState<Array<any>>([]);
