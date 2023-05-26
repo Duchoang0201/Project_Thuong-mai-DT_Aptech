@@ -36,54 +36,40 @@ export default function ProductDetails({
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
   const [data, setData] = useState<Array<any>>(product.rateInfor);
-  const [reload, setReload] = useState<number>(0);
-  const [updatedProduct, setUpdatedProduct] = useState<Array<any>>([]);
+
+  // const [rating, setRating] = useState<number>();
   const router = useRouter();
   const { auth } = useAuthStore((state: any) => state);
   console.log(auth);
   //////////////////
-
-  useEffect(() => {
-    console.log("test: ", updatedProduct);
-    const patchData = async () => {
-      try {
-        const response = await axios.patch(
-          `${URL_ENV}/products/${product._id}`,
-          updatedProduct
-        );
-        console.log("Success");
-        console.log(response.data); // Dữ liệu phản hồi từ máy chủ (tuỳ chọn)
-      } catch (error) {
-        console.error(error); // Xử lý lỗi nếu có
-      }
-    };
-
-    patchData();
-  }, [reload]);
-
   const onFinish = async (record: any) => {
-    const customer = {
-      comment: record.comment,
-      customerId: auth.payload?._id,
-      firstName: auth.payload?.firstName,
-      lastName: auth.payload?.lastName,
-    };
+    try {
+      const customer = {
+        comment: record.comment,
+        customerId: auth.payload?._id,
+        firstName: auth.payload?.firstName,
+        lastName: auth.payload?.lastName,
+      };
+      product.rateInfor.push({
+        customer: customer,
+        rateNumber: record.rateNumber,
+      });
 
-    const updatedComment = {
-      ...product,
-      rateInfor: [
-        ...product.rateInfor,
-        { customer: customer, rateNumber: record.rateNumber },
-      ],
-    };
+      // console.log(product);
+      console.log(product);
+      console.log(product.rateInfor);
+      console.log(product._id);
+      console.log(`${URL_ENV}/products/${product._id}`);
 
-    // console.log(product);
-    console.log(product);
-    console.log(product.rateInfor);
-    console.log(product._id);
-    console.log(`${URL_ENV}/products/${product._id}`);
-    setUpdatedProduct(updatedComment);
-    setReload((pre) => pre + 1);
+      const response = await axios.patch(
+        `${URL_ENV}/products/${product._id}`,
+        product.rateInfor
+      );
+      console.log("Success");
+      console.log(response.data); // Dữ liệu phản hồi từ máy chủ (tuỳ chọn)
+    } catch (error) {
+      console.error(error); // Xử lý lỗi nếu có
+    }
   };
 
   const handleImageClick = (items: any) => {
