@@ -21,7 +21,16 @@ const {
 // Get all on Multiple conditions
 router.get("/", async (req, res, next) => {
   try {
-    const { active, isDeleted, name, description, skip, limit } = req.query;
+    const {
+      active,
+      isDeleted,
+      name,
+      description,
+      skip,
+      limit,
+      hotDeal,
+      topMonth,
+    } = req.query;
 
     const query = {
       $and: [
@@ -32,6 +41,8 @@ router.get("/", async (req, res, next) => {
         description
           ? { description: { $regex: new RegExp(description, "i") } }
           : null,
+        hotDeal ? { promotionPosition: "DEAL" } : null,
+        topMonth ? { promotionPosition: "TOP-MONTH" } : null,
       ].filter(Boolean),
     };
 

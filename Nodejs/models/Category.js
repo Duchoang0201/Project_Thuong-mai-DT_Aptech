@@ -1,6 +1,17 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
+const createdBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+const updatedBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+
 const CategorySchema = Schema(
   {
     name: { type: String, required: true },
@@ -13,11 +24,12 @@ const CategorySchema = Schema(
     createdDate: {
       type: Date,
     },
-    createdBy: { type: Object },
+    createdBy: createdBySchema,
+
     updatedDate: {
       type: Date,
     },
-    updatedBy: { type: Object },
+    updatedBy: updatedBySchema,
     note: { type: String },
     imageUrl: { type: String },
   },

@@ -1,6 +1,6 @@
 import axios from "axios";
-import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Badge, Divider, Dropdown, MenuProps, Space } from "antd";
+import React, { useEffect, useState } from "react";
+import { Avatar, Badge, Dropdown, Space } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
 import { useRouter } from "next/router";
@@ -25,6 +25,7 @@ function NavBar({}: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
 
+  console.log("««««« itemsCart »»»»»", itemsCart);
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
   const [findProduct, setFindProduct] = useState<Array<any>>([]);
@@ -32,7 +33,6 @@ function NavBar({}: Props) {
   const [scroll, setScroll] = useState<number>(10);
 
   const { logout } = useAuthStore((state: any) => state);
-
   const router = useRouter();
 
   useEffect(() => {
@@ -85,7 +85,6 @@ function NavBar({}: Props) {
       setFresh((pre) => pre + 1);
     }
   };
-
   const itemsAccount = [
     {
       key: "information",
@@ -123,7 +122,7 @@ function NavBar({}: Props) {
 
   return (
     <>
-      <div className={scroll > 80 ? Style.container : Style.contaier__Scroll}>
+      <div className={scroll > 150 ? Style.container : Style.contaier__Scroll}>
         <div>
           <ul className={`${Style.listTop}`}>
             <li
@@ -153,9 +152,7 @@ function NavBar({}: Props) {
               onClick={() => {
                 handleNavigation("/");
               }}
-            >
-              JewelShop
-            </li>
+            ></li>
             {user && (
               <>
                 <li
@@ -164,32 +161,74 @@ function NavBar({}: Props) {
                     handleNavigation("/cart");
                   }}
                 >
-                  <div className={`${Style.icon}`}>
-                    <Badge count={itemsCart.length} className="d-flex">
-                      <ShoppingCartOutlined
-                        style={{ fontSize: 20, cursor: "pointer" }}
-                      />
-                      <span style={{ fontSize: 20 }} className={Style.items}>
-                        Giỏ hàng
-                      </span>
-                    </Badge>
-                  </div>
-                </li>
-                <li className={Style.listTopItem1}>
-                  {" "}
-                  <div className={Style.icon}>
-                    {" "}
+                  <div>
                     <Dropdown
+                      overlayStyle={{ zIndex: 10000 }}
                       overlay={
                         <Menu>
-                          {itemsAccount.map((item) => (
-                            <Menu.Item key={item.key}>{item.label}</Menu.Item>
-                          ))}
+                          {itemsCart.length > 0 &&
+                            itemsCart.map((item: any) => (
+                              <Menu.Item key={item.product?._id}>
+                                <div>
+                                  <Badge color="blue" count={item.quantity}>
+                                    <Avatar
+                                      shape="square"
+                                      size="large"
+                                      src={`${URL_ENV}${item.product?.imageUrl}`}
+                                    />
+                                  </Badge>
+                                  <span>{item.product?.name}</span>
+                                </div>
+                              </Menu.Item>
+                            ))}
                         </Menu>
                       }
                       className="d-flex"
                     >
-                      <Badge>
+                      <Badge
+                        count={itemsCart.length}
+                        className={
+                          scroll > 150
+                            ? `d-flex ${Style.icon__scroll}`
+                            : `d-flex ${Style.icon}`
+                        }
+                      >
+                        <ShoppingCartOutlined style={{ fontSize: 20 }} />
+                        <div style={{ fontSize: 20 }} className={Style.items}>
+                          Giỏ hàng
+                        </div>
+                      </Badge>
+                    </Dropdown>
+                  </div>
+                </li>
+                <li
+                  className={Style.listTopItem1}
+                  onClick={() => {
+                    handleNavigation("/account");
+                  }}
+                >
+                  {" "}
+                  <div>
+                    {" "}
+                    <Dropdown
+                      overlayStyle={{ zIndex: 10000 }}
+                      overlay={
+                        <Menu>
+                          {itemsAccount.length > 0 &&
+                            itemsAccount.map((item) => (
+                              <Menu.Item key={item.key}>{item.label}</Menu.Item>
+                            ))}
+                        </Menu>
+                      }
+                      className="d-flex"
+                    >
+                      <Badge
+                        className={
+                          scroll > 150
+                            ? `d-flex ${Style.icon__scroll}`
+                            : `d-flex ${Style.icon}`
+                        }
+                      >
                         <UserOutlined
                           style={{ fontSize: 20, cursor: "pointer" }}
                         />
@@ -234,8 +273,7 @@ function NavBar({}: Props) {
         <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
-            style={{ width: "35%" }}
-            className={scroll > 80 ? Style.lengths : Style.length__Scroll}
+            className={scroll > 150 ? Style.lengths : Style.length__Scroll}
             selectedKeys={[current]}
           >
             <Menu.Item
@@ -246,13 +284,13 @@ function NavBar({}: Props) {
             </Menu.Item>
             <Menu.Item key="collection">Bộ sưu tập </Menu.Item>
             <Menu.Item key="brand">Thương hiệu</Menu.Item>
-            <Menu.Item key="contact">Liên hệ</Menu.Item>
+            <Menu.Item key="contact ">Liên hệ</Menu.Item>
           </Menu>
 
           <Select
             allowClear
-            style={{ width: "125px", marginTop: "5px" }}
-            // className={scroll > 80 ? Style.input : Style.input__Scroll}
+            // style={{ width: "125px", marginTop: "5px" }}
+            className={scroll > 150 ? Style.input : Style.input__Scroll}
             placeholder="Search"
             optionFilterProp="children"
             onChange={onSearch}

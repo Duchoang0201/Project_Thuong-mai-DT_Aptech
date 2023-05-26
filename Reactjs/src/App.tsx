@@ -54,6 +54,18 @@ const App: React.FC = () => {
   const { auth } = useAuthStore((state: any) => state);
   const [user, setUser] = useState<any>();
 
+  /// USER ONLINE_OFFLINE
+  const socket = useRef<any>();
+
+  useEffect(() => {
+    socket.current = io(URL_ENV);
+    setTimeout(() => {}, 3000);
+  }, [URL_ENV]);
+
+  useEffect(() => {
+    socket.current.emit("addUser", auth.payload._id);
+  }, [auth]);
+
   useEffect(() => {
     if (auth) {
       axios.get(`${URL_ENV}/employees/${auth.payload._id}`).then((res) => {
@@ -61,11 +73,6 @@ const App: React.FC = () => {
       });
     }
   }, [URL_ENV, auth]);
-  const socket = useRef<any>();
-
-  useEffect(() => {
-    socket.current = io(URL_ENV);
-  }, [URL_ENV]);
 
   // Function reresh to clear local storage
 

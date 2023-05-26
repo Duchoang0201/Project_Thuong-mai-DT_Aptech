@@ -166,11 +166,18 @@ export default function Orders() {
 
         let total = 0;
         orderDetails.forEach((od: any) => {
-          let sum = od.quantity * od.product.total;
+          let sum = od.quantity * od.product?.total;
           total = total + sum;
         });
 
-        return <strong>{total}</strong>;
+        return (
+          <strong>
+            {total.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}
+          </strong>
+        );
       },
     },
     {

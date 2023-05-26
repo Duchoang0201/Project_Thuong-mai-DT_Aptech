@@ -81,7 +81,11 @@ function CategoryCRUD() {
 
   //Create data
   const handleCreate = (record: any) => {
-    record.createdBy = auth.payload;
+    record.createdBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.createdDate = new Date().toISOString();
     if (record.Locked === undefined) {
       record.Locked = false;
@@ -138,7 +142,11 @@ function CategoryCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    record.updatedBy = auth.payload;
+    record.updatedBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.updatedDate = new Date().toISOString();
     if (record.active === undefined) {
       record.active = false;

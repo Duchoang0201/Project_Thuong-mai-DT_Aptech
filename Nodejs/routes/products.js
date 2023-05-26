@@ -247,9 +247,12 @@ router.patch("/:id", function (req, res, next) {
         const itemId = req.params.id;
         const itemBody = req.body;
 
+        console.log("««««« itemBody »»»»»", itemBody);
         if (itemId) {
-          let update = await Product.findByIdAndUpdate(itemId, itemBody);
-          res.status(200).send("Updated successfully");
+          let update = await Product.findByIdAndUpdate(itemId, itemBody, {
+            new: true,
+          });
+          res.status(200).send({ oke: "Updated successfully", update: update });
         }
       } catch (error) {
         res.status(500).send(error);

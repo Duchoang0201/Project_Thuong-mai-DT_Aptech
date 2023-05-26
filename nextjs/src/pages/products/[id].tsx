@@ -1,39 +1,99 @@
-import { useState, useEffect } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Rate, Collapse, Mentions, Input, Button, message } from "antd";
+import {
+  Modal,
+  Rate,
+  Collapse,
+  Input,
+  Button,
+  List,
+  Form,
+  message,
+} from "antd";
 import Style from "./index.module.css";
-import { PhoneFilled, PhoneOutlined } from "@ant-design/icons";
+import { PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 const { Panel } = Collapse;
-const { getMentions } = Mentions;
 const { TextArea } = Input;
 import "swiper/swiper-bundle.css";
 import "swiper/css/pagination";
 
-import { Pagination } from "swiper";
+// import { Pagination } from "swiper";
 import { Navigation } from "swiper";
-import { useCartStore } from "@/hook/useCountStore";
+import { useAuthStore } from "@/hook/useAuthStore";
 // import { Route } from "react-router-dom";
 
 type Props = {
   product: any;
   allProduct: any;
+  productParams: any;
 };
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function ProductDetails({ product, allProduct }: Props) {
-  const { add, items, increase } = useCartStore((state: any) => state);
-
-  // console.log("product tim thay: ", product);
+export default function ProductDetails({
+  product,
+  allProduct,
+  productParams,
+}: Props) {
+  const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
+  const [data, setData] = useState<Array<any>>(product.rateInfor);
+
   // const [rating, setRating] = useState<number>();
   const router = useRouter();
+  const { auth } = useAuthStore((state: any) => state);
+  //////////////////
+  const onFinish = async (record: any) => {
+    const customer = {
+      customerId: auth.payload?._id,
+      firstName: auth.payload?.firstName,
+      lastName: auth.payload?.lastName,
+      comment: record.comment,
+    };
+
+    const response = await axios.get(`${URL_ENV}/products/${product._id}`);
+    const updateData = response.data;
+
+    if (response.data.rateInfo) {
+      updateData.rateInfo.push({
+        customer: customer,
+        rateNumber: record.rateNumber,
+      });
+    } else {
+      updateData.rateInfo = [];
+      updateData.rateInfo.push({
+        customer: customer,
+        rateNumber: record.rateNumber,
+      });
+    }
+
+    const updateRate = {
+      rateInfo: updateData.rateInfo,
+    };
+
+    console.log("««««« updateRate »»»»»", updateRate);
+
+    axios
+      .patch(`${URL_ENV}/products/${product._id}`, {
+        rateInfo: updateData.rateInfo,
+      })
+      .then((res) => {
+        commentForm.resetFields();
+        message.success(
+          "Cảm ơn quý khách đã đánh giá sản phẩm của chúng tôi",
+          1.5
+        );
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const handleImageClick = (items: any) => {
     console.log("click");
@@ -120,7 +180,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 {" "}
                 <Rate allowHalf defaultValue={product.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product?.rateInfor?.length})
+                  ({product.rateInfor?.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
@@ -131,7 +191,12 @@ export default function ProductDetails({ product, allProduct }: Props) {
               </div>
 
               <div>
-                <span className="fs-4">{product.price}đ</span>
+                <span className="fs-4">
+                  {product.price.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </span>
               </div>
               <div>
                 <b>{product.active === true ? "Còn hàng" : "Hết hàng"}</b>
@@ -151,33 +216,17 @@ export default function ProductDetails({ product, allProduct }: Props) {
               </div>
               <div className="mt-1 ">
                 <button
-                  onClick={() => {
-                    if (
-                      !items.some((i: any) => i.product._id === product._id)
-                    ) {
-                      add({ product: product, quantity: 1 });
-                      message.success(
-                        "Thêm sản phẩm vào giỏ hàng thành công",
-                        1.5
-                      );
-                    } else {
-                      increase(product._id);
-                      message.success(
-                        "Đã thêm 1 sản phẩm vào giỏ hàng thành công, ",
-                        1.5
-                      );
-                    }
-                  }}
-                  className="w-100  border-bottom border-dark  rounded bg-danger bg-gradient text-light"
+                  className="w-100  border-bottom border-dark  rounded bg-gradient text-light"
+                  style={{ background: "#AD2A36", height: "35px" }}
                 >
                   <b>Đặt hàng ngay</b>
                 </button>
               </div>
-              <div className="w-75 ms-5 d-flex">
-                <div className="">
+              <div className="w-100  d-flex ">
+                <div className="mt-2 ">
                   <PhoneOutlined />
                 </div>
-                <p className="text-center  fw-bolder mt-1">
+                <p className={`${Style.guide__tilte}`}>
                   Liên hệ 1800 000 để được tư vấn miễn phí và các thông tin
                   khuyến mãi
                 </p>
@@ -186,33 +235,101 @@ export default function ProductDetails({ product, allProduct }: Props) {
           </div>
         </div>
         <br />
-        <div>
-          <Collapse size="large">
-            <Panel header="Thông số và mô tả sản phẩm" key="1">
-              <p>{product.description}</p>
-            </Panel>
-          </Collapse>
+        <div className="  d-flex justify-content-center">
+          <div className="w-75">
+            <Collapse size="small">
+              <Panel header="Thông số và mô tả sản phẩm" key="1">
+                <p>{product.description}</p>
+              </Panel>
+            </Collapse>
+          </div>
         </div>
-        <div>
-          <Collapse size="large">
-            <Panel header="Bình luận" key="1">
-              <TextArea showCount maxLength={100} />
-              <Button className="m-2" type="primary">
-                Submit
-              </Button>
-            </Panel>
-          </Collapse>
+        <div className="d-flex justify-content-center">
+          <div className="w-75">
+            <Collapse size="small">
+              <Panel header="Bình luận" key="1">
+                <div className={Style.scroll__bar}>
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={data}
+                    renderItem={(item, index) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          // avatar={<Avatar src={`${URL_ENV}/${item.customer}`} />}
+                          title={
+                            <div>
+                              <span style={{ marginRight: "10px" }}>
+                                {item.customer.firstName}
+                              </span>
+                              <Rate allowHalf defaultValue={item.rateNumber} />
+                            </div>
+                          }
+                          description={item.customer.comment}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </div>
+                <hr style={{ width: "100%" }} />
+                {/* ////////////////////////////////////////// */}
+                <Form
+                  form={commentForm}
+                  name="commentForm"
+                  labelCol={{ span: 8 }}
+                  wrapperCol={{ span: 16 }}
+                  // initialValues={{ remember: true }}
+                  onFinish={onFinish}
+                  // onFinishFailed={onFinishFailed}
+
+                  autoComplete="off"
+                  className={Style.comment}
+                >
+                  <Form.Item
+                    label={"Đánh giá"}
+                    name="rateNumber"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập đánh giá!",
+                      },
+                    ]}
+                  >
+                    <Rate />
+                  </Form.Item>
+                  <Form.Item
+                    label={"Bình luận"}
+                    name="comment"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Vui lòng nhập bình luận!",
+                      },
+                    ]}
+                  >
+                    <TextArea showCount maxLength={100} />
+                  </Form.Item>
+
+                  <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                    <Button type="primary" htmlType="submit">
+                      Submit
+                    </Button>
+                  </Form.Item>
+                </Form>
+                {/* //////////////////////////////////////////////////// */}
+              </Panel>
+            </Collapse>
+          </div>
         </div>
 
         <div className="d-none d-sm-block">
           <p className="fs-4 "> Sản phẩm được yêu thích</p>
           <div className=" m-5 d-flex justify-content-center ">
             {allProduct?.results?.map((items: any, index: any) => {
-              if (index <= 3)
+              if (index >= 13 && index <= 16)
                 return (
                   <div
                     key={index}
-                    className={`m-2 d-flex-column justify-content-center w-25 ${Style.items}`}
+                    className={`m-2 d-flex-column justify-content-center w-25 `}
                   >
                     <div className="">
                       <Image
@@ -264,7 +381,7 @@ export default function ProductDetails({ product, allProduct }: Props) {
                           alt="Description of the image"
                           width={200}
                           height={200}
-                          className="w-100 "
+                          className="w-75 "
                           onClick={() =>
                             handlePageId(
                               `/products/${items._id}`,
@@ -310,6 +427,8 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: any) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
+
+  const productParams = params;
   const product = await axios
     .get(`${URL_ENV}/products/${params.id}`)
     .then((response) => {
@@ -321,5 +440,11 @@ export async function getStaticProps({ params }: any) {
   });
 
   // Pass post data to the page via props
-  return { props: { product: product, allProduct: allProduct } };
+  return {
+    props: {
+      product: product,
+      allProduct: allProduct,
+      productParams: productParams,
+    },
+  };
 }

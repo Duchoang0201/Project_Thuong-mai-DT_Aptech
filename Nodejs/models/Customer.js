@@ -2,6 +2,17 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcryptjs");
 
+const createdBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+const updatedBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+
 const customerSchema = Schema(
   {
     firstName: { type: String, required: true },
@@ -36,12 +47,12 @@ const customerSchema = Schema(
     createdDate: {
       type: Date,
     },
-    createdBy: { type: Object },
+    createdBy: createdBySchema,
     imageUrl: { type: String },
     updatedDate: {
       type: Date,
     },
-    updatedBy: { type: Object },
+    updatedBy: updatedBySchema,
     note: { type: String },
   },
   {

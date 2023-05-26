@@ -70,7 +70,14 @@ const AccountOrders = (props: Props) => {
       dataIndex: "product.price",
       key: "product.price",
       render: (text: any, record: any) => {
-        return <div>{numeral(record?.product?.price).format("0,0$")}</div>;
+        return (
+          <div>
+            {(record?.product?.price).toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}
+          </div>
+        );
       },
     },
     {
@@ -117,7 +124,7 @@ const AccountOrders = (props: Props) => {
       responsive: ["md"],
     },
     {
-      width: "5%",
+      width: "10%",
       title: "Tổng tiền",
       dataIndex: "totalMoney",
       key: "totalMoney",
@@ -130,7 +137,14 @@ const AccountOrders = (props: Props) => {
           total = total + sum;
         });
         total = Number(total.toFixed(2));
-        return <strong>{total}</strong>;
+        return (
+          <strong>
+            {total.toLocaleString("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            })}
+          </strong>
+        );
       },
       responsive: ["md"],
     },
