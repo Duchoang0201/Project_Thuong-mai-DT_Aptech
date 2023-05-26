@@ -183,13 +183,22 @@ function Products({ products, categories, supplier }: Props) {
                               if (productExists === true) {
                                 increase(productId);
                                 message.success(
-                                  "Thêm 1 sản phẩm vào giỏ hàng!",
+                                  {
+                                    content: "Thêm 1 sản phẩm vào giỏ hàng!",
+                                    style: {
+                                      marginTop: 130,
+                                    },
+                                  },
                                   1.5
                                 );
                               } else {
                                 add({ product: items, quantity: 1 });
+                                message.success(1.5);
                                 message.success(
-                                  "Đã thêm sản phẩm vào giỏ hàng!",
+                                  {
+                                    content: "Đã thêm sản phẩm vào giỏ hàng!",
+                                    style: { zIndex: 9999999999 },
+                                  },
                                   1.5
                                 );
                               }

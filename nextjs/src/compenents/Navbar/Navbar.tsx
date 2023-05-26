@@ -299,8 +299,12 @@ function NavBar({}: Props) {
           </Menu>
 
           <Select
+            dropdownMatchSelectWidth={false}
+            dropdownStyle={{
+              position: "fixed",
+              top: 130,
+            }}
             allowClear
-            // style={{ width: "125px", marginTop: "5px" }}
             className={scroll > 150 ? Style.input : Style.input__Scroll}
             placeholder="Search"
             optionFilterProp="children"
