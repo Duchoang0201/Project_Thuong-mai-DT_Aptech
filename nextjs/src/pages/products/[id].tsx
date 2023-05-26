@@ -3,33 +3,88 @@ import { useRouter } from "next/router";
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Rate, Collapse, Mentions, Input, Button } from "antd";
+import { Modal, Rate, Collapse, Input, Button, List, Form } from "antd";
 import Style from "./index.module.css";
-import { PhoneFilled, PhoneOutlined } from "@ant-design/icons";
+import { PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
+import VirtualList from "rc-virtual-list";
 
 const { Panel } = Collapse;
 const { TextArea } = Input;
 import "swiper/swiper-bundle.css";
 import "swiper/css/pagination";
 
-import { Pagination } from "swiper";
+// import { Pagination } from "swiper";
 import { Navigation } from "swiper";
+import { useAuthStore } from "@/hook/useAuthStore";
 // import { Route } from "react-router-dom";
 
 type Props = {
   product: any;
   allProduct: any;
+  productParams: any;
 };
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function ProductDetails({ product, allProduct }: Props) {
+export default function ProductDetails({
+  product,
+  allProduct,
+  productParams,
+}: Props) {
   // console.log("product tim thay: ", product);
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
-  // const [rating, setRating] = useState<number>();
+  const [data, setData] = useState<Array<any>>(product.rateInfor);
+  const [reload, setReload] = useState<number>(0);
+  const [updatedProduct, setUpdatedProduct] = useState<Array<any>>([]);
   const router = useRouter();
+  const { auth } = useAuthStore((state: any) => state);
+  console.log(auth);
+  //////////////////
+
+  useEffect(() => {
+    console.log("test: ", updatedProduct);
+    const patchData = async () => {
+      try {
+        const response = await axios.patch(
+          `${URL_ENV}/products/${product._id}`,
+          updatedProduct
+        );
+        console.log("Success");
+        console.log(response.data); // Dữ liệu phản hồi từ máy chủ (tuỳ chọn)
+      } catch (error) {
+        console.error(error); // Xử lý lỗi nếu có
+      }
+    };
+
+    patchData();
+  }, [reload]);
+
+  const onFinish = async (record: any) => {
+    const customer = {
+      comment: record.comment,
+      customerId: auth.payload?._id,
+      firstName: auth.payload?.firstName,
+      lastName: auth.payload?.lastName,
+    };
+
+    const updatedComment = {
+      ...product,
+      rateInfor: [
+        ...product.rateInfor,
+        { customer: customer, rateNumber: record.rateNumber },
+      ],
+    };
+
+    // console.log(product);
+    console.log(product);
+    console.log(product.rateInfor);
+    console.log(product._id);
+    console.log(`${URL_ENV}/products/${product._id}`);
+    setUpdatedProduct(updatedComment);
+    setReload((pre) => pre + 1);
+  };
 
   const handleImageClick = (items: any) => {
     console.log("click");
@@ -127,7 +182,12 @@ export default function ProductDetails({ product, allProduct }: Props) {
               </div>
 
               <div>
-                <span className="fs-4">{product.price}đ</span>
+                <span className="fs-4">
+                  {product.price.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </span>
               </div>
               <div>
                 <b>{product.active === true ? "Còn hàng" : "Hết hàng"}</b>
@@ -146,15 +206,18 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 </ul>
               </div>
               <div className="mt-1 ">
-                <button className="w-100  border-bottom border-dark  rounded bg-danger bg-gradient text-light">
+                <button
+                  className="w-100  border-bottom border-dark  rounded bg-gradient text-light"
+                  style={{ background: "#AD2A36", height: "35px" }}
+                >
                   <b>Đặt hàng ngay</b>
                 </button>
               </div>
-              <div className="w-75 ms-5 d-flex">
-                <div className="">
+              <div className="w-100  d-flex ">
+                <div className="mt-2 ">
                   <PhoneOutlined />
                 </div>
-                <p className="text-center  fw-bolder mt-1">
+                <p className={`${Style.guide__tilte}`}>
                   Liên hệ 1800 000 để được tư vấn miễn phí và các thông tin
                   khuyến mãi
                 </p>
@@ -176,10 +239,81 @@ export default function ProductDetails({ product, allProduct }: Props) {
           <div className="w-75">
             <Collapse size="small">
               <Panel header="Bình luận" key="1">
-                <TextArea showCount maxLength={100} />
-                <Button className="m-2" type="primary">
-                  Submit
-                </Button>
+                <div className={Style.scroll__bar}>
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={data}
+                    renderItem={(item, index) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          // avatar={<Avatar src={`${URL_ENV}/${item.customer}`} />}
+                          title={
+                            <div>
+                              <span style={{ marginRight: "10px" }}>
+                                {item.customer.firstName}
+                              </span>
+                              <Rate allowHalf defaultValue={item.rateNumber} />
+                            </div>
+                          }
+                          description={item.customer.comment}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </div>
+
+                {/* ////////////////////////////////////////// */}
+                <Form
+                  name="basic"
+                  labelCol={{ span: 8 }}
+                  wrapperCol={{ span: 16 }}
+                  initialValues={{ remember: true }}
+                  onFinish={onFinish}
+                  // onFinishFailed={onFinishFailed}
+                  autoComplete="off"
+                  style={{
+                    // width: "100%",
+                    marginTop: "3%",
+                    // display: "flex",
+                    // justifyContent: "center",
+                    // alignItems: "center",
+                  }}
+                  className={Style.comment}
+                >
+                  <Form.Item
+                    name="comment"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Comment!",
+                      },
+                    ]}
+                  >
+                    <TextArea
+                      showCount
+                      maxLength={100}
+                      // style={{ width: "100%" }}
+                    />
+                  </Form.Item>
+                  <Form.Item
+                    name="rateNumber"
+                    rules={[
+                      {
+                        required: true,
+                        message: "Please input your Rate Number!",
+                      },
+                    ]}
+                  >
+                    <Rate />
+                  </Form.Item>
+
+                  <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                    <Button type="primary" htmlType="submit">
+                      Submit
+                    </Button>
+                  </Form.Item>
+                </Form>
+                {/* //////////////////////////////////////////////////// */}
               </Panel>
             </Collapse>
           </div>
@@ -291,6 +425,8 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: any) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
+
+  const productParams = params;
   const product = await axios
     .get(`${URL_ENV}/products/${params.id}`)
     .then((response) => {
@@ -302,5 +438,11 @@ export async function getStaticProps({ params }: any) {
   });
 
   // Pass post data to the page via props
-  return { props: { product: product, allProduct: allProduct } };
+  return {
+    props: {
+      product: product,
+      allProduct: allProduct,
+      productParams: productParams,
+    },
+  };
 }

@@ -62,9 +62,9 @@
 }
 @media screen and (max-width: 720px){
     .title{
-        display: none;
+        
         background: none ;   
-        margin: 5% 0%;
+        height: 10px;
     }
    .items{
     margin-right: 8%;

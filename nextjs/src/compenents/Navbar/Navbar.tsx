@@ -162,20 +162,30 @@ function NavBar({}: Props) {
                     handleNavigation("/cart");
                   }}
                 >
-                  <div className={`${Style.icon}`}>
-                    <Badge count={itemsCart.length} className="d-flex">
-                      <ShoppingCartOutlined
-                        style={{ fontSize: 20, cursor: "pointer" }}
-                      />
-                      <span style={{ fontSize: 20 }} className={Style.items}>
+                  <div>
+                    <Badge
+                      count={itemsCart.length}
+                      className={
+                        scroll > 150
+                          ? `d-flex ${Style.icon__scroll}`
+                          : `d-flex ${Style.icon}`
+                      }
+                    >
+                      <ShoppingCartOutlined style={{ fontSize: 20 }} />
+                      <div style={{ fontSize: 20 }} className={Style.items}>
                         Giỏ hàng
-                      </span>
+                      </div>
                     </Badge>
                   </div>
                 </li>
-                <li className={Style.listTopItem1}>
+                <li
+                  className={Style.listTopItem1}
+                  onClick={() => {
+                    handleNavigation("/account");
+                  }}
+                >
                   {" "}
-                  <div className={Style.icon}>
+                  <div>
                     {" "}
                     <Dropdown
                       overlay={
@@ -187,7 +197,13 @@ function NavBar({}: Props) {
                       }
                       className="d-flex"
                     >
-                      <Badge>
+                      <Badge
+                        className={
+                          scroll > 150
+                            ? `d-flex ${Style.icon__scroll}`
+                            : `d-flex ${Style.icon}`
+                        }
+                      >
                         <UserOutlined
                           style={{ fontSize: 20, cursor: "pointer" }}
                         />
@@ -243,7 +259,7 @@ function NavBar({}: Props) {
             </Menu.Item>
             <Menu.Item key="collection">Bộ sưu tập </Menu.Item>
             <Menu.Item key="brand">Thương hiệu</Menu.Item>
-            <Menu.Item key="contact">Liên hệ</Menu.Item>
+            <Menu.Item key="contact ">Liên hệ</Menu.Item>
           </Menu>
 
           <Select

@@ -14,4 +14,23 @@
    height: 280px;
    
 }
+.guide__tilte{
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bolder;
+    margin-left: 18px;
+}
+.comment{
+    width: 1210px;
+}
 
+.scroll__bar{
+    overflow-y: scroll;
+    height: 180px;
+}
+
+@media screen and (max-width: 400px) {
+    .comment{
+        width: 100%;
+    }
+}
