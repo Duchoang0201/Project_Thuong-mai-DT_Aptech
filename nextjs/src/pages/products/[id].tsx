@@ -39,7 +39,11 @@ type Props = {
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function ProductDetails({ product }: Props) {
+export default function ProductDetails({
+  product,
+  allProduct,
+  productParams,
+}: Props) {
   const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
@@ -287,7 +291,7 @@ export default function ProductDetails({ product }: Props) {
                 <Form
                   form={commentForm}
                   name="commentForm"
-                  labelCol={{ span: 8 }}
+                  labelCol={{ span: 4 }}
                   wrapperCol={{ span: 16 }}
                   onFinish={onFinish}
                   autoComplete="off"

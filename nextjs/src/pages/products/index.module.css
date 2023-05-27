@@ -21,8 +21,8 @@
     margin-left: 18px;
 }
 .comment{
-    width: 1210px;
-    margin-left: 7%;
+    width: 100%;
+    margin-left: 2%;
     margin-top: 2%;
 }
 
@@ -34,15 +34,15 @@
 
 @media screen and (max-width: 400px) {
     .comment{
-        width: 86%;
+        width: 70%;
     }
     
 }
 
-@media screen and (min-width: 400px) and (max-width: 900px){
+@media screen and (min-width: 400px) and (max-width: 800px){
     .comment{
-        width: 100%;
-        margin-left: 15%;
+        width: 80%;
+        /* margin-left: 15%; */
     }
     
 }
