@@ -1042,7 +1042,7 @@ const ProductsCRUD = () => {
             label="Price"
             rules={[{ required: true, message: "Please enter Price" }]}
           >
-            <InputNumber min={1} />
+            <InputNumber style={{ width: 150 }} min={1} />
           </Form.Item>{" "}
           <Form.Item
             labelCol={{
@@ -1300,7 +1300,7 @@ const ProductsCRUD = () => {
             label="Price"
             rules={[{ required: true, message: "Please enter Price" }]}
           >
-            <InputNumber min={1} />
+            <InputNumber style={{ width: 150 }} min={1} />
           </Form.Item>{" "}
           <Form.Item
             labelCol={{
