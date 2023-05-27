@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/router";
 import axios from "axios";
 import Image from "next/image";
@@ -39,11 +39,7 @@ type Props = {
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function ProductDetails({
-  product,
-  allProduct,
-  productParams,
-}: Props) {
+export default function ProductDetails({ product }: Props) {
   const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
@@ -51,10 +47,16 @@ export default function ProductDetails({
 
   const { add, items, increase } = useCartStore((state: any) => state);
 
-  // const [rating, setRating] = useState<number>();
-  const router = useRouter();
   const { auth } = useAuthStore((state: any) => state);
   //////////////////
+
+  const [productMain, setProductMain] = useState<any>();
+  useEffect(() => {
+    axios.get(`${URL_ENV}/products/${product._id}`).then((res) => {
+      setProductMain(res.data);
+    });
+  }, [product]);
+
   const onFinish = async (record: any) => {
     const customer = {
       customerId: auth.payload?._id,
@@ -78,12 +80,6 @@ export default function ProductDetails({
         rateNumber: record.rateNumber,
       });
     }
-
-    const updateRate = {
-      rateInfo: updateData.rateInfo,
-    };
-
-    console.log("««««« updateRate »»»»»", updateRate);
 
     axios
       .patch(`${URL_ENV}/products/${product._id}`, {
@@ -111,10 +107,6 @@ export default function ProductDetails({
     setVisible(false);
   };
 
-  const handlePageId = (path: any, rateInfor: any) => {
-    router.push(path);
-  };
-
   return (
     <>
       <div className="container d-flex-column justify-content-center py-3">
@@ -126,7 +118,7 @@ export default function ProductDetails({
             >
               <div>
                 <Image
-                  src={`${URL_ENV}/${product.imageUrl}`}
+                  src={`${URL_ENV}/${productMain?.imageUrl}`}
                   alt="Description of the image"
                   width={200}
                   height={200}
@@ -144,9 +136,8 @@ export default function ProductDetails({
                   navigation={true}
                   slidesPerView={2}
                   spaceBetween={30}
-                  // modules={[Pagination]}
                 >
-                  {product?.images?.map((items: any, index: any) => {
+                  {productMain?.images?.map((items: any, index: any) => {
                     if (index <= 20)
                       return (
                         <>
@@ -181,31 +172,31 @@ export default function ProductDetails({
               </div>
             </div>
             <div className="p-2 bd-highlight ">
-              <h3 className="fs-5">{product.name}</h3>
-              <div className={Style.rating}>
+              <h3 className="fs-5">{product?.name}</h3>
+              <div>
                 {" "}
-                <Rate allowHalf defaultValue={product.averageRate} />
+                <Rate value={product?.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product.rateInfor?.length})
+                  ({product?.rateInfor?.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
                 <p>
-                  Mã: <span className="fs-6">{product.categoryId}</span>
+                  Mã: <span className="fs-6">{product?.categoryId}</span>
                 </p>
-                <p>{product.amountSold} đã bán</p>
+                <p>{product?.amountSold} đã bán</p>
               </div>
 
               <div>
                 <span className="fs-4">
-                  {product.price.toLocaleString("vi-VN", {
+                  {product?.price.toLocaleString("vi-VN", {
                     style: "currency",
                     currency: "VND",
                   })}
                 </span>
               </div>
               <div>
-                <b>{product.active === true ? "Còn hàng" : "Hết hàng"}</b>
+                <b>{productMain?.active === true ? "Còn hàng" : "Hết hàng"}</b>
               </div>
               <div className="mt-1 border border-dark border-1 rounded-3 ">
                 <div
@@ -223,7 +214,7 @@ export default function ProductDetails({
               <div className="mt-1 ">
                 <button
                   onClick={() => {
-                    const productId = product?._id;
+                    const productId = productMain?._id;
 
                     console.log("««««« items »»»»»", items);
                     const productExists = items.some(

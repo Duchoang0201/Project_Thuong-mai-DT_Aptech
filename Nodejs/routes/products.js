@@ -128,6 +128,47 @@ router.get("/:id", validateSchema(productIdSchema), async (req, res, next) => {
     .populate("category")
     .populate("supplier")
     .lean({ virtuals: true });
+
+  let amountSold = await Order.aggregate([
+    { $unwind: "$orderDetails" },
+    {
+      $lookup: {
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "productSold",
+      },
+    },
+    { $unwind: "$productSold" },
+    {
+      $group: {
+        _id: "$productSold._id",
+        productName: { $first: "$productSold.name" },
+        price: { $first: "$productSold.price" },
+        totalQuantity: { $sum: "$orderDetails.quantity" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        productName: 1,
+        price: 1,
+        totalQuantity: 1,
+      },
+    },
+  ]);
+
+  // Find the matching amountSold for the found product
+  const foundAmountSold = amountSold.find((soldProduct) => {
+    return found._id.toString() === soldProduct._id.toString();
+  });
+
+  if (foundAmountSold) {
+    found.amountSold = foundAmountSold.totalQuantity;
+  } else {
+    found.amountSold = 0;
+  }
+
   if (found) {
     return res.status(200).json(found);
   }

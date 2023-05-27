@@ -811,8 +811,6 @@ const ProductsCRUD = () => {
 
   // UPLOAD
 
-  //Handle Change Picture:
-  // const handleChangeListPicture =
   //Search DEPEN ON CATEGORY
   //Search on CategoryID
   const [categoryId, setCategoryId] = useState("");

@@ -62,8 +62,8 @@ productSchema.virtual("total").get(function () {
 
 // Average rate of Product
 productSchema.virtual("averageRate").get(function () {
-  if (this.rateInfor && this.rateInfor.length > 0) {
-    const rates = this.rateInfor
+  if (this.rateInfo && this.rateInfo.length > 0) {
+    const rates = this.rateInfo
       .map((item) => item.rateNumber)
       .filter((rate) => rate !== null && rate !== undefined); // Extracting all rateNumbers
 
