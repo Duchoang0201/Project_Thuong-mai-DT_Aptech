@@ -175,7 +175,7 @@ export default function ProductDetails({ product }: Props) {
               <h3 className="fs-5">{product?.name}</h3>
               <div>
                 {" "}
-                <Rate value={product?.averageRate} />
+                <Rate disabled value={product?.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
                   ({product?.rateInfor?.length})
                 </span>
