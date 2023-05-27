@@ -797,17 +797,16 @@ const ProductsCRUD = () => {
     if (record.isDeleted === undefined) {
       record.isDeleted = false;
     }
-    console.log("««««« record »»»»»", record);
-    // axios
-    //   .patch(API_URL + "/" + updateId._id, record)
-    //   .then((res) => {
-    //     setRefresh((f) => f + 1);
-    //     message.success(`Update product ${record.name} successFully!!`, 3);
-    //     setOpen(false);
-    //   })
-    //   .catch((err) => {
-    //     message.error(err.response.data.message);
-    //   });
+    axios
+      .patch(API_URL + "/" + updateId._id, record)
+      .then((res) => {
+        setRefresh((f) => f + 1);
+        message.success(`Update product ${record.name} successFully!!`, 3);
+        setOpen(false);
+      })
+      .catch((err) => {
+        message.error(err.response.data.message);
+      });
   };
 
   // UPLOAD

@@ -4,7 +4,12 @@ const yup = require("yup");
 const { Product, Order } = require("../models");
 const mongooseLeanVirtuals = require("mongoose-lean-virtuals");
 const ObjectId = require("mongodb").ObjectId;
-const { validateSchema, getProductsSchema } = require("../validation/product");
+const {
+  validateSchema,
+  getProductsSchema,
+  productIdSchema,
+  productBodySchema,
+} = require("../validation/product");
 // let data = [
 //     {id: 1, name: 'iphone 14 ProMax', price: 1500},
 //     {id: 2, name: 'iphone 13 ProMax', price: 1200},
@@ -117,155 +122,64 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
 });
 
 //Get a data
-router.get("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
-
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Product.findById(itemId)
-        .populate("category")
-        .populate("supplier")
-        .lean({ virtuals: true });
-      if (found) {
-        return res.status(200).json(found);
-      }
-      return res.status(500).send({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
+router.get("/:id", validateSchema(productIdSchema), async (req, res, next) => {
+  const itemId = req.params.id;
+  let found = await Product.findById(itemId)
+    .populate("category")
+    .populate("supplier")
+    .lean({ virtuals: true });
+  if (found) {
+    return res.status(200).json(found);
+  }
+  return res.status(500).send({ oke: false, message: "Object not found" });
 });
-router.post("/", async (req, res, next) => {
-  const validationSchema = yup.object({
-    body: yup.object({
-      name: yup.string().required().max(50),
-      price: yup.number().required().positive(),
-      discount: yup.number().required().positive().min(0).max(75),
-      stock: yup.number().required().positive().integer(),
-    }),
-  });
-
-  validationSchema
-    .validate({ body: req.body }, { abortEarly: false })
-    .then(async () => {
-      try {
-        const newItem = req.body;
-        const data = new Product(newItem);
-        let result = await data.save();
-        res
-          .status(200)
-          .json({ success: true, message: "Created successfully", result });
-      } catch (error) {
-        res.status(500).json({ error: error });
-      }
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provier: "Yup",
-      });
-    });
+router.post("/", validateSchema(productBodySchema), async (req, res, next) => {
+  try {
+    const newItem = req.body;
+    const data = new Product(newItem);
+    let result = await data.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Created successfully", result });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
 // Delete data
-router.delete("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
-
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Product.findByIdAndDelete(itemId);
-      if (found) {
-        return res.status(200).json({ oke: true, result: found });
-      }
-      return res.status(500).send({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
+router.delete(
+  "/:id",
+  validateSchema(productIdSchema),
+  async (req, res, next) => {
+    const itemId = req.params.id;
+    let found = await Product.findByIdAndDelete(itemId);
+    if (found) {
+      return res.status(200).json({ oke: true, result: found });
+    }
+    return res.status(500).send({ oke: false, message: "Object not found" });
+  }
+);
 
 //PATCH DATA
-router.patch("/:id", function (req, res, next) {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
+router.patch(
+  "/:id",
+  validateSchema(productIdSchema),
+  async (req, res, next) => {
+    try {
+      const itemId = req.params.id;
+      const itemBody = req.body;
 
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      try {
-        const itemId = req.params.id;
-        const itemBody = req.body;
-
-        console.log("««««« itemBody »»»»»", itemBody);
-        if (itemId) {
-          let update = await Product.findByIdAndUpdate(itemId, itemBody, {
-            new: true,
-          });
-          res.status(200).send({ oke: "Updated successfully", update: update });
-        }
-      } catch (error) {
-        res.status(500).send(error);
+      console.log("««««« itemBody »»»»»", itemBody);
+      if (itemId) {
+        let update = await Product.findByIdAndUpdate(itemId, itemBody, {
+          new: true,
+        });
+        res.status(200).send({ oke: "Updated successfully", update: update });
       }
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+);
 
 module.exports = router;

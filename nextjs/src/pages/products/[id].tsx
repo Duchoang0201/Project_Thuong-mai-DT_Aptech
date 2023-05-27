@@ -193,7 +193,7 @@ export default function ProductDetails({
                 <p>
                   Mã: <span className="fs-6">{product.categoryId}</span>
                 </p>
-                <p>... đã bán</p>
+                <p>{product.amountSold} đã bán</p>
               </div>
 
               <div>
