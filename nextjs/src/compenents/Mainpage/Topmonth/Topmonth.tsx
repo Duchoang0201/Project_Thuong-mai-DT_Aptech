@@ -15,11 +15,12 @@ import { Button, Card, Divider, Rate } from "antd";
 
 import Image from "next/image";
 
-import router from "next/router";
+import router, { useRouter } from "next/router";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function Topmoth({ topMonth }: any) {
+  const router = useRouter();
   const [hotDeals, setHotDeals] = useState([]);
   const swiperRef = useRef<any>(null);
 
@@ -48,6 +49,11 @@ export default function Topmoth({ topMonth }: any) {
       clearTimeout(autoplayTimeout);
     };
   }, []);
+
+  const handleClick = (value: any) => {
+    router.push(`/${value._id}`);
+  };
+
   return (
     <>
       <div>
@@ -92,7 +98,10 @@ export default function Topmoth({ topMonth }: any) {
                       background: `rgba(245,245,245,0.8)`,
                     }}
                   >
-                    <Card style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <Card
+                      style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                      onClick={() => handleClick}
+                    >
                       {" "}
                       <Image
                         alt={item.name}

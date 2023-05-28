@@ -7,10 +7,11 @@ import { Pagination, Navigation, Autoplay } from "swiper";
 import axios from "axios";
 import { Button, Card, Divider, Rate } from "antd";
 import Image from "next/image";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function App({ hotDeal }: any) {
+  const router = useRouter();
   const [hotDeals, setHotDeals] = useState([]);
   const swiperRef = useRef<any>(null);
   const [autoplayConfig, setAutoplayConfig] = useState({

@@ -46,9 +46,6 @@ export default function ProductDetails({ product }: Props) {
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
   const [data, setData] = useState<Array<any>>(product.rateInfo);
-  console.log("product:", product);
-
-  console.log("data:", data);
 
   const { add, items, increase } = useCartStore((state: any) => state);
 
@@ -56,13 +53,17 @@ export default function ProductDetails({ product }: Props) {
   //////////////////
 
   const [productMain, setProductMain] = useState<any>();
+
   useEffect(() => {
     axios.get(`${URL_ENV}/products/${product._id}`).then((res) => {
       setProductMain(res.data);
     });
   }, [product]);
 
-  useEffect(() => {}, [product]);
+  useEffect(() => {
+    console.log("update data: ", product);
+    setData(product.rateInfo);
+  }, [product]);
   const onFinish = async (record: any) => {
     const customer = {
       customerId: auth.payload?._id,
