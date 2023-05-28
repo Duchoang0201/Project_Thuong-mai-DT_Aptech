@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import router, { useRouter } from "next/router";
+
+import { useRouter } from "next/router";
+
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -39,15 +41,14 @@ type Props = {
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function ProductDetails({
-  product,
-  allProduct,
-  productParams,
-}: Props) {
+export default function ProductDetails({ product }: Props) {
   const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
-  const [data, setData] = useState<Array<any>>(product.rateInfor);
+  const [data, setData] = useState<Array<any>>(product.rateInfo);
+  console.log("product:", product);
+
+  console.log("data:", data);
 
   const { add, items, increase } = useCartStore((state: any) => state);
 
@@ -61,6 +62,7 @@ export default function ProductDetails({
     });
   }, [product]);
 
+  useEffect(() => {}, [product]);
   const onFinish = async (record: any) => {
     const customer = {
       customerId: auth.payload?._id,
@@ -110,12 +112,10 @@ export default function ProductDetails({
   const handleModalClose = () => {
     setVisible(false);
   };
-  const handlePageId = (path: any, rateInfor: any) => {
-    router.push(path);
-  };
+
   return (
     <>
-      <div className="container d-flex-column justify-content-center">
+      <div className="container d-flex-column justify-content-center py-3">
         <div className=" w-75" style={{ margin: "0px 12%" }}>
           <div className=" d-flex flex-lg-row justify-content-center flex-column ">
             <div
@@ -124,7 +124,7 @@ export default function ProductDetails({
             >
               <div>
                 <Image
-                  src={`${URL_ENV}/${product.imageUrl}`}
+                  src={`${URL_ENV}/${productMain?.imageUrl}`}
                   alt="Description of the image"
                   width={200}
                   height={200}
@@ -134,7 +134,7 @@ export default function ProductDetails({
 
               <div
                 className="d-flex flex-row  mt-2"
-                style={{ width: "200px", height: "100px" }}
+                style={{ width: "200px", height: "100px", marginLeft: "2% " }}
               >
                 <Swiper
                   modules={[Navigation]}
@@ -143,11 +143,11 @@ export default function ProductDetails({
                   slidesPerView={2}
                   spaceBetween={30}
                 >
-                  {product?.images?.map((items: any, index: any) => {
+                  {productMain?.images?.map((items: any, index: any) => {
                     if (index <= 20)
                       return (
                         <>
-                          <SwiperSlide className="m-3 w-25">
+                          <SwiperSlide className="ms-2 w-25">
                             <Image
                               src={`${URL_ENV}/${items}`}
                               alt="Description of the image"
@@ -157,7 +157,11 @@ export default function ProductDetails({
                               onClick={() => handleImageClick(items)}
                               // style={{ maxHeight: "180px", minHeight: "80px" }}
                             ></Image>
-                            <Modal onCancel={handleModalClose} footer={null}>
+                            <Modal
+                              visible={visible}
+                              onCancel={handleModalClose}
+                              footer={null}
+                            >
                               <Image
                                 src={`${URL_ENV}/${picture}`}
                                 alt="Image"
@@ -174,31 +178,31 @@ export default function ProductDetails({
               </div>
             </div>
             <div className="p-2 bd-highlight ">
-              <h3 className="fs-5">{product.name}</h3>
-              <div className={Style.rating}>
+              <h3 className="fs-5">{product?.name}</h3>
+              <div>
                 {" "}
-                <Rate allowHalf defaultValue={product.averageRate} />
+                <Rate disabled value={product?.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product.rateInfor?.length})
+                  ({product?.rateInfor?.length})
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
                 <p>
-                  Mã: <span className="fs-6">{product.categoryId}</span>
+                  Mã: <span className="fs-6">{product?.categoryId}</span>
                 </p>
-                <p>... đã bán</p>
+                <p>{product?.amountSold} đã bán</p>
               </div>
 
               <div>
                 <span className="fs-4">
-                  {product.price.toLocaleString("vi-VN", {
+                  {product?.price.toLocaleString("vi-VN", {
                     style: "currency",
                     currency: "VND",
                   })}
                 </span>
               </div>
               <div>
-                <b>{product.active === true ? "Còn hàng" : "Hết hàng"}</b>
+                <b>{productMain?.active === true ? "Còn hàng" : "Hết hàng"}</b>
               </div>
               <div className="mt-1 border border-dark border-1 rounded-3 ">
                 <div
@@ -216,7 +220,7 @@ export default function ProductDetails({
               <div className="mt-1 ">
                 <button
                   onClick={() => {
-                    const productId = product?._id;
+                    const productId = productMain?._id;
 
                     console.log("««««« items »»»»»", items);
                     const productExists = items.some(
@@ -286,132 +290,80 @@ export default function ProductDetails({
                 </div>
                 <hr style={{ width: "100%" }} />
                 {/* ////////////////////////////////////////// */}
-                <Form
-                  form={commentForm}
-                  name="commentForm"
-                  labelCol={{ span: 8 }}
-                  wrapperCol={{ span: 16 }}
-                  // initialValues={{ remember: true }}
-                  onFinish={onFinish}
-                  // onFinishFailed={onFinishFailed}
+                {auth && (
+                  <>
+                    <Form
+                      form={commentForm}
+                      name="commentForm"
+                      labelCol={{ span: 6 }}
+                      wrapperCol={{ span: 14 }}
+                      onFinish={onFinish}
+                      autoComplete="off"
+                      className={Style.comment}
+                    >
+                      <Form.Item
+                        label={"Đánh giá"}
+                        name="rateNumber"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập đánh giá!",
+                          },
+                        ]}
+                      >
+                        <Rate />
+                      </Form.Item>
+                      <Form.Item
+                        label={"Bình luận"}
+                        name="comment"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập bình luận!",
+                          },
+                        ]}
+                      >
+                        <TextArea showCount maxLength={100} />
+                      </Form.Item>
 
-                  autoComplete="off"
-                  className={Style.comment}
-                >
-                  <Form.Item
-                    label={"Đánh giá"}
-                    name="rateNumber"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập đánh giá!",
-                      },
-                    ]}
-                  >
-                    <Rate />
-                  </Form.Item>
-                  <Form.Item
-                    label={"Bình luận"}
-                    name="comment"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập bình luận!",
-                      },
-                    ]}
-                  >
-                    <TextArea showCount maxLength={100} />
-                  </Form.Item>
+                      <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+                        <Button type="primary" htmlType="submit">
+                          Submit
+                        </Button>
+                      </Form.Item>
+                    </Form>
+                  </>
+                )}
 
-                  <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-                    <Button type="primary" htmlType="submit">
-                      Submit
-                    </Button>
-                  </Form.Item>
-                </Form>
                 {/* //////////////////////////////////////////////////// */}
               </Panel>
             </Collapse>
           </div>
         </div>
-
-        <div className="d-none d-sm-block">
-          <p className="fs-4 "> Sản phẩm được yêu thích</p>
-          <div className=" m-5 d-flex justify-content-center ">
-            {allProduct?.results?.map((items: any, index: any) => {
-              if (index >= 13 && index <= 16)
-                return (
-                  <div
-                    key={index}
-                    className={`m-2 d-flex-column justify-content-center w-25 `}
-                  >
-                    <div className="">
-                      <Image
-                        src={`${URL_ENV}/${items.imageUrl}`}
-                        alt="Description of the image"
-                        width={200}
-                        height={200}
-                        className="w-100 rounded "
-                        onClick={() =>
-                          handlePageId(
-                            `/products/${items._id}`,
-                            items.rateInfor
-                          )
-                        }
-                      ></Image>
-                    </div>
-                    <div>
-                      <p
-                        style={{ color: "blue" }}
-                        className="fs-6 primary ps-1"
-                      >
-                        {" "}
-                        {items.name}
-                      </p>
-                    </div>
-                  </div>
-                );
-            })}
+        <Divider>
+          <h3>Sản phẩm yêu thích </h3>
+        </Divider>
+        <div
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(208,206,191,1) 19%, rgba(222,221,202,1) 56%, rgba(160,167,151,1) 86%)",
+          }}
+        >
+          <div className="container">
+            <Topmoth />
           </div>
         </div>
-        <div className=" ms-3 pt-5 ">
-          <p className="fs-4">Các sản phẩm khác</p>
-          <div className="h-50">
-            <Swiper
-              modules={[Navigation]}
-              className="mySwiper"
-              navigation={true}
-              slidesPerView={3}
-              spaceBetween={30}
-              pagination={{ clickable: true }}
-            >
-              {allProduct?.results?.map((items: any, index: any) => {
-                if (index <= 20)
-                  return (
-                    <>
-                      <SwiperSlide className="m-3 w-25">
-                        <Image
-                          src={`${URL_ENV}/${items.imageUrl}`}
-                          alt="Description of the image"
-                          width={200}
-                          height={200}
-                          className="w-75 "
-                          onClick={() =>
-                            handlePageId(
-                              `/products/${items._id}`,
-                              items.rateInfor
-                            )
-                          }
-                          style={{ maxHeight: "180px", minHeight: "80px" }}
-                        ></Image>
-                        <p className="fs-6">{items.name}</p>
-                      </SwiperSlide>
-                      <div className="swiper-button-prev">k</div>
-                      <div className="swiper-button-next">d</div>
-                    </>
-                  );
-              })}
-            </Swiper>
+        <Divider>
+          <h3>Sản phẩm yêu thích </h3>
+        </Divider>
+        <div
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(208,206,191,1) 19%, rgba(222,221,202,1) 56%, rgba(160,167,151,1) 86%)",
+          }}
+        >
+          <div className="container">
+            <Hotdeal />
           </div>
         </div>
       </div>
