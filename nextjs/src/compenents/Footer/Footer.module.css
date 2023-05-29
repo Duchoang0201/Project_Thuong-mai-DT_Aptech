@@ -31,9 +31,10 @@
         flex-direction: column;
         width: 100%;
         margin-bottom: 10px;
+       
     }
     .content1 {
-        width: 100%;
+        width: 90%;
         border-collapse: collapse;
         
       }

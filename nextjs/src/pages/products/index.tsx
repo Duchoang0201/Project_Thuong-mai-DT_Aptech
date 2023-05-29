@@ -77,7 +77,7 @@ function Products({ products, categories, supplier }: Props) {
       // console.log(respones.data.results);
       setData(respones.data.results);
     });
-  }, [fetchData, queryParams]);
+  }, [fetchData]);
 
   const showDrawer = () => {
     setOpen(true);
