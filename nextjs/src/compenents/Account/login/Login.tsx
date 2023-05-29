@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Button, Form, Input } from "antd";
 import { UserOutlined, LockOutlined } from "@ant-design/icons";
@@ -10,13 +10,15 @@ import Link from "next/link";
 const Login = () => {
   const { login } = useAuthStore((state: any) => state);
   const { auth } = useAuthStore((state: any) => state);
-
+  const [refresh, setRefresh] = useState(0);
   const router = useRouter();
   const onLogin = async (values: any) => {
     const { email, password } = values;
     login({ email, password });
+
     router.push("/");
   };
+  useEffect(() => {}, [refresh]);
 
   return (
     <div className={`${style.root} `}>

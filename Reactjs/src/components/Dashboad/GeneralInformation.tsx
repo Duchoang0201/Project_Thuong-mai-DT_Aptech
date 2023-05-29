@@ -223,7 +223,7 @@ const GeneralInformation = (props: Props) => {
           <Card
             title={`Top nhân viên bán hàng xuất sắc trong năm`}
             bordered={false}
-            style={{ width: "100%" }}
+            // style={{ width: "100%" }}
           >
             <div
               className="px-3 py-3"

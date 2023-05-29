@@ -143,6 +143,7 @@ function SupperliersCRUD() {
       })
       .catch((err) => {
         console.log(err);
+        message.error(`${err.response.data.message}`, 2);
       });
   };
 

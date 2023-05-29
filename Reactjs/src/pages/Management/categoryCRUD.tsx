@@ -101,7 +101,7 @@ function CategoryCRUD() {
         formData.append("file", file);
 
         axios
-          .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
+          .post(`${URL_ENV}/upload/categories/${_id}/image`, formData)
           .then((respose) => {
             message.success("Thêm mới thành công!");
             createForm.resetFields();
@@ -117,19 +117,6 @@ function CategoryCRUD() {
   };
   //Delete a Data
   const handleDelete = (record: any) => {
-    // axios
-    //   .patch(API_URL + "/" + record._id, { isDeleted: true })
-    //   .then((res) => {
-    //     console.log(res);
-    //     setOpen(false);
-    //     setOpenCreate(false);
-    //     setRefresh((f) => f + 1);
-    //     message.success("Deleted sucessfully!!", 1.5);
-    //   })
-    //   .catch((err) => {
-    //     console.log(err);
-    //   });
-
     axios
       .delete(API_URL + "/" + record._id)
       .then((res) => {
@@ -457,14 +444,13 @@ function CategoryCRUD() {
 
               if (info.file.status === "done") {
                 message.success(`${info.file.name} file uploaded successfully`);
-
-                setTimeout(() => {
-                  console.log("««««« run »»»»»");
-                  setRefresh(refresh + 1);
-                }, 1000);
               } else if (info.file.status === "error") {
                 message.error(`${info.file.name} file upload failed.`);
               }
+              setTimeout(() => {
+                console.log("««««« run »»»»»");
+                setRefresh(refresh + 1);
+              }, 3000);
             }}
           >
             <Button icon={<UploadOutlined />} />

@@ -919,7 +919,6 @@ const ProductsCRUD = () => {
       .catch((err) => console.log(err));
   }, [refresh, URL_FILTER]);
 
-  console.log("««««« updateId »»»»»", updateId);
   return (
     <>
       {/* Modal Create A product */}

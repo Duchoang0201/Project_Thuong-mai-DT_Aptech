@@ -3,7 +3,6 @@ import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 import { message } from "antd";
-import router from "next/router";
 interface isLogin {
   email: string;
   password: string;
@@ -25,10 +24,10 @@ export const useAuthStore = create(
                 password: password,
               });
               loginData = response.data; // Store the response data
-
               set({ auth: response.data }, false, {
                 type: "auth/login-success",
               });
+
               if (loginData && loginData.payload && loginData.payload._id) {
                 axios.patch(`${URL_ENV}/customers/${loginData.payload._id}`, {
                   LastActivity: new Date(),
@@ -36,8 +35,8 @@ export const useAuthStore = create(
               }
             } catch (err: any) {
               set({ auth: null }, false, { type: "auth/login-error" });
-              message.error(`Account's ${err?.response?.statusText}`, 2.5);
-              console.error(err);
+              // message.error(`Account's ${err?.response?.statusText}`, 2.5);
+              // console.error(err);
             }
           },
           logout: async () => {

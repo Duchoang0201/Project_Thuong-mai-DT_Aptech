@@ -59,6 +59,21 @@ function Products({ products, categories, supplier }: Props) {
     increase,
   } = useCartStore((state: any) => state);
 
+  const [scroll, setScroll] = useState<number>(10);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScroll(window.scrollY);
+    };
+
+    handleResize(); // Set initial window width
+    window.addEventListener("scroll", handleResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleResize);
+    };
+  }, []);
+
   //CALL API PRODUCT FILLTER
   const queryParams = [
     // productName && `productName=${productName}`,
@@ -92,32 +107,26 @@ function Products({ products, categories, supplier }: Props) {
   };
   const handleDataChange = (value: any) => {
     setCategoryId(value);
-    // setFetchData((pre) => pre + 1);
   };
 
   const handleChangeSupplier = (value: any) => {
     setSupplierId(value);
-    // setFetchData((pre) => pre + 1);
   };
 
   const handleToPrice = (value: any) => {
     setToPrice(value);
-    // setFetchData((pre) => pre + 1);
   };
   const handleFromPrice = (value: any) => {
     setFromPrice(value);
-    // setFetchData((pre) => pre + 1);
   };
 
   const handleFromDiscount = (value: any) => {
     // console.log(value);
     setFromDiscount(value);
-    // setFetchData((pre) => pre + 1);
   };
 
   const handleToDiscount = (value: any) => {
     setToDiscount(value);
-    // setFetchData((pre) => pre + 1);
   };
 
   // console.log("data: ", data);
@@ -166,7 +175,12 @@ function Products({ products, categories, supplier }: Props) {
                       <div className="d-flex justify-content-center align-items-center">
                         <div className={Style.name}>{items.name}</div>
                         <div className={Style.price}>
-                          <div>{items.price}đ</div>
+                          <div>
+                            {items.price.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </div>
                         </div>
                         <div className={Style.button}>
                           <Button
@@ -197,7 +211,10 @@ function Products({ products, categories, supplier }: Props) {
                                 message.success(
                                   {
                                     content: "Đã thêm sản phẩm vào giỏ hàng!",
-                                    style: { zIndex: 9999999999 },
+                                    style: {
+                                      zIndex: 9999999999,
+                                      marginTop: 130,
+                                    },
                                   },
                                   1.5
                                 );
@@ -221,6 +238,13 @@ function Products({ products, categories, supplier }: Props) {
                 <Space wrap className="d-flex flex-column ">
                   <h5>Danh mục sản phẩm</h5>
                   <Select
+                    dropdownMatchSelectWidth={false}
+                    dropdownStyle={{
+                      position: "fixed",
+                      top: scroll > 90 ? 210 : 245,
+
+                      width: 300,
+                    }}
                     allowClear
                     autoClearSearchValue={!categoryId ? true : false}
                     defaultValue={"None"}
@@ -234,6 +258,13 @@ function Products({ products, categories, supplier }: Props) {
 
                   <h5>Hãng sản phẩm</h5>
                   <Select
+                    dropdownMatchSelectWidth={false}
+                    dropdownStyle={{
+                      position: "fixed",
+                      top: scroll > 90 ? 290 : 325,
+
+                      width: 300,
+                    }}
                     allowClear
                     autoClearSearchValue={!supplierId ? true : false}
                     defaultValue={"None"}
@@ -312,6 +343,7 @@ function Products({ products, categories, supplier }: Props) {
             placement="left"
             onClose={onClose}
             open={open}
+            style={{ marginTop: scroll > 150 ? 130 : 0 }}
           >
             <Space wrap>
               <h5>Danh mục sản phẩm</h5>

@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Avatar, Badge, Dropdown, Space } from "antd";
+import { Avatar, Badge, Dropdown, Space, message } from "antd";
 import { Menu, Input, Select } from "antd";
 import Style from "./Navbar.module.css";
 import { useRouter } from "next/router";
@@ -71,13 +71,16 @@ function NavBar({}: Props) {
   }, [fresh]);
 
   useEffect(() => {
-    axios
-      .get(`${URL_ENV}/customers/${auth?.payload?._id}`)
-      .then((res: any) => {
-        setUser(res.data.result);
-      })
-      .catch((err) => console.log(err));
-  }, [auth?.payload?._id]);
+    if (auth) {
+      axios
+        .get(`${URL_ENV}/customers/${auth?.payload?._id}`)
+        .then((res: any) => {
+          setUser(res.data.result);
+        })
+        .catch((err) => console.log(err));
+    } else {
+    }
+  }, [auth, auth?.payload?._id]);
 
   const handleNavigation = (path: any) => {
     // router.reload();
@@ -184,7 +187,7 @@ function NavBar({}: Props) {
                               itemsCart.map((item: any) => (
                                 <Menu.Item key={item.product?._id}>
                                   <div className="d-flex justify-content-between">
-                                    <div className="w-75 text-truncate py-2">
+                                    <div className="w-75 text-truncate py-3">
                                       <Badge color="blue" count={item.quantity}>
                                         <Avatar
                                           shape="square"
@@ -195,7 +198,7 @@ function NavBar({}: Props) {
                                       <span> {item.product?.name}</span>
                                     </div>
 
-                                    <div>
+                                    <div className="py-3">
                                       {item.product?.price.toLocaleString(
                                         "vi-VN",
                                         {
@@ -341,10 +344,11 @@ function NavBar({}: Props) {
             dropdownMatchSelectWidth={false}
             dropdownStyle={{
               position: "fixed",
-              top: 130,
+              top: scroll > 150 ? 140 : 130,
+              width: 300,
             }}
             allowClear
-            className={scroll > 150 ? Style.input : Style.input__Scroll}
+            className={scroll > 150 ? `${Style.input} ` : Style.input__Scroll}
             placeholder="Search"
             optionFilterProp="children"
             onChange={onSearch}

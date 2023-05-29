@@ -116,9 +116,7 @@ const MainMenu = () => {
   const navigate = useNavigate();
   const { logout } = useAuthStore((state: any) => state);
 
-  //   const [current, setCurrent] = useState("category");
   const onMenuClick = (value: any) => {
-    console.log("««««« value »»»»»", value);
     addBread(value.key);
     if (value.key === "account/logout") {
       logout();
@@ -126,17 +124,9 @@ const MainMenu = () => {
     } else {
       navigate("/" + value.key);
     }
-
-    // setCurrent(value.key);
   };
 
   return (
-    // <Menu
-    //   onClick={onMenuClick}
-    //   selectedKeys={[current]}
-    //   mode="horizontal"
-    //   items={items}
-    // />
     <Menu
       theme="dark"
       mode="inline"
