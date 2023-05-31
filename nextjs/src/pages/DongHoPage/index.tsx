@@ -6,7 +6,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
 import { Col, Row, message } from "antd";
-import Style from "./product.module.css";
+import Style from "./DongHo.module.css";
 
 import { MoreOutlined } from "@ant-design/icons";
 import {
@@ -19,7 +19,8 @@ import {
   FloatButton,
 } from "antd";
 import { useCartStore } from "@/hook/useCountStore";
-import Hotdeal from "../../compenents/Mainpage/Topmonth/Topmonth";
+
+import Hotdeal from "../../compenents/Mainpage/Hotdeal/Hotdeal";
 
 // import { useAuthStore } from "../../hook/useAuthStore";
 // import { useCartStore } from "@/hook/useCountStore";
@@ -28,6 +29,7 @@ type Props = {
   products: any;
   categories: any;
   supplier: any;
+  props: any;
 };
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
@@ -35,7 +37,7 @@ const API_URL_Product = `${URL_ENV}/products`;
 const API_URL_Categories = `${URL_ENV}/categories`;
 const API_URL_Supplier = `${URL_ENV}/suppliers`;
 
-function Products({ products, categories, supplier }: Props) {
+function DongHo({ products, categories, supplier }: Props) {
   // const { items } = useCartStore((state: any) => state);
   // const { add } = useCartStore((state: any) => state);
   // const { auth } = useAuthStore((state: any) => state);
@@ -74,10 +76,22 @@ function Products({ products, categories, supplier }: Props) {
     .join("&");
 
   useEffect(() => {
-    axios.get(`${API_URL_Product}?${queryParams}`).then((respones: any) => {
-      // console.log(respones.data.results);
-      setData(respones.data.results);
-    });
+    if (fetchData === 0) {
+      axios
+        .get(
+          `${API_URL_Product}?categoryId=6418ecd7695619ee88123bd9
+    `
+        )
+        .then((respones: any) => {
+          // console.log(respones.data.results);
+          setData(respones.data.results);
+        });
+    } else {
+      axios.get(`${API_URL_Product}?${queryParams}`).then((respones: any) => {
+        // console.log(respones.data.results);
+        setData(respones.data.results);
+      });
+    }
   }, [fetchData]);
 
   const showDrawer = () => {
@@ -141,12 +155,7 @@ function Products({ products, categories, supplier }: Props) {
       {/* ////////////////////////////////////// */}
 
       <Row>
-        <Col span={18} push={4}>
-          <div
-            className={`d-flex justify-content-center align-items-center ${Style.title}`}
-          >
-            {/* <h2 style={{ color: "#6508fa" }}>Sản Phẩm</h2> */}
-          </div>
+        <Col span={20} push={2}>
           <div className={`${Style.container1}`}>
             <ul className={Style.list}>
               {data &&
@@ -219,181 +228,12 @@ function Products({ products, categories, supplier }: Props) {
             <Hotdeal />
           </div>
         </Col>
-        <Col span={4} pull={18} className={`${Style.col2} `}>
-          <Affix offsetTop={95}>
-            <div className="py-4">
-              <div className={`pt-3  ${Style.splitRowPC}`}>
-                <Space wrap className="d-flex flex-column ">
-                  <h5>Danh mục sản phẩm</h5>
-                  <Select
-                    allowClear
-                    autoClearSearchValue={!categoryId ? true : false}
-                    defaultValue={"None"}
-                    style={{ width: 180 }}
-                    onChange={handleDataChange}
-                    options={categories?.results?.map((items: any) => ({
-                      label: items.name,
-                      value: items._id,
-                    }))}
-                  />
-
-                  <h5>Hãng sản phẩm</h5>
-                  <Select
-                    allowClear
-                    autoClearSearchValue={!supplierId ? true : false}
-                    defaultValue={"None"}
-                    style={{ width: 180 }}
-                    onChange={handleChangeSupplier}
-                    options={supplier?.results?.map((items: any) => ({
-                      label: items.name,
-                      value: items._id,
-                    }))}
-                  />
-                  <h5>Lọc giá</h5>
-                  <div className="d-flex">
-                    <InputNumber
-                      defaultValue={"0"}
-                      placeholder="Enter From"
-                      min={0}
-                      onChange={handleFromPrice}
-                      style={{ margin: "0 5px" }}
-                    />
-
-                    <InputNumber
-                      defaultValue={"0"}
-                      placeholder="Enter to"
-                      // max={}
-                      onChange={handleToPrice}
-                    />
-                  </div>
-                  <h5>Mức giảm giá</h5>
-                  <div className="d-flex">
-                    <InputNumber
-                      placeholder="Enter From"
-                      defaultValue={"0"}
-                      min={0}
-                      onChange={handleFromDiscount}
-                      style={{ margin: "0 5px" }}
-                    />
-
-                    <InputNumber
-                      placeholder="Enter to"
-                      defaultValue={"0"}
-                      max={90}
-                      onChange={handleToDiscount}
-                    />
-                  </div>
-                  <div className="d-flex ">
-                    <Button type="primary" onClick={handleSubmit}>
-                      Lọc sản phẩm
-                    </Button>
-                    <Button
-                      type="primary"
-                      onClick={handleClearSubmit}
-                      className="ms-1"
-                    >
-                      Xóa lọc
-                    </Button>
-                  </div>
-                </Space>
-              </div>
-            </div>
-          </Affix>
-        </Col>
-        {/* //responsive */}
-        <div className={Style.splitRow}>
-          <Affix offsetTop={top}>
-            <FloatButton
-              icon={<MoreOutlined />}
-              type="primary"
-              onClick={showDrawer}
-              style={{ right: 24 }}
-            ></FloatButton>
-          </Affix>
-
-          <Drawer
-            width={250}
-            title="Lọc sản phẩm"
-            placement="left"
-            onClose={onClose}
-            open={open}
-          >
-            <Space wrap>
-              <h5>Danh mục sản phẩm</h5>
-              <Select
-                defaultValue="None"
-                style={{ width: 220 }}
-                onChange={handleDataChange}
-                options={categories?.results?.map((items: any) => ({
-                  label: items.name,
-                  value: items._id,
-                }))}
-              />
-              <h5>Hãng sản phẩm</h5>
-              <Select
-                defaultValue="None"
-                style={{ width: 220 }}
-                onChange={handleChangeSupplier}
-                options={supplier?.results?.map((items: any) => ({
-                  label: items.name,
-                  value: items._id,
-                }))}
-              />
-            </Space>
-            <h5>Lọc giá</h5>
-            <div className="d-flex mt-3">
-              <InputNumber
-                defaultValue="0"
-                placeholder="Enter From"
-                min={0}
-                onChange={handleFromPrice}
-                style={{ margin: "0 5px" }}
-              />
-
-              <InputNumber
-                defaultValue="0"
-                placeholder="Enter to"
-                max={1000}
-                onChange={handleToPrice}
-              />
-            </div>
-            <h5>Mức giảm giá</h5>
-            <div className="d-flex">
-              <InputNumber
-                defaultValue="0"
-                placeholder="Enter From"
-                min={0}
-                onChange={handleFromDiscount}
-                style={{ margin: "0 5px" }}
-              />
-
-              <InputNumber
-                defaultValue="0"
-                placeholder="Enter to"
-                max={90}
-                onChange={handleToDiscount}
-              />
-            </div>
-            <div className="mt-3">
-              <Button type="primary" onClick={handleSubmit}>
-                Lọc sản phẩm
-              </Button>
-              <Button
-                type="primary"
-                onClick={handleClearSubmit}
-                className="ms-1"
-              >
-                Xóa lọc
-              </Button>
-            </div>
-          </Drawer>
-        </div>
       </Row>
     </div>
   );
 }
 
-export default Products;
+export default DongHo;
 
 export async function getStaticProps() {
   const products = await axios.get(API_URL_Product).then((response) => {

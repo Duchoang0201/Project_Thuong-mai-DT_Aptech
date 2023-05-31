@@ -183,9 +183,9 @@ export default function ProductDetails({ product }: Props) {
               <div>
                 {" "}
                 <Rate disabled value={product?.averageRate} />
-                <span className={`${Style.ratingNumber}`}>
-                  ({product?.rateInfor?.length})
-                </span>
+                {/* <span className={`${Style.ratingNumber}`}>
+                  ({product?.rateInfo?.length})
+                </span> */}
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
                 <p>

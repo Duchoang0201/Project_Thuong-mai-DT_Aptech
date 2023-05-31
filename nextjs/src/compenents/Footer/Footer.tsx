@@ -16,13 +16,13 @@ function Footer({}: Props) {
           <p>Thanh Sơn, phường Thanh Bình, quận Hải Châu, TP. Đà Nẵng</p>
           <p>
             Điện thoại:{" "}
-            <Link href={"/phone"} className="text-decoration-none">
+            <Link href={"/LienHe"} className="text-decoration-none">
               0356057252
             </Link>
           </p>
           <p>
             Tổng đài CSKH:{" "}
-            <Link href={"/phone"} className="text-decoration-none">
+            <Link href={"/LienHe"} className="text-decoration-none">
               18000000
             </Link>
           </p>
@@ -31,13 +31,13 @@ function Footer({}: Props) {
           <h5>Về chúng tôi</h5>
 
           <p>
-            <Link href={"/aboutus"} className="text-decoration-none">
+            <Link href={"/ThuongHieu"} className="text-decoration-none">
               Giới thiệu về thương hiệu
             </Link>
           </p>
           <p>
             {" "}
-            <Link href={"/branch"} className="text-decoration-none">
+            <Link href={"/ThuongHieu"} className="text-decoration-none">
               Các chi nhánh trên toàn quốc
             </Link>
           </p>

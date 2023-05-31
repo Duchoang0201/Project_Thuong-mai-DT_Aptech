@@ -135,7 +135,7 @@ function NavBar({}: Props) {
 
   return (
     <>
-      <div className={scroll > 150 ? Style.container : Style.contaier__Scroll}>
+      <div className={scroll > 60 ? Style.container : Style.contaier__Scroll}>
         <div>
           <ul className={`${Style.listTop}`}>
             <li
@@ -214,7 +214,7 @@ function NavBar({}: Props) {
                         <Badge
                           count={itemsCart.length}
                           className={
-                            scroll > 150
+                            scroll > 60
                               ? `d-flex ${Style.icon__scroll}`
                               : `d-flex ${Style.icon}`
                           }
@@ -238,7 +238,7 @@ function NavBar({}: Props) {
                       <Badge
                         count={itemsCart.length}
                         className={
-                          scroll > 150
+                          scroll > 60
                             ? `d-flex ${Style.icon__scroll}`
                             : `d-flex ${Style.icon}`
                         }
@@ -330,11 +330,26 @@ function NavBar({}: Props) {
               key="products"
               onClick={() => handleNavigation("/products")}
             >
-              Sản phẩm
+              Các sản phẩm
             </Menu.Item>
-            <Menu.Item key="collection">Bộ sưu tập </Menu.Item>
-            <Menu.Item key="brand">Thương hiệu</Menu.Item>
-            <Menu.Item key="contact ">Liên hệ</Menu.Item>
+            <Menu.Item
+              key="DongHo"
+              onClick={() => handleNavigation("/DongHoPage")}
+            >
+              Đồng hồ{" "}
+            </Menu.Item>
+            <Menu.Item
+              key="brand"
+              onClick={() => handleNavigation("/ThuongHieu")}
+            >
+              Thương hiệu
+            </Menu.Item>
+            <Menu.Item
+              key="contact "
+              onClick={() => handleNavigation("/LienHe")}
+            >
+              Liên hệ
+            </Menu.Item>
           </Menu>
 
           <Select
