@@ -398,16 +398,6 @@ function SupperliersCRUD() {
                   };
                 })}
               />
-              {/* {supplierId && (
-                <span style={{ width: "20%" }}>
-                  <Button
-                    onClick={() => {
-                      setSupplierId("");
-                    }}
-                    icon={<ClearOutlined />}
-                  />
-                </span>
-              )} */}
             </div>
           </>
         );

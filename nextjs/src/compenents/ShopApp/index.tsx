@@ -1,6 +1,4 @@
 import React, { useEffect, useState } from "react";
-import Carts from "./components/Carts";
-import CreateOrder from "./components/Order/CreateOrder";
 import { useCartStore } from "@/hook/useCountStore";
 import CartShoppe from "./components/Carts/CartShoppe";
 import axios from "axios";

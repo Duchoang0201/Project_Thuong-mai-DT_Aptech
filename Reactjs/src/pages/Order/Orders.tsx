@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   Button,
@@ -62,6 +62,75 @@ export default function Orders() {
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
+      render: (text: any, record: any) => (
+        <div className="d-flex justify-content-center">
+          {" "}
+          <button
+            type="button"
+            className="btn btn-outline-primary"
+            onClick={async () => {
+              const response = await axiosClient.get(
+                "orders/" + selectedOrder._id
+              );
+              const currentOrder = response.data;
+              let { orderDetails } = currentOrder;
+              const found = orderDetails.find(
+                (x: any) => x.productId === record.productId
+              );
+              if (found) {
+                found.quantity += 1;
+              } else {
+                orderDetails.push({
+                  productId: record._id,
+                  quantity: 1,
+                });
+              }
+
+              await axiosClient.patch("orders/" + selectedOrder._id, {
+                orderDetails,
+              });
+              setRefresh((f) => f + 1);
+            }}
+          >
+            +
+          </button>
+          <div className="border px-4 py-2 text-center align-self-center justify-content-center ">
+            {text}
+          </div>
+          <button
+            type="button"
+            className="btn btn-outline-danger"
+            onClick={async () => {
+              const response = await axiosClient.get(
+                "orders/" + selectedOrder._id
+              );
+              const currentOrder = response.data;
+              let { orderDetails } = currentOrder;
+              const found = orderDetails.find(
+                (x: any) => x.productId === record.productId
+              );
+              if (found.quantity === 1) {
+                orderDetails = orderDetails.filter(
+                  (x: any) => x.productId !== record.productId
+                );
+
+                await axiosClient.patch("orders/" + selectedOrder._id, {
+                  orderDetails,
+                });
+                setRefresh((f) => f + 1);
+              } else {
+                found.quantity -= 1;
+                await axiosClient.patch("orders/" + selectedOrder._id, {
+                  orderDetails,
+                });
+                setRefresh((f) => f + 1);
+              }
+            }}
+          >
+            -
+          </button>
+        </div>
+      ),
     },
     {
       title: "Tên sản phẩm",
@@ -129,22 +198,16 @@ export default function Orders() {
       },
     },
     {
-      width: "10%",
-
       title: "Hình thức thanh toán",
       dataIndex: "paymentType",
       key: "paymentType",
     },
     {
-      width: "10%",
-
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
     },
     {
-      width: "10%",
-
       title: "Địa chỉ giao hàng",
       dataIndex: "shippingAddress",
       key: "shippingAddress",
@@ -163,8 +226,6 @@ export default function Orders() {
       },
     },
     {
-      width: "10%",
-
       title: "Tổng tiền",
       dataIndex: "totalMoney",
       key: "totalMoney",
@@ -217,6 +278,9 @@ export default function Orders() {
         onCancel={() => {
           setAddProductsModalVisible(false);
         }}
+        onOk={() => {
+          setAddProductsModalVisible(false);
+        }}
       >
         {products &&
           products.map((p: any) => {
@@ -263,7 +327,7 @@ export default function Orders() {
         <Col span={24}>
           {" "}
           <Table
-            scroll={{ x: 200 }}
+            scroll={{ x: "max-content", y: "max-content" }}
             rowKey="_id"
             dataSource={orders}
             columns={columns}

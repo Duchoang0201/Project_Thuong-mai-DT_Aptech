@@ -17,7 +17,7 @@ export default function CreateOrder() {
   };
 
   return (
-    <div className="container text-end">
+    <div className="container ">
       <button
         className="btn btn-primary "
         style={{ border: 0, height: 42, width: 120 }}

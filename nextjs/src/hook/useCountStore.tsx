@@ -96,7 +96,7 @@ export const useCartStore = create(
           if (found) {
             if (found.quantity === 1) {
               const newItems = items.filter(
-                (x: any) => x.product._id !== found.product.id
+                (x: any) => x.product._id !== found.product._id
               );
               const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
                 products: newItems,
