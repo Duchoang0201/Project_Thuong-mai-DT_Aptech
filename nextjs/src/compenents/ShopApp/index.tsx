@@ -32,7 +32,6 @@ export default function ShopApp() {
       {/* <Carts /> */}
       {getUser && <CartShoppe />}
       <hr />
-      <CreateOrder />
     </div>
   );
 }

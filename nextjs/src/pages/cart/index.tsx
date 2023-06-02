@@ -1,11 +1,14 @@
 import { useCartStore } from "@/hook/useCountStore";
 import React, { useEffect, useState } from "react";
 import ShopApp from "@/compenents/ShopApp";
-import { Affix, Button, Card } from "antd";
+import { Affix, Button, Card, Checkbox } from "antd";
+import CreateOrder from "@/compenents/ShopApp/components/Order/CreateOrder";
 
 export default function CounterApp() {
   const [loading, setLoading] = useState(true);
-
+  const { selectAllCheck, removeAllCheck } = useCartStore(
+    (state: any) => state
+  );
   useEffect(() => {
     setTimeout(() => {
       setLoading(false);
@@ -21,7 +24,33 @@ export default function CounterApp() {
         <ShopApp />
       </Card>
       <Affix offsetBottom={8}>
-        <div className="container">asdas</div>
+        <Card className="container">
+          <div className="row text-center">
+            <div className="col-sm-2">
+              <Checkbox
+                onChange={(info: any) => {
+                  if (info.target.checked) {
+                    selectAllCheck();
+                  } else {
+                    removeAllCheck();
+                  }
+                }}
+              >
+                {" "}
+                Chọn tất cả
+              </Checkbox>
+            </div>
+            <div className="col-sm-4">
+              <div>Sản phẩm</div>
+            </div>
+            <div className="col-sm-2">Đơn giá</div>
+            <div className="col-sm-2">Số lượng</div>
+            <div className="col-sm-2">
+              {" "}
+              <CreateOrder />
+            </div>
+          </div>
+        </Card>
       </Affix>
     </div>
   );
