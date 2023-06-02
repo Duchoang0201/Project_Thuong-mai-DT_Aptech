@@ -10,9 +10,8 @@ import "swiper/css/navigation";
 // import required modules
 import { Pagination, Navigation } from "swiper";
 import axios from "axios";
-import { Card } from "antd";
+import { Card, Image } from "antd";
 
-import Image from "next/image";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function App({ hotTrend }: any) {
@@ -44,29 +43,26 @@ export default function App({ hotTrend }: any) {
         breakpoints={{
           0: {
             slidesPerView: 1,
-            spaceBetween: 1,
-          },
-          400: {
-            slidesPerView: 2,
-            spaceBetween: 1,
+            centeredSlides: true,
           },
           900: {
-            slidesPerView: 4,
-            spaceBetween: 1,
+            slidesPerView: 2,
+            centeredSlides: true,
+          },
+          1200: {
+            slidesPerView: 3,
+            centeredSlides: true,
           },
         }}
       >
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
             <>
-              <SwiperSlide className="px-4 py-4">
+              <SwiperSlide>
                 <Card
-                  className=" rounded-4 "
+                  className=" rounded-4 text-center"
                   bordered={false}
                   style={{
-                    width: 300,
-                    height: 350,
-
                     background: `rgba(245,245,245,0.1)`,
                   }}
                 >
@@ -76,10 +72,9 @@ export default function App({ hotTrend }: any) {
                   >
                     {" "}
                     <Image
+                      preview={false}
                       alt={item.name}
                       src={`${URL_ENV}/${item.imageUrl}`}
-                      width={200}
-                      height={200}
                     />
                   </Card>
                   <h6 style={{ height: 40 }} className="text-center  py-2">

@@ -191,7 +191,7 @@ const AccountOrders = (props: Props) => {
                   .catch((error) => {
                     console.error(error);
                   });
-                if (handleChangeStock.data) {
+                if (handleChangeStock?.data) {
                   await axios
                     .patch(`${URL_ENV}/orders/${record._id}`, {
                       status: "CANCELED",

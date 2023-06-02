@@ -11,9 +11,9 @@ import "swiper/css/navigation";
 import { Autoplay, EffectCoverflow, Pagination } from "swiper";
 
 import axios from "axios";
-import { Button, Card, Divider, Rate } from "antd";
+import { Button, Card, Divider, Rate, Image } from "antd";
 
-import Image from "next/image";
+// import Image from "next/image";
 
 import router from "next/router";
 
@@ -66,18 +66,19 @@ export default function Topmoth({ topMonth }: any) {
           }}
           pagination={true}
           modules={[Autoplay, EffectCoverflow, Pagination]}
-          className="Top_Month py-4 px-3 text-center" // Remove any shadow styles from the className
+          // className="Top_Month py-4 px-4 text-center"
           breakpoints={{
             0: {
               slidesPerView: 1,
               centeredSlides: true,
             },
-            500: {
+            900: {
               slidesPerView: 2,
               centeredSlides: true,
             },
-            900: {
+            1200: {
               slidesPerView: 3,
+              centeredSlides: true,
             },
           }}
           onSwiper={(swiper) => (swiperRef.current = swiper)}
@@ -86,15 +87,14 @@ export default function Topmoth({ topMonth }: any) {
             hotDeals.map((item: any, index: any) => (
               <>
                 <SwiperSlide
-                  className="text-center"
+                  // className="text-center"
                   key={`${item._id}-${index + 1}`}
                 >
                   <Card
+                    className="text-center"
                     key={`${item.name}-${index + 1}`}
                     bordered={false}
                     style={{
-                      width: 300,
-                      height: 500,
                       background: `rgba(245,245,245,0.8)`,
                     }}
                   >
@@ -103,8 +103,6 @@ export default function Topmoth({ topMonth }: any) {
                       <Image
                         alt={item.name}
                         src={`${URL_ENV}/${item.imageUrl}`}
-                        width={200}
-                        height={200}
                       />
                     </Card>
 

@@ -5,8 +5,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination, Navigation, Autoplay } from "swiper";
 import axios from "axios";
-import { Button, Card, Divider, Rate } from "antd";
-import Image from "next/image";
+import { Button, Card, Divider, Rate, Image } from "antd";
 import router from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
@@ -68,12 +67,13 @@ export default function App({ hotDeal }: any) {
             slidesPerView: 1,
             centeredSlides: true,
           },
-          500: {
+          900: {
             slidesPerView: 2,
             centeredSlides: true,
           },
-          900: {
+          1200: {
             slidesPerView: 3,
+            centeredSlides: true,
           },
         }}
         modules={[Pagination, Navigation, Autoplay]}
@@ -84,27 +84,20 @@ export default function App({ hotDeal }: any) {
       >
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
-            <SwiperSlide className="px-3 py-4" key={index}>
+            <SwiperSlide key={`${item._id}-${index + 1}`}>
               <Card
                 className="border rounded-4 "
                 bordered={false}
                 style={{
-                  width: 300,
-                  height: 500,
                   background: `rgba(245,245,245,0.8)`,
                 }}
               >
                 <Card
-                  className="border rounded-4"
+                  className="border rounded-4 text-center"
                   style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
                 >
                   {" "}
-                  <Image
-                    alt={item.name}
-                    src={`${URL_ENV}/${item.imageUrl}`}
-                    width={200}
-                    height={200}
-                  />
+                  <Image alt={item.name} src={`${URL_ENV}/${item.imageUrl}`} />
                 </Card>
                 <p style={{ height: 40 }} className="text-center">
                   {item.name}

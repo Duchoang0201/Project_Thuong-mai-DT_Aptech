@@ -23,7 +23,7 @@ export default function CounterApp() {
       <Card className="bg-body-secondary" loading={loading}>
         <ShopApp />
       </Card>
-      <Affix offsetBottom={8}>
+      <Affix offsetBottom={10}>
         <Card className="container">
           <div className="row text-center">
             <div className="col-sm-2">
@@ -43,7 +43,7 @@ export default function CounterApp() {
             <div className="col-sm-4">
               <div> Tổng số sản phẩm: {itemsCheckout.length}</div>
             </div>
-            <div className="col-sm-2">
+            <div className="col-sm-4">
               Tổng thanh toán :{" "}
               {itemsCheckout
                 .map((item: any) => item.product.price * item.quantity)
@@ -56,7 +56,6 @@ export default function CounterApp() {
                   currency: "VND",
                 })}
             </div>
-            <div className="col-sm-2"></div>
             <div className="col-sm-2">
               {" "}
               <CreateOrder />

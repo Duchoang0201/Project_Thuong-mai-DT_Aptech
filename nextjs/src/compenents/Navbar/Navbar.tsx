@@ -225,7 +225,7 @@ function NavBar() {
                         <Badge
                           count={itemsCart?.length}
                           className={
-                            scroll > 150
+                            scroll > 60
                               ? `d-flex ${Style.icon__scroll}`
                               : `d-flex ${Style.icon}`
                           }
@@ -286,7 +286,7 @@ function NavBar() {
                     >
                       <Badge
                         className={
-                          scroll > 150
+                          scroll > 60
                             ? `d-flex ${Style.icon__scroll}`
                             : `d-flex ${Style.icon}`
                         }
@@ -335,7 +335,7 @@ function NavBar() {
         <div className={Style.menuAnt}>
           <Menu
             mode="horizontal"
-            className={scroll > 150 ? Style.lengths : Style.length__Scroll}
+            className={scroll > 60 ? Style.lengths : Style.length__Scroll}
             selectedKeys={[current]}
           >
             <Menu.Item
