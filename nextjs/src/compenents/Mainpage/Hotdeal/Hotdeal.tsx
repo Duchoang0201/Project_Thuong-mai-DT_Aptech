@@ -88,13 +88,11 @@ export default function App({ hotDeal }: any) {
               <Card
                 className="border rounded-4 "
                 bordered={false}
-                style={{
-                  background: `rgba(245,245,245,0.8)`,
-                }}
+                style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
               >
                 <Card
                   className="border rounded-4 text-center"
-                  style={{ backgroundColor: "rgba(0,0,0,0.5)" }}
+                  style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
                 >
                   {" "}
                   <Image alt={item.name} src={`${URL_ENV}/${item.imageUrl}`} />

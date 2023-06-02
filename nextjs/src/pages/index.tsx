@@ -66,7 +66,7 @@ export default function Home(props: any) {
         <Divider>
           <h3>Số lượng mua nhiều nhất trong tháng</h3>
         </Divider>
-        <div style={monthStyle}>
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
           <div className="container">
             <Topmoth topMonth={topMonth} />
           </div>
@@ -74,7 +74,7 @@ export default function Home(props: any) {
         <Divider>
           <h3> Ưu đãi hấp dẫn </h3>
         </Divider>
-        <div style={hotStyle}>
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
           <div className="container">
             <Hotdeal hotDeal={hotDeal} />
           </div>

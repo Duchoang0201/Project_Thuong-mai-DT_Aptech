@@ -94,11 +94,9 @@ export default function Topmoth({ topMonth }: any) {
                     className="text-center"
                     key={`${item.name}-${index + 1}`}
                     bordered={false}
-                    style={{
-                      background: `rgba(245,245,245,0.8)`,
-                    }}
+                    style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
                   >
-                    <Card style={{ backgroundColor: "rgba(0,0,0,0.5)" }}>
+                    <Card style={{ backgroundColor: "rgba(0,0,0,0.3)" }}>
                       {" "}
                       <Image
                         alt={item.name}
