@@ -14,7 +14,6 @@ export default function Carts() {
   const { auth } = useAuthStore((state: any) => state);
   const [getUser, setGetUser] = useState<any>(null);
 
-  console.log("««««« items »»»»»", items);
   useEffect(() => {
     axios
       .get(`${URL_ENV}/customers/${auth?.payload._id}`)

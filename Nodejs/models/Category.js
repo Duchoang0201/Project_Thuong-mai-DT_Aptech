@@ -2,12 +2,12 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 
 const createdBySchema = new Schema({
-  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee" },
   firstName: { type: String },
   lastName: { type: String },
 });
 const updatedBySchema = new Schema({
-  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee" },
   firstName: { type: String },
   lastName: { type: String },
 });

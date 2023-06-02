@@ -92,7 +92,7 @@ function Products({ products, categories, supplier }: Props) {
       // console.log(respones.data.results);
       setData(respones.data.results);
     });
-  }, [fetchData, queryParams]);
+  }, [fetchData]);
 
   const showDrawer = () => {
     setOpen(true);
@@ -187,7 +187,7 @@ function Products({ products, categories, supplier }: Props) {
                             onClick={() => {
                               const productId = items?._id;
 
-                              const productExists = itemsCart.some(
+                              const productExists = itemsCart?.some(
                                 (item: any) => item.product._id === productId
                               );
                               console.log(
@@ -207,12 +207,10 @@ function Products({ products, categories, supplier }: Props) {
                                 );
                               } else {
                                 add({ product: items, quantity: 1 });
-                                message.success(1.5);
                                 message.success(
                                   {
                                     content: "Đã thêm sản phẩm vào giỏ hàng!",
                                     style: {
-                                      zIndex: 9999999999,
                                       marginTop: 130,
                                     },
                                   },

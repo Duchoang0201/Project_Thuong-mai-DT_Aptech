@@ -54,6 +54,7 @@ const customerSchema = Schema(
     },
     updatedBy: updatedBySchema,
     note: { type: String },
+    lastActivity: { type: Date },
   },
   {
     versionKey: false,

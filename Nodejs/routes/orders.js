@@ -180,7 +180,7 @@ router.get("/questions/7", function (req, res, next) {
 // ------------------------------------------------------------------------------------------------
 // QUESTIONS 8
 // ------------------------------------------------------------------------------------------------
-router.get("/questions/8", function (req, res, next) {
+router.get("/questions/8", async (req, res, next) => {
   try {
     const { status, date } = req.query;
 
@@ -194,7 +194,7 @@ router.get("/questions/8", function (req, res, next) {
     const compareFromDate = { $gte: ["$createdDate", fromDate] };
     const compareToDate = { $lt: ["$createdDate", toDate] };
 
-    Order.aggregate([
+    await Order.aggregate([
       {
         $match: {
           $expr: { $and: [compareStatus, compareFromDate, compareToDate] },
@@ -240,7 +240,7 @@ router.get("/questions/8", function (req, res, next) {
 // ------------------------------------------------------------------------------------------------
 // QUESTIONS 8B
 // ------------------------------------------------------------------------------------------------
-router.get("/questions/8b", function (req, res, next) {
+router.get("/questions/8b", async (req, res, next) => {
   try {
     let { status, fromDate, toDate } = req.query;
 
@@ -257,7 +257,7 @@ router.get("/questions/8b", function (req, res, next) {
     const compareFromDate = { $gte: ["$createdDate", fromDate] };
     const compareToDate = { $lt: ["$createdDate", toDate] };
 
-    Order.aggregate([
+    await Order.aggregate([
       {
         $match: {
           $expr: { $and: [compareStatus, compareFromDate, compareToDate] },

@@ -67,26 +67,20 @@ io.on("connection", (socket) => {
   });
 
   // send and get message
+  //send and get message
   socket.on("sendMessage", ({ senderId, receiverId, text }) => {
     const user = getUser(receiverId);
-
-    // Emit userOnline event when a user connects
-
-    io.emit("userOnline", {
-      users,
-    });
-
-    // io.to().emit() to send 1 client
-    if (user) {
-      io.to(user.socketId).emit("getMessage", {
-        senderId,
-        text,
-      });
+    const messageData = {
+      senderId,
+      text,
+    };
+    if (user && user.socketId) {
+      io.emit("getMessage", messageData);
     } else {
-      io.emit("getMessage", {
-        data: null,
-      });
+      // Handle the case where the user is not found
+      io.emit("getMessage", messageData);
     }
+    // io.emit("sendMessageToClients", messageData);
   });
 
   // when disconnect
@@ -94,13 +88,6 @@ io.on("connection", (socket) => {
     console.log("a user disconnected!");
     removeUser(socket.id);
     io.emit("getUsers", users);
-
-    // Emit userOnline event when a user disconnects
-    setTimeout(() => {
-      io.emit("userOnline", {
-        users,
-      });
-    }, 2000);
   });
 });
 

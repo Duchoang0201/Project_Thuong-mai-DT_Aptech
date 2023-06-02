@@ -142,6 +142,13 @@ export default function Orders() {
       dataIndex: "status",
       key: "status",
     },
+    {
+      width: "10%",
+
+      title: "Địa chỉ giao hàng",
+      dataIndex: "shippingAddress",
+      key: "shippingAddress",
+    },
 
     {
       title: "Nhân viên",
@@ -316,52 +323,3 @@ export default function Orders() {
     </div>
   );
 }
-
-// {open && (
-//   <Row>
-//     <Col span={24}>
-//       {" "}
-//       {open && (
-//         <Card title="Order Detail">
-//           <div>
-//             {/* Description of order */}
-//             <Descriptions
-//               bordered
-//               column={1}
-//               labelStyle={{ fontWeight: "700" }}
-//             >
-//               <Descriptions.Item label="Trạng thái">
-//                 {selectedOrder.status}
-//               </Descriptions.Item>
-//               <Descriptions.Item label="Khách hàng">
-//                 {selectedOrder.customer?.firstName}{" "}
-//                 {selectedOrder.customer?.lastName}
-//               </Descriptions.Item>
-//               <Descriptions.Item label="Nhân viên">
-//                 {selectedOrder.employee?.firstName}{" "}
-//                 {selectedOrder.employee?.lastName}
-//               </Descriptions.Item>
-//             </Descriptions>
-//             <Divider />
-
-//             {/* Table include product of orderDetails */}
-//             <Table
-//               scroll={{ x: 200 }}
-//               rowKey="_id"
-//               dataSource={selectedOrder.orderDetails}
-//               columns={productColumns}
-//             />
-
-//             <Button
-//               onClick={() => {
-//                 setAddProductsModalVisible(true);
-//               }}
-//             >
-//               Thêm sản phẩm
-//             </Button>
-//           </div>
-//         </Card>
-//       )}
-//     </Col>
-//   </Row>
-// )}

@@ -9,6 +9,7 @@ const Conversation = require("./Conversation");
 const Message = require("./Message");
 const Slide = require("./Slide");
 const Feature = require("./Feature");
+const Cart = require("./Cart");
 
 module.exports = {
   Category,
@@ -22,4 +23,5 @@ module.exports = {
   Message,
   Slide,
   Feature,
+  Cart,
 };

@@ -36,7 +36,7 @@ const CheckoutPayment = (props: Props) => {
   // const handleChangePayMethod = (value: any) => {
   //   setPayMethod(value);
   // };
-  const { items } = useCartStore((state: any) => state);
+  const { itemsCheckout } = useCartStore((state: any) => state);
   const { auth }: any = useAuthStore((state: any) => state);
   useEffect(() => {
     const fetchData = async () => {
@@ -136,7 +136,7 @@ const CheckoutPayment = (props: Props) => {
     orderData.description = values.description;
     orderData.shippingAddress = values.address;
     orderData.status = "WAITING";
-    orderData.orderDetails = items.map((item: any) => ({
+    orderData.orderDetails = itemsCheckout.map((item: any) => ({
       productId: item.product._id,
       quantity: item.quantity,
     }));
@@ -152,13 +152,23 @@ const CheckoutPayment = (props: Props) => {
       lat: position.lat,
       lng: position.lon,
     };
-    console.log("««««« oderData »»»»»", orderData);
+
     if (payMethod === "shipCod") {
       orderData.paymentType = "CASH";
 
       const payPost = async () => {
-        const found = await axios.post(`${URL_ENV}/orders`, orderData);
+        const found: any = await axios.post(`${URL_ENV}/orders`, orderData);
+        console.log("««««« found »»»»»", found);
         if (found) {
+          //Change stock of product :
+          const handleChangeStock = await axios
+            .post(`${URL_ENV}/products/orderp/${found?.data._id}/stock`)
+            .then((response) => {
+              console.log(response.data.message);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
           router.push("/success-payment");
         }
       };
@@ -167,14 +177,28 @@ const CheckoutPayment = (props: Props) => {
     if (payMethod === "momo") {
       orderData.paymentType = "MOMO";
 
-      const amount = items
+      const amount = itemsCheckout
         .map((item: any) => item.product.price * item.quantity)
         .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
 
       const payPost = async () => {
         try {
-          const postOder = await axios.post(`${URL_ENV}/orders`, orderData);
+          const postOder: any = await axios.post(
+            `${URL_ENV}/orders`,
+            orderData
+          );
+
           if (postOder) {
+            //Change stock of product :
+            const handleChangeStock = await axios
+              .post(`${URL_ENV}/products/orderp/${postOder?.data?._id}/stock`)
+              .then((response) => {
+                console.log(response.data.message);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+
             const found = await axios.post(
               `${URL_ENV}/orders/pay/create_momo_url`,
               { amount: amount }
@@ -192,7 +216,7 @@ const CheckoutPayment = (props: Props) => {
     if (payMethod === "vnpay") {
       orderData.paymentType = "VNPAY";
 
-      const amount = items
+      const amount = itemsCheckout
         .map((item: any) => item.product.price * item.quantity)
         .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
 
@@ -200,12 +224,20 @@ const CheckoutPayment = (props: Props) => {
         try {
           const postOder = await axios.post(`${URL_ENV}/orders`, orderData);
           if (postOder) {
+            const handleChangeStock = await axios
+              .post(`${URL_ENV}/products/orderp/${postOder?.data?._id}/stock`)
+              .then((response) => {
+                console.log(response.data.message);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+
             const found = await axios.post(
               `${URL_ENV}/orders/pay/create_vnpay_url`,
               { amount: amount }
             );
 
-            console.log("««««« found »»»»»", found.data);
             window.location.href = found.data.urlPay;
           }
         } catch (error) {
@@ -230,10 +262,10 @@ const CheckoutPayment = (props: Props) => {
       return null;
     }
 
-    if (items) {
+    if (itemsCheckout) {
       return (
         <>
-          {items.map((i: any, index: any) => {
+          {itemsCheckout.map((i: any, index: any) => {
             return (
               <React.Fragment key={i.product.id}>
                 <div className="d-flex justify-content-between">
@@ -256,8 +288,8 @@ const CheckoutPayment = (props: Props) => {
           <div className="d-flex justify-content-between">
             <strong>Tổng</strong>
             <strong>
-              {items.length > 0
-                ? items
+              {itemsCheckout.length > 0
+                ? itemsCheckout
                     .map((item: any) => item.product.price * item.quantity)
                     .reduce(
                       (accumulator: any, subtotal: any) =>

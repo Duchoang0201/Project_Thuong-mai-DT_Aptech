@@ -14,6 +14,13 @@ Thành viên nhóm 2:
 
     https://online-web-serveronline.netlify.app
 
+    //main
+    https://deploy-admin-website.vercel.app
+
+//WEB_NEXTJS_SHOP:
+
+    https://deploy-shop-website.vercel.app
+
 // MOMO CHECK ACCOUNT:
 
 No Tên Số thẻ Hạn ghi trên thẻ OTP Trường hợp test

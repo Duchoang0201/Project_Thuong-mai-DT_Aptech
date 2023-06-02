@@ -17,7 +17,7 @@ export default function CounterApp() {
         <h4 className="text-center py-4">Giỏ hàng của bạn</h4>
       </div>
 
-      <Card loading={loading}>
+      <Card className="bg-body-secondary" loading={loading}>
         <ShopApp />
       </Card>
     </div>

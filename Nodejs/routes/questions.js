@@ -266,7 +266,7 @@ router.get("/13", async (req, res, next) => {
     // ];
     // let query = { address: new RegExp(`${address}`) };
 
-    Order.aggregate()
+    await Order.aggregate()
       .lookup({
         from: "customers",
         localField: "customerId",

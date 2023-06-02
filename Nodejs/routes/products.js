@@ -174,6 +174,92 @@ router.get("/:id", validateSchema(productIdSchema), async (req, res, next) => {
   }
   return res.status(500).send({ oke: false, message: "Object not found" });
 });
+
+// CHANGE STOCK OF PRODUCT when orders SUCCESS
+router.post("/orderp/:orderId/stock", async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Update the stock for each product in the order details
+    for (const orderDetail of order.orderDetails) {
+      const productId = orderDetail.productId;
+      const quantity = orderDetail.quantity;
+
+      // Find the product by ID
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        console.log(`Product not found for order detail: ${orderDetail._id}`);
+        continue;
+      }
+
+      // Calculate the new stock based on the quantity
+      const newStock = product.stock - quantity;
+
+      // Update the product's stock
+      product.stock = newStock;
+
+      // Save the updated product
+      await product.save();
+    }
+
+    res.json({ message: "Stock updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// CHANGE STOCK OF PRODUCT when orders SUCCESS
+router.post("/orderm/:orderId/stock", async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Update the stock for each product in the order details
+    for (const orderDetail of order.orderDetails) {
+      const productId = orderDetail.productId;
+      const quantity = orderDetail.quantity;
+
+      // Find the product by ID
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        console.log(`Product not found for order detail: ${orderDetail._id}`);
+        continue;
+      }
+
+      // Calculate the new stock based on the quantity
+      const newStock = product.stock + quantity;
+
+      // Update the product's stock
+      product.stock = newStock;
+
+      // Save the updated product
+      await product.save();
+    }
+
+    res.json({ message: "Stock updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+///CREATE NEW PRODUCT
 router.post("/", validateSchema(productBodySchema), async (req, res, next) => {
   try {
     const newItem = req.body;
@@ -210,7 +296,6 @@ router.patch(
       const itemId = req.params.id;
       const itemBody = req.body;
 
-      console.log("««««« itemBody »»»»»", itemBody);
       if (itemId) {
         let update = await Product.findByIdAndUpdate(itemId, itemBody, {
           new: true,

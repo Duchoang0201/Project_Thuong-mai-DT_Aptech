@@ -66,13 +66,15 @@ export default function Topmoth({ topMonth }: any) {
           }}
           pagination={true}
           modules={[Autoplay, EffectCoverflow, Pagination]}
-          className="Top_Month py-5 px-4" // Remove any shadow styles from the className
+          className="Top_Month py-4 px-3 text-center" // Remove any shadow styles from the className
           breakpoints={{
             0: {
               slidesPerView: 1,
+              centeredSlides: true,
             },
-            400: {
+            500: {
               slidesPerView: 2,
+              centeredSlides: true,
             },
             900: {
               slidesPerView: 3,
@@ -83,8 +85,12 @@ export default function Topmoth({ topMonth }: any) {
           {hotDeals.length > 0 &&
             hotDeals.map((item: any, index: any) => (
               <>
-                <SwiperSlide key={index}>
+                <SwiperSlide
+                  className="text-center"
+                  key={`${item._id}-${index + 1}`}
+                >
                   <Card
+                    key={`${item.name}-${index + 1}`}
                     bordered={false}
                     style={{
                       width: 300,

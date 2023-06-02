@@ -123,7 +123,6 @@ function NavBar({}: Props) {
         <div
           onClick={() => {
             logout();
-            router.push("/");
             setUser(null);
           }}
         >
@@ -183,8 +182,8 @@ function NavBar({}: Props) {
                         overlayStyle={{ zIndex: 10000 }}
                         overlay={
                           <Menu>
-                            {itemsCart.length > 0 &&
-                              itemsCart.map((item: any) => (
+                            {itemsCart?.length > 0 &&
+                              itemsCart?.map((item: any) => (
                                 <Menu.Item key={item.product?._id}>
                                   <div className="d-flex justify-content-between">
                                     <div className="w-75 text-truncate py-3">
@@ -199,7 +198,7 @@ function NavBar({}: Props) {
                                     </div>
 
                                     <div className="py-3">
-                                      {item.product?.price.toLocaleString(
+                                      {item.product?.price?.toLocaleString(
                                         "vi-VN",
                                         {
                                           style: "currency",
@@ -215,7 +214,7 @@ function NavBar({}: Props) {
                         className="d-flex"
                       >
                         <Badge
-                          count={itemsCart.length}
+                          count={itemsCart?.length}
                           className={
                             scroll > 150
                               ? `d-flex ${Style.icon__scroll}`
@@ -239,7 +238,7 @@ function NavBar({}: Props) {
                   >
                     <div>
                       <Badge
-                        count={itemsCart.length}
+                        count={itemsCart?.length}
                         className={
                           scroll > 150
                             ? `d-flex ${Style.icon__scroll}`

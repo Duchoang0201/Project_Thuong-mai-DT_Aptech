@@ -1,7 +1,11 @@
 import { useAuthStore } from "@/hook/useAuthStore";
 import numeral from "numeral";
 
-import { SearchOutlined } from "@ant-design/icons";
+import {
+  DeleteOutlined,
+  RestOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -9,8 +13,11 @@ import {
   Descriptions,
   Divider,
   Modal,
+  Popconfirm,
+  Space,
   Table,
   Tooltip,
+  message,
 } from "antd";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
@@ -24,7 +31,7 @@ const AccountOrders = (props: Props) => {
   const { auth }: any = useAuthStore((state: any) => state);
   const [userOrders, setUserOrders] = useState<any>();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-
+  const [refresh, setRefresh] = useState(0);
   //TableLoading
 
   const [loadingTable, setLoadingTable] = useState(true);
@@ -49,7 +56,7 @@ const AccountOrders = (props: Props) => {
       .then((res) => {
         setUserOrders(res.data.results);
       });
-  }, [URL_ENV, auth]);
+  }, [URL_ENV, auth, refresh]);
 
   const ordersColumn = [
     {
@@ -109,10 +116,16 @@ const AccountOrders = (props: Props) => {
     },
     {
       width: "7%",
-
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      render: (text: any, record: any) => {
+        return text === "WAITING" ? (
+          <div className="text-primary">{text}</div>
+        ) : (
+          <div className="text-danger">{text}</div>
+        );
+      },
       responsive: ["lg"],
     },
     {
@@ -156,7 +169,7 @@ const AccountOrders = (props: Props) => {
       key: "orderDetails",
       render: (text: any, record: any) => {
         return (
-          <strong className="text-end">
+          <Space className="text-end">
             <Button
               onClick={() => {
                 setSelectedOrder(record);
@@ -164,7 +177,42 @@ const AccountOrders = (props: Props) => {
               shape="circle"
               icon={<SearchOutlined />}
             />
-          </strong>
+            <Popconfirm
+              okText="Delete"
+              okType="danger"
+              onConfirm={async () => {
+                console.log(record._id);
+
+                const handleChangeStock: any = await axios
+                  .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                  .then((response) => {
+                    console.log(response.data.message);
+                  })
+                  .catch((error) => {
+                    console.error(error);
+                  });
+                if (handleChangeStock.data) {
+                  await axios
+                    .patch(`${URL_ENV}/orders/${record._id}`, {
+                      status: "CANCELED",
+                    })
+                    .then((res) =>
+                      setTimeout(() => {
+                        setRefresh((f) => f + 1);
+                      }, 2000)
+                    )
+                    .catch((err) => {
+                      console.log("««««« err »»»»»", err);
+                    });
+                } else {
+                  message.error(`SYSTEM ERROR !!!`);
+                }
+              }}
+              title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
+            >
+              <Button danger icon={<RestOutlined />}></Button>
+            </Popconfirm>
+          </Space>
         );
       },
     },

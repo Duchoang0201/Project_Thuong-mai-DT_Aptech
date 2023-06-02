@@ -66,9 +66,11 @@ export default function App({ hotDeal }: any) {
         breakpoints={{
           0: {
             slidesPerView: 1,
+            centeredSlides: true,
           },
-          400: {
+          500: {
             slidesPerView: 2,
+            centeredSlides: true,
           },
           900: {
             slidesPerView: 3,
@@ -82,7 +84,7 @@ export default function App({ hotDeal }: any) {
       >
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
-            <SwiperSlide className="px-4 py-4" key={index}>
+            <SwiperSlide className="px-3 py-4" key={index}>
               <Card
                 className="border rounded-4 "
                 bordered={false}

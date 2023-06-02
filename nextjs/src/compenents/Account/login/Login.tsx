@@ -15,8 +15,6 @@ const Login = () => {
   const onLogin = async (values: any) => {
     const { email, password } = values;
     login({ email, password });
-
-    router.push("/");
   };
   useEffect(() => {}, [refresh]);
 
@@ -28,6 +26,7 @@ const Login = () => {
       </div>
       <div>
         <Form
+          title="ád"
           name="basic"
           className={` login-form ${style.form__border}`}
           initialValues={{ remember: true }}
@@ -37,6 +36,9 @@ const Login = () => {
           }}
           autoComplete="off"
         >
+          <div className="text-center py-2">
+            <h3>Đăng nhập tài khoản</h3>{" "}
+          </div>
           <Form.Item
             labelCol={{
               span: 7,
