@@ -29,7 +29,7 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 ////////////////////////////////////////////////
 
-function NavBar({ data }: Props) {
+function NavBar() {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
   const { search }: any = PropsSearch((state) => state);

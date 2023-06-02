@@ -1,7 +1,7 @@
 import { useCartStore } from "@/hook/useCountStore";
 import React, { useEffect, useState } from "react";
 import ShopApp from "@/compenents/ShopApp";
-import { Card } from "antd";
+import { Affix, Button, Card } from "antd";
 
 export default function CounterApp() {
   const [loading, setLoading] = useState(true);
@@ -20,6 +20,9 @@ export default function CounterApp() {
       <Card className="bg-body-secondary" loading={loading}>
         <ShopApp />
       </Card>
+      <Affix offsetBottom={8}>
+        <div className="container">asdas</div>
+      </Affix>
     </div>
   );
 }

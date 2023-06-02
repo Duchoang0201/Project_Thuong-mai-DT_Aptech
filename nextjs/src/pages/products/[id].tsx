@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 
-import { useRouter } from "next/router";
+import router, { useRouter } from "next/router";
 
 import axios from "axios";
 import Image from "next/image";
@@ -226,19 +226,27 @@ export default function ProductDetails({ product }: Props) {
               <div className="mt-1 ">
                 <button
                   onClick={() => {
-                    const productId = productMain?._id;
+                    if (auth?.payload?._id) {
+                      const productId = productMain?._id;
 
-                    console.log("««««« items »»»»»", items);
-                    const productExists = items.some(
-                      (item: any) => item.product._id === productId
-                    );
-                    console.log("««««« productExists »»»»»", productExists);
-                    if (productExists === true) {
-                      increase(productId);
-                      message.success("Thêm 1 sản phẩm vào giỏ hàng!", 1.5);
+                      console.log("««««« items »»»»»", items);
+                      const productExists = items.some(
+                        (item: any) => item.product._id === productId
+                      );
+                      console.log("««««« productExists »»»»»", productExists);
+                      if (productExists === true) {
+                        increase(productId);
+                        message.success("Thêm 1 sản phẩm vào giỏ hàng!", 1.5);
+                      } else {
+                        add({ product: product, quantity: 1 });
+                        message.success("Đã thêm sản phẩm vào giỏ hàng!", 1.5);
+                      }
                     } else {
-                      add({ product: product, quantity: 1 });
-                      message.success("Đã thêm sản phẩm vào giỏ hàng!", 1.5);
+                      router.push("/login");
+                      message.warning(
+                        "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
+                        1.5
+                      );
                     }
                   }}
                   className="w-100  border-bottom border-dark  rounded bg-gradient text-light"

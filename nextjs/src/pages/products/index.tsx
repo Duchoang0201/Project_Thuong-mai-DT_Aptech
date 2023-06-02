@@ -19,9 +19,7 @@ import {
   FloatButton,
 } from "antd";
 import { useCartStore } from "@/hook/useCountStore";
-
-// import { useAuthStore } from "../../hook/useAuthStore";
-// import { useCartStore } from "@/hook/useCountStore";
+import { useAuthStore } from "@/hook/useAuthStore";
 
 type Props = {
   products: any;
@@ -37,7 +35,7 @@ const API_URL_Supplier = `${URL_ENV}/suppliers`;
 function Products({ products, categories, supplier }: Props) {
   // const { items } = useCartStore((state: any) => state);
   // const { add } = useCartStore((state: any) => state);
-  // const { auth } = useAuthStore((state: any) => state);
+  const { auth } = useAuthStore((state: any) => state);
   const [open, setOpen] = useState<boolean>(false);
   const [fetchData, setFetchData] = useState<number>(0);
   const [data, setData] = useState<Array<any>>([]);
@@ -185,35 +183,43 @@ function Products({ products, categories, supplier }: Props) {
                         <div className={Style.button}>
                           <Button
                             onClick={() => {
-                              const productId = items?._id;
+                              if (auth?.payload?._id) {
+                                const productId = items?._id;
 
-                              const productExists = itemsCart?.some(
-                                (item: any) => item.product._id === productId
-                              );
-                              console.log(
-                                "««««« productExists »»»»»",
-                                productExists
-                              );
-                              if (productExists === true) {
-                                increase(productId);
-                                message.success(
-                                  {
-                                    content: "Thêm 1 sản phẩm vào giỏ hàng!",
-                                    style: {
-                                      marginTop: 130,
-                                    },
-                                  },
-                                  1.5
+                                const productExists = itemsCart?.some(
+                                  (item: any) => item.product._id === productId
                                 );
-                              } else {
-                                add({ product: items, quantity: 1 });
-                                message.success(
-                                  {
-                                    content: "Đã thêm sản phẩm vào giỏ hàng!",
-                                    style: {
-                                      marginTop: 130,
+                                console.log(
+                                  "««««« productExists »»»»»",
+                                  productExists
+                                );
+                                if (productExists === true) {
+                                  increase(productId);
+                                  message.success(
+                                    {
+                                      content: "Thêm 1 sản phẩm vào giỏ hàng!",
+                                      style: {
+                                        marginTop: 130,
+                                      },
                                     },
-                                  },
+                                    1.5
+                                  );
+                                } else {
+                                  add({ product: items, quantity: 1 });
+                                  message.success(
+                                    {
+                                      content: "Đã thêm sản phẩm vào giỏ hàng!",
+                                      style: {
+                                        marginTop: 130,
+                                      },
+                                    },
+                                    1.5
+                                  );
+                                }
+                              } else {
+                                router.push("/login");
+                                message.warning(
+                                  "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
                                   1.5
                                 );
                               }

@@ -40,30 +40,32 @@ export default function App({ Component, pageProps }: AppProps) {
   const handleGetCart2 = useMemo(async () => {
     let cart: any = [];
 
-    const checkCart = await axios.get(
-      `${URL_ENV}/carts/customer/${auth?.payload?._id}`
-    );
+    if (auth?.payload?._id) {
+      const checkCart = await axios.get(
+        `${URL_ENV}/carts/customer/${auth?.payload?._id}`
+      );
 
-    if (checkCart.data.cart._id) {
-      cart = checkCart.data.cart;
-    } else {
-      await axios
-        .post(`${URL_ENV}/carts`, {
-          customerId: auth?.payload?._id,
-          products: [],
-        })
-        .then((res) => {
-          cart = res.data.result;
-        })
-        .catch((err) => {
-          console.log(
-            "««««« err.data.response.message »»»»»",
-            err.data.response.message
-          );
-        });
+      if (checkCart.data.cart._id) {
+        cart = checkCart.data.cart;
+      } else {
+        await axios
+          .post(`${URL_ENV}/carts`, {
+            customerId: auth?.payload?._id,
+            products: [],
+          })
+          .then((res) => {
+            cart = res.data.result;
+          })
+          .catch((err) => {
+            console.log(
+              "««««« err.data.response.message »»»»»",
+              err.data.response.message
+            );
+          });
+      }
+
+      getDataServer(cart, auth?.payload?._id);
     }
-
-    getDataServer(cart, auth?.payload?._id);
   }, [auth?.payload?._id, getDataServer]);
   handleGetCart2;
   return (
