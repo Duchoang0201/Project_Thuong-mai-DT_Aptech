@@ -74,7 +74,8 @@ export const useCartStore = create(
           }
           const found = items.find((x: any) => x.product._id === id);
           if (found) {
-            found.quantity++;
+            found.quantity += 1;
+
             const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
               products: items,
             });

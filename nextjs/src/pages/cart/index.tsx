@@ -1,8 +1,20 @@
 import { useCartStore } from "@/hook/useCountStore";
 import React, { useEffect, useState } from "react";
 import ShopApp from "@/compenents/ShopApp";
-import { Affix, Button, Card, Checkbox } from "antd";
+import {
+  Affix,
+  Avatar,
+  Badge,
+  Button,
+  Card,
+  Checkbox,
+  Divider,
+  Dropdown,
+  Menu,
+} from "antd";
 import CreateOrder from "@/compenents/ShopApp/components/Order/CreateOrder";
+import { ShoppingCartOutlined } from "@ant-design/icons";
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function CounterApp() {
   const [loading, setLoading] = useState(true);
@@ -24,7 +36,13 @@ export default function CounterApp() {
         <ShopApp />
       </Card>
       <Affix offsetBottom={10}>
-        <Card className="container">
+        <Card
+          type="inner"
+          title={
+            <Divider orientation="left">Tạm tính đơn hàng của bạn</Divider>
+          }
+          className="container"
+        >
           <div className="row text-center">
             <div className="col-sm-2">
               <Checkbox
@@ -41,7 +59,42 @@ export default function CounterApp() {
               </Checkbox>
             </div>
             <div className="col-sm-4">
-              <div> Tổng số sản phẩm: {itemsCheckout.length}</div>
+              <Dropdown
+                placement="topRight"
+                overlay={
+                  <Menu>
+                    {itemsCheckout?.length > 0 &&
+                      itemsCheckout?.map((item: any) => (
+                        <Menu.Item key={item.product?._id}>
+                          <div className="d-flex justify-content-between">
+                            <div className="w-75 text-truncate py-3">
+                              <Badge color="blue" count={item.quantity}>
+                                <Avatar
+                                  shape="square"
+                                  size="large"
+                                  src={`${URL_ENV}${item.product?.imageUrl}`}
+                                />
+                              </Badge>
+                              <span> {item.product?.name}</span>
+                            </div>
+
+                            <div className="py-3">
+                              {item.product?.price?.toLocaleString("vi-VN", {
+                                style: "currency",
+                                currency: "VND",
+                              })}
+                            </div>
+                          </div>
+                        </Menu.Item>
+                      ))}
+                  </Menu>
+                }
+                className="d-flex"
+              >
+                <Badge count={itemsCheckout?.length}>
+                  <div className="py-1"> Tổng số sản phẩm đã chọn</div>
+                </Badge>
+              </Dropdown>
             </div>
             <div className="col-sm-4">
               Tổng thanh toán :{" "}

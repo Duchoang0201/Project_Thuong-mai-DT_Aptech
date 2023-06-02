@@ -34,23 +34,19 @@ export default function App({ hotTrend }: any) {
   return (
     <>
       <Swiper
-        slidesPerView={4}
-        // grabCursor={true}
-        // navigation={true}
         modules={[Pagination, Navigation]}
         className="hotDeals"
-        initialSlide={3}
         breakpoints={{
           0: {
-            slidesPerView: 1,
-            centeredSlides: true,
-          },
-          900: {
             slidesPerView: 2,
             centeredSlides: true,
           },
-          1200: {
+          900: {
             slidesPerView: 3,
+            centeredSlides: true,
+          },
+          1200: {
+            slidesPerView: 4,
             centeredSlides: true,
           },
         }}

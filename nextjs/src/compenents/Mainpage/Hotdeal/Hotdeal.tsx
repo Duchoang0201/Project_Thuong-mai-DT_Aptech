@@ -60,7 +60,7 @@ export default function App({ hotDeal }: any) {
         pagination={{
           clickable: true,
         }}
-        spaceBetween={50}
+        spaceBetween={160}
         className={`mySwiper`}
         breakpoints={{
           0: {
