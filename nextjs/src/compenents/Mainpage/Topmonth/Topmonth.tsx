@@ -56,13 +56,13 @@ export default function Topmoth({ topMonth }: any) {
           effect={"coverflow"}
           grabCursor={true}
           slidesPerView={4}
-          spaceBetween={160}
+          spaceBetween={50}
           initialSlide={3}
           coverflowEffect={{
-            rotate: 30,
-            stretch: 2,
-            depth: 50,
-            modifier: 1,
+            rotate: 0,
+            stretch: 0,
+            depth: 100,
+            modifier: 2.5,
           }}
           pagination={true}
           modules={[Autoplay, EffectCoverflow, Pagination]}
