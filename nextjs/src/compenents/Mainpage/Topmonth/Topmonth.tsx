@@ -66,6 +66,7 @@ export default function Topmoth({ topMonth }: any) {
           }}
           pagination={true}
           modules={[Autoplay, EffectCoverflow, Pagination]}
+          speed={3000}
           // className="Top_Month py-4 px-4 text-center"
           breakpoints={{
             0: {

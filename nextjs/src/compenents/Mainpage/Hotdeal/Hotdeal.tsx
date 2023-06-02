@@ -54,6 +54,7 @@ export default function App({ hotDeal }: any) {
   return (
     <>
       <Swiper
+        speed={3000}
         centeredSlides={true}
         slidesPerView={3}
         navigation={true}
