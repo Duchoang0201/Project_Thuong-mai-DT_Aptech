@@ -1,3 +1,4 @@
+import { memo } from "react";
 import React from "react";
 import Style from "./Footer.module.css";
 import Link from "next/link";
@@ -67,4 +68,4 @@ function Footer({}: Props) {
   );
 }
 
-export default Footer;
+export default memo(Footer);

@@ -1,10 +1,11 @@
 import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { Avatar, Badge, Dropdown, Space } from "antd";
-import { Menu, Input, Select } from "antd";
+import { Avatar, Badge, Dropdown, Space, Button } from "antd";
+import { Menu, Input, Form } from "antd";
 import Style from "./Navbar.module.css";
 import { useRouter } from "next/router";
 import { useAuthStore } from "@/hook/useAuthStore";
+import { PropsSearch } from "./PropsSearch";
 
 import {
   UserAddOutlined,
@@ -15,15 +16,23 @@ import {
   UserOutlined,
   BranchesOutlined,
 } from "@ant-design/icons";
-
+const { Search } = Input;
 import { useCartStore } from "../../hook/useCountStore";
 
-type Props = {};
+type Props = {
+  data: any;
+};
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+// const API_URL_Product = `${URL_ENV}/products/${}`;
 
-function NavBar({}: Props) {
+/////////////search <ant design> ///////////////////////////////
+
+////////////////////////////////////////////////
+
+function NavBar({ data }: Props) {
   const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart }: any = useCartStore((state: any) => state);
+  const { search }: any = PropsSearch((state) => state);
 
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
@@ -31,9 +40,13 @@ function NavBar({}: Props) {
   const [fresh, setFresh] = useState<number>(0);
   const [scroll, setScroll] = useState<number>(10);
   const [windowWidth, setWindowWidth] = useState<number>(0);
+  const [inputValue, setInputValue] = useState<string>("");
+
+  const [searchValue, setSearchValue] = useState("");
 
   const { logout } = useAuthStore((state: any) => state);
   const router = useRouter();
+  const [findForm]: any = Form.useForm();
 
   useEffect(() => {
     const handleResize = () => {
@@ -84,20 +97,18 @@ function NavBar({}: Props) {
     router.push(path);
   };
 
-  const onSearch = async (value: any) => {
-    console.log("value: ", value);
-    const data = await axios
-      .get(`${URL_ENV}/products?productName=${value}`)
-      .then((response) => {
-        return response.data.results;
-      });
-
-    if (typeof value !== "undefined") {
-      setFindProduct(data);
-      router.push(`/products/${value}`);
-      setFresh((pre) => pre + 1);
-    }
+  const handleFind = (value: any) => {
+    search(value);
+    // setInputValue("");
+    findForm.resetFields();
+    router.push(`/SearchPage`);
   };
+
+  const handleReset = () => {
+    setSearchValue("");
+  };
+  ////////////////////////////////////////////////search///////////////////////////
+
   const itemsAccount = [
     {
       key: "information",
@@ -352,28 +363,14 @@ function NavBar({}: Props) {
             </Menu.Item>
           </Menu>
 
-          <Select
-            dropdownMatchSelectWidth={false}
-            dropdownStyle={{
-              position: "fixed",
-              top: 130,
-            }}
-            allowClear
-            className={scroll > 150 ? Style.input : Style.input__Scroll}
-            placeholder="Search"
-            optionFilterProp="children"
-            onChange={onSearch}
-            showSearch
-            filterOption={(input, option) =>
-              (option?.label ?? "").toLowerCase().includes(input.toLowerCase())
-            }
-            options={findProduct.map((item: any, index: any) => {
-              return {
-                label: `${item.name}`,
-                value: item._id,
-              };
-            })}
-          />
+          <Form form={findForm}>
+            <Search
+              placeholder="input search text"
+              onSearch={handleFind}
+              style={{ width: 200 }}
+              allowClear
+            />
+          </Form>
         </div>
       </div>
     </>
@@ -381,3 +378,14 @@ function NavBar({}: Props) {
 }
 
 export default NavBar;
+
+export async function getStaticProps() {
+  const data = await axios.get(`${URL_ENV}/products`).then((response) => {
+    return response.data;
+  });
+  return {
+    props: {
+      data,
+    },
+  };
+}

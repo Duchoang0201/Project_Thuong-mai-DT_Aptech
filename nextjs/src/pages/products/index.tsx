@@ -21,7 +21,7 @@ import {
 import { useCartStore } from "@/hook/useCountStore";
 import Hotdeal from "../../compenents/Mainpage/Topmonth/Topmonth";
 
-// import { useAuthStore } from "../../hook/useAuthStore";
+import { useAuthStore } from "../../hook/useAuthStore";
 // import { useCartStore } from "@/hook/useCountStore";
 
 type Props = {
@@ -59,6 +59,8 @@ function Products({ products, categories, supplier }: Props) {
     items: itemsCart,
     increase,
   } = useCartStore((state: any) => state);
+
+  const { auth }: any = useAuthStore((state) => state);
 
   //CALL API PRODUCT FILLTER
   const queryParams = [
@@ -172,36 +174,39 @@ function Products({ products, categories, supplier }: Props) {
                         <div className={Style.button}>
                           <Button
                             onClick={() => {
-                              const productId = items?._id;
-
-                              const productExists = itemsCart.some(
-                                (item: any) => item.product._id === productId
-                              );
-                              console.log(
-                                "««««« productExists »»»»»",
-                                productExists
-                              );
-                              if (productExists === true) {
-                                increase(productId);
-                                message.success(
-                                  {
-                                    content: "Thêm 1 sản phẩm vào giỏ hàng!",
-                                    style: {
-                                      marginTop: 130,
-                                    },
-                                  },
-                                  1.5
-                                );
+                              if (auth === null) {
+                                router.push("/login");
                               } else {
-                                add({ product: items, quantity: 1 });
-                                message.success(1.5);
-                                message.success(
-                                  {
-                                    content: "Đã thêm sản phẩm vào giỏ hàng!",
-                                    style: { zIndex: 9999999999 },
-                                  },
-                                  1.5
+                                const productId = items?._id;
+                                const productExists = itemsCart.some(
+                                  (item: any) => item.product._id === productId
                                 );
+                                console.log(
+                                  "««««« productExists »»»»»",
+                                  productExists
+                                );
+                                if (productExists === true) {
+                                  increase(productId);
+                                  message.success(
+                                    {
+                                      content: "Thêm 1 sản phẩm vào giỏ hàng!",
+                                      style: {
+                                        marginTop: 130,
+                                      },
+                                    },
+                                    1.5
+                                  );
+                                } else {
+                                  add({ product: items, quantity: 1 });
+                                  message.success(1.5);
+                                  message.success(
+                                    {
+                                      content: "Đã thêm sản phẩm vào giỏ hàng!",
+                                      style: { zIndex: 9999999999 },
+                                    },
+                                    1.5
+                                  );
+                                }
                               }
                             }}
                           >
@@ -284,14 +289,8 @@ function Products({ products, categories, supplier }: Props) {
                     />
                   </div>
                   <div className="d-flex ">
-                    <Button type="primary" onClick={handleSubmit}>
-                      Lọc sản phẩm
-                    </Button>
-                    <Button
-                      type="primary"
-                      onClick={handleClearSubmit}
-                      className="ms-1"
-                    >
+                    <Button onClick={handleSubmit}>Lọc sản phẩm</Button>
+                    <Button onClick={handleClearSubmit} className="ms-1">
                       Xóa lọc
                     </Button>
                   </div>

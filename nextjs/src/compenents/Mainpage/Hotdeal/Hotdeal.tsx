@@ -1,3 +1,4 @@
+import { memo } from "react";
 import React, { useEffect, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
@@ -10,7 +11,7 @@ import Image from "next/image";
 import router, { useRouter } from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-export default function App({ hotDeal }: any) {
+function App({ hotDeal }: any) {
   const router = useRouter();
   const [hotDeals, setHotDeals] = useState([]);
   const swiperRef = useRef<any>(null);
@@ -137,3 +138,5 @@ export default function App({ hotDeal }: any) {
     </>
   );
 }
+
+export default App;

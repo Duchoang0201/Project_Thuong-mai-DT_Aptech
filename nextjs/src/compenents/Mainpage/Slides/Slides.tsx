@@ -78,7 +78,7 @@ const Slides = () => {
                   onClick={() => {
                     router.push(`${item.url}`);
                   }}
-                  className="w-100"
+                  className={`w-100 `}
                   key={`${index + 1}`}
                 >
                   <Image
