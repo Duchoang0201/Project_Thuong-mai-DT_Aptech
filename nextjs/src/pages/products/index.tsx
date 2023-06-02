@@ -286,7 +286,6 @@ function Products({ products, categories, supplier }: Props) {
                     <InputNumber
                       defaultValue={"0"}
                       placeholder="Enter to"
-                      max={1000}
                       onChange={handleToPrice}
                     />
                   </div>

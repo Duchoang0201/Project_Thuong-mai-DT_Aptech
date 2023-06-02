@@ -154,7 +154,6 @@ function SupperliersCRUD() {
   const [isDelete, setIsDelete] = useState("");
   const [isActive, setIsActive] = useState("");
   const onSearchIsDelete = useCallback((value: any) => {
-    console.log("««««« value »»»»»", value);
     if (value === "active") {
       setIsActive("true");
       setIsDelete("");

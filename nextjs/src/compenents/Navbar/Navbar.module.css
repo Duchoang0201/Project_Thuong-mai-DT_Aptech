@@ -132,7 +132,7 @@
 }
 
 .lengths{
-  width: 35%;
+  width: 25%;
   background-color: #070707; /* Màu nền */
   color: rgb(255, 252, 240);
 }
@@ -142,7 +142,7 @@
 }
 
 .length__Scroll{
-  width: 35%;
+  width: 25%;
 }
 
 
@@ -222,9 +222,15 @@ color: #070707;
     display: none;
     
   }
-  .length{
-    width: 70%;
-    /* color: azure; */
+  .lengths{
+    width: 45%;
+    background-color: #070707; /* Màu nền */
+    color: rgb(255, 252, 240);
+  }
+  
+  
+  .length__Scroll{
+    width: 45%;
   }
   
 }

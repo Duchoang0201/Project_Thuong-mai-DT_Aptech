@@ -25,7 +25,7 @@ import {
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
 // Date Picker
@@ -158,46 +158,53 @@ function CategoryCRUD() {
 
   const [isDelete, setIsDelete] = useState("");
   const [isActive, setIsActive] = useState("");
-  const onSearchIsDelete = useCallback((value: any) => {
-    if (value === "active") {
-      setIsActive("true");
-      setIsDelete("");
-    }
-    if (value === "unActive") {
-      setIsActive("false");
-      setIsDelete("");
-    }
-    if (value === "Deleted") {
-      setIsDelete("true");
-      setIsActive("");
-    }
-    if (value !== "active" && value !== "unActive" && value !== "Deleted") {
-      setIsActive("");
-      setIsDelete("");
-    }
-  }, []);
+  const onSearchIsDelete = useMemo(
+    () => (value: any) => {
+      if (value === "active") {
+        setIsActive("true");
+        setIsDelete("");
+      }
+      if (value === "unActive") {
+        setIsActive("false");
+        setIsDelete("");
+      }
+      if (value === "Deleted") {
+        setIsDelete("true");
+        setIsActive("");
+      }
+      if (value !== "active" && value !== "unActive" && value !== "Deleted") {
+        setIsActive("");
+        setIsDelete("");
+      }
+    },
+    []
+  );
 
   //SEARCH DEPEN ON NAME
   const [categoriesName, setCategoriesName] = useState("");
 
-  const onSearchCategoriesName = useCallback((value: any) => {
-    if (value) {
-      setCategoriesName(value);
-    } else {
-      setCategoriesName("");
-    }
+  const onSearchCategoriesName = useMemo(() => {
+    return (value: any) => {
+      if (value) {
+        setCategoriesName(value);
+      } else {
+        setCategoriesName("");
+      }
+    };
   }, []);
 
   //SEARCH DEPEN ON DESCRIPTION
   const [categoryDescription, setCategoryDescription] = useState("");
 
-  const onSearchCategoryDescription = (record: any) => {
-    if (record) {
-      setCategoryDescription(record);
-    } else {
-      setCategoryDescription("");
-    }
-  };
+  const onSearchCategoryDescription = useMemo(() => {
+    return (record: any) => {
+      if (record) {
+        setCategoryDescription(record);
+      } else {
+        setCategoryDescription("");
+      }
+    };
+  }, []);
 
   //Search on Skip and Limit
 
