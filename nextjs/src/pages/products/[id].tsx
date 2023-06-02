@@ -42,6 +42,7 @@ type Props = {
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function ProductDetails({ product }: Props) {
+  console.log(product);
   const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
@@ -203,7 +204,11 @@ export default function ProductDetails({ product }: Props) {
                 </span>
               </div>
               <div>
-                <b>{productMain?.active === true ? "Còn hàng" : "Hết hàng"}</b>
+                <b>
+                  {productMain?.active === true && productMain?.stock > 0
+                    ? "Còn hàng"
+                    : "Hết hàng"}
+                </b>
               </div>
               <div className="mt-1 border border-dark border-1 rounded-3 ">
                 <div
