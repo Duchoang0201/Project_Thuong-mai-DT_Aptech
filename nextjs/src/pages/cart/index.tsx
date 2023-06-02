@@ -6,7 +6,7 @@ import CreateOrder from "@/compenents/ShopApp/components/Order/CreateOrder";
 
 export default function CounterApp() {
   const [loading, setLoading] = useState(true);
-  const { selectAllCheck, removeAllCheck } = useCartStore(
+  const { selectAllCheck, removeAllCheck, itemsCheckout } = useCartStore(
     (state: any) => state
   );
   useEffect(() => {
@@ -41,10 +41,22 @@ export default function CounterApp() {
               </Checkbox>
             </div>
             <div className="col-sm-4">
-              <div>Sản phẩm</div>
+              <div> Tổng số sản phẩm: {itemsCheckout.length}</div>
             </div>
-            <div className="col-sm-2">Đơn giá</div>
-            <div className="col-sm-2">Số lượng</div>
+            <div className="col-sm-2">
+              Tổng thanh toán :{" "}
+              {itemsCheckout
+                .map((item: any) => item.product.price * item.quantity)
+                .reduce(
+                  (accumulator: any, subtotal: any) => accumulator + subtotal,
+                  0
+                )
+                .toLocaleString("vi-VN", {
+                  style: "currency",
+                  currency: "VND",
+                })}
+            </div>
+            <div className="col-sm-2"></div>
             <div className="col-sm-2">
               {" "}
               <CreateOrder />
