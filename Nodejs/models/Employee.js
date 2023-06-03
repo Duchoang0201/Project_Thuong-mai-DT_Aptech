@@ -7,7 +7,16 @@ const bcrypt = require("bcryptjs");
 
 // Validator
 // https://mongoosejs.com/docs/validation.html#built-in-validators
-
+const createdBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+const updatedBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
 const employeeSchema = new Schema(
   {
     firstName: { type: String, required: true },
@@ -40,10 +49,14 @@ const employeeSchema = new Schema(
     address: { type: String, required: true },
     birthday: { type: Date },
     imageUrl: { type: String },
-    LastActivity: { type: Date },
+    lastActivity: { type: Date },
     isAdmin: { type: Boolean },
     Locked: { type: Boolean },
     note: { type: String },
+    createdDate: { type: Date },
+    createdBy: createdBySchema,
+    updatedDate: { type: Date },
+    updatedBy: updatedBySchema,
   },
   {
     versionKey: false,

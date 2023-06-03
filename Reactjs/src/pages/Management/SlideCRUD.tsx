@@ -87,7 +87,11 @@ function SlidesCRUD() {
 
   //Create data
   const handleCreate = (record: any) => {
-    record.createdBy = auth.payload;
+    record.createdBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.createdDate = new Date().toISOString();
     if (record.active === undefined) {
       record.active = false;
@@ -133,7 +137,11 @@ function SlidesCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    record.updatedBy = auth.payload;
+    record.updatedBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.updatedDate = new Date().toISOString();
 
     axios
@@ -151,12 +159,12 @@ function SlidesCRUD() {
 
   //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
 
-  const [isLocked, setIsLocked] = useState("");
-  const onSearchIsLocked = useCallback((value: any) => {
+  const [isActive, setIsActive] = useState("");
+  const onSearchIsActive = useCallback((value: any) => {
     if (value) {
-      setIsLocked(value);
+      setIsActive(value);
     } else {
-      setIsLocked("");
+      setIsActive("");
     }
   }, []);
 
@@ -207,7 +215,7 @@ function SlidesCRUD() {
     slideTitle && `&title=${slideTitle}`,
     slideSummary && `&summary=${slideSummary}`,
     slideUrl && `&url=${slideUrl}`,
-    isLocked && `&active=${isLocked}`,
+    isActive && `&active=${isActive}`,
     skip && `&skip=${skip}`,
   ]
     .filter(Boolean)
@@ -230,7 +238,7 @@ function SlidesCRUD() {
       title: () => {
         return (
           <div>
-            {isLocked ? (
+            {isActive ? (
               <div className="text-danger">No</div>
             ) : (
               <div className="secondary">No</div>
@@ -246,12 +254,12 @@ function SlidesCRUD() {
             <Space>
               {" "}
               {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
-              {record.active === false && (
+              {record.active === true && (
                 <span style={{ fontSize: "16px", color: "#08c" }}>
                   <CheckCircleOutlined /> Active
                 </span>
               )}
-              {record.active === true && (
+              {record.active === false && (
                 <span style={{ fontSize: "16px", color: "#dc3545" }}>
                   <CheckCircleOutlined /> Locked
                 </span>
@@ -267,13 +275,13 @@ function SlidesCRUD() {
               <Select
                 allowClear
                 onClear={() => {
-                  setIsLocked("");
+                  setIsActive("");
                 }}
                 style={{ width: "125px" }}
                 placeholder="Select a supplier"
                 optionFilterProp="children"
                 showSearch
-                onChange={onSearchIsLocked}
+                onChange={onSearchIsActive}
                 filterOption={(input, option) =>
                   (option?.label ?? "")
                     .toLowerCase()
@@ -281,12 +289,12 @@ function SlidesCRUD() {
                 }
                 options={[
                   {
-                    value: "false",
+                    value: "true",
                     label: "Active",
                   },
 
                   {
-                    value: "true",
+                    value: "false",
                     label: "Deleted",
                   },
                 ]}
@@ -645,7 +653,7 @@ function SlidesCRUD() {
           pagination={false}
           scroll={{ x: "max-content", y: 610 }}
           rowClassName={(record) => {
-            return record.active === true
+            return record.active === false
               ? "text-danger bg-success-subtle"
               : "";
           }}

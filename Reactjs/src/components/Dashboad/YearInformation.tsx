@@ -28,6 +28,7 @@ const YearInformation = (props: Props) => {
       setProductsActive(res.data.amountResults);
     });
   }, [URL_ENV]);
+
   return (
     <div>
       {" "}
@@ -41,6 +42,7 @@ const YearInformation = (props: Props) => {
                 {" "}
                 <Space>
                   <Statistic
+                    prefix={`VNĐ`}
                     title="Year's Sale"
                     value={orderTotal?.total}
                     formatter={formatter}

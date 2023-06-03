@@ -1,10 +1,15 @@
 const express = require("express");
 const router = express.Router();
 const yup = require("yup");
-const { Product } = require("../models");
+const { Product, Order } = require("../models");
 const mongooseLeanVirtuals = require("mongoose-lean-virtuals");
 const ObjectId = require("mongodb").ObjectId;
-const { validateSchema, getProductsSchema } = require("../validation/product");
+const {
+  validateSchema,
+  getProductsSchema,
+  productIdSchema,
+  productBodySchema,
+} = require("../validation/product");
 // let data = [
 //     {id: 1, name: 'iphone 14 ProMax', price: 1500},
 //     {id: 2, name: 'iphone 13 ProMax', price: 1200},
@@ -31,6 +36,8 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
       toDiscount,
       fromStock,
       toStock,
+      hotDeal,
+      topMonth,
       skip,
       limit,
     } = req.query;
@@ -49,8 +56,11 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
         toStock ? { stock: { $lte: Number(toStock) } } : null,
         fromDiscount ? { discount: { $gte: Number(fromDiscount) } } : null,
         toDiscount ? { discount: { $lte: Number(toDiscount) } } : null,
+        hotDeal ? { promotionPosition: "DEAL" } : null,
+        topMonth ? { promotionPosition: "TOP-MONTH" } : null,
       ].filter(Boolean),
     };
+
     let results = await Product.find(query)
       .populate("category")
       .populate("supplier")
@@ -60,160 +70,242 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
       .sort({ isDeleted: 1 })
       .limit(limit);
 
+    let amountSold = await Order.aggregate([
+      { $unwind: "$orderDetails" },
+      {
+        $lookup: {
+          from: "products",
+          localField: "orderDetails.productId",
+          foreignField: "_id",
+          as: "productSold",
+        },
+      },
+      { $unwind: "$productSold" },
+      {
+        $group: {
+          _id: "$productSold._id",
+          productName: { $first: "$productSold.name" },
+          price: { $first: "$productSold.price" },
+          totalQuantity: { $sum: "$orderDetails.quantity" },
+        },
+      },
+      {
+        $project: {
+          _id: 1,
+          productName: 1,
+          price: 1,
+          totalQuantity: 1,
+        },
+      },
+    ]);
+
+    // Map the amountSold array to create a dictionary of ID-quantity pairs
+    const amountSoldDict = amountSold.reduce((dict, item) => {
+      dict[item._id.toString()] = item.totalQuantity;
+      return dict;
+    }, {});
+
+    // Add the "amountSold" field to each item in the "results" array
+    results = results.map((item) => {
+      const amountSoldQuantity = amountSoldDict[item._id.toString()] || 0;
+      return {
+        ...item,
+        amountSold: amountSoldQuantity,
+      };
+    });
+
     let amountResults = await Product.countDocuments(query);
     res.json({ results: results, amountResults: amountResults });
   } catch (error) {
-    res.status(500).json({ ok: false, error });
+    res.status(500).json({ ok: false, error: error.message });
   }
 });
 
 //Get a data
-router.get("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
+router.get("/:id", validateSchema(productIdSchema), async (req, res, next) => {
+  const itemId = req.params.id;
+  let found = await Product.findById(itemId)
+    .populate("category")
+    .populate("supplier")
+    .lean({ virtuals: true });
+
+  let amountSold = await Order.aggregate([
+    { $unwind: "$orderDetails" },
+    {
+      $lookup: {
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "productSold",
+      },
+    },
+    { $unwind: "$productSold" },
+    {
+      $group: {
+        _id: "$productSold._id",
+        productName: { $first: "$productSold.name" },
+        price: { $first: "$productSold.price" },
+        totalQuantity: { $sum: "$orderDetails.quantity" },
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        productName: 1,
+        price: 1,
+        totalQuantity: 1,
+      },
+    },
+  ]);
+
+  // Find the matching amountSold for the found product
+  const foundAmountSold = amountSold.find((soldProduct) => {
+    return found._id.toString() === soldProduct._id.toString();
   });
 
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Product.findById(itemId)
-        .populate("category")
-        .populate("supplier")
-        .lean({ virtuals: true });
-      if (found) {
-        return res.status(200).json(found);
-      }
-      return res.status(500).send({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
+  if (foundAmountSold) {
+    found.amountSold = foundAmountSold.totalQuantity;
+  } else {
+    found.amountSold = 0;
+  }
+
+  if (found) {
+    return res.status(200).json(found);
+  }
+  return res.status(500).send({ oke: false, message: "Object not found" });
 });
-router.post("/", async (req, res, next) => {
-  const validationSchema = yup.object({
-    body: yup.object({
-      name: yup.string().required().max(50),
-      price: yup.number().required().positive(),
-      discount: yup.number().required().positive().min(0).max(75),
-      stock: yup.number().required().positive().integer(),
-    }),
-  });
 
-  validationSchema
-    .validate({ body: req.body }, { abortEarly: false })
-    .then(async () => {
-      try {
-        const newItem = req.body;
-        const data = new Product(newItem);
-        let result = await data.save();
-        res
-          .status(200)
-          .json({ success: true, message: "Created successfully", result });
-      } catch (error) {
-        res.status(500).json({ error: error });
+// CHANGE STOCK OF PRODUCT when orders SUCCESS
+router.post("/orderp/:orderId/stock", async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Update the stock for each product in the order details
+    for (const orderDetail of order.orderDetails) {
+      const productId = orderDetail.productId;
+      const quantity = orderDetail.quantity;
+
+      // Find the product by ID
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        console.log(`Product not found for order detail: ${orderDetail._id}`);
+        continue;
       }
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provier: "Yup",
-      });
-    });
+
+      // Calculate the new stock based on the quantity
+      const newStock = product.stock - quantity;
+
+      // Update the product's stock
+      product.stock = newStock;
+
+      // Save the updated product
+      await product.save();
+    }
+
+    res.json({ message: "Stock updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+// CHANGE STOCK OF PRODUCT when orders SUCCESS
+router.post("/orderm/:orderId/stock", async (req, res) => {
+  try {
+    const orderId = req.params.orderId;
+
+    // Find the order by ID
+    const order = await Order.findById(orderId);
+
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Update the stock for each product in the order details
+    for (const orderDetail of order.orderDetails) {
+      const productId = orderDetail.productId;
+      const quantity = orderDetail.quantity;
+
+      // Find the product by ID
+      const product = await Product.findById(productId);
+
+      if (!product) {
+        console.log(`Product not found for order detail: ${orderDetail._id}`);
+        continue;
+      }
+
+      // Calculate the new stock based on the quantity
+      const newStock = product.stock + quantity;
+
+      // Update the product's stock
+      product.stock = newStock;
+
+      // Save the updated product
+      await product.save();
+    }
+
+    res.json({ message: "Stock updated successfully" });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Internal server error" });
+  }
+});
+
+///CREATE NEW PRODUCT
+router.post("/", validateSchema(productBodySchema), async (req, res, next) => {
+  try {
+    const newItem = req.body;
+    const data = new Product(newItem);
+    let result = await data.save();
+    res
+      .status(200)
+      .json({ success: true, message: "Created successfully", result });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
 // Delete data
-router.delete("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
-
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Product.findByIdAndDelete(itemId);
-      if (found) {
-        return res.status(200).json({ oke: true, result: found });
-      }
-      return res.status(500).send({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
+router.delete(
+  "/:id",
+  validateSchema(productIdSchema),
+  async (req, res, next) => {
+    const itemId = req.params.id;
+    let found = await Product.findByIdAndDelete(itemId);
+    if (found) {
+      return res.status(200).json({ oke: true, result: found });
+    }
+    return res.status(500).send({ oke: false, message: "Object not found" });
+  }
+);
 
 //PATCH DATA
-router.patch("/:id", function (req, res, next) {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "Validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
+router.patch(
+  "/:id",
+  validateSchema(productIdSchema),
+  async (req, res, next) => {
+    try {
+      const itemId = req.params.id;
+      const itemBody = req.body;
 
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      try {
-        const itemId = req.params.id;
-        const itemBody = req.body;
-
-        if (itemId) {
-          let update = await Product.findByIdAndUpdate(itemId, itemBody);
-          res.status(200).send("Updated successfully");
-        }
-      } catch (error) {
-        res.status(500).send(error);
+      if (itemId) {
+        let update = await Product.findByIdAndUpdate(itemId, itemBody, {
+          new: true,
+        });
+        res.status(200).send({ oke: "Updated successfully", update: update });
       }
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
+    } catch (error) {
+      res.status(500).send(error);
+    }
+  }
+);
 
 module.exports = router;

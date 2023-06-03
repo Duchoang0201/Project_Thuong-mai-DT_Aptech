@@ -266,7 +266,7 @@ router.get("/13", async (req, res, next) => {
     // ];
     // let query = { address: new RegExp(`${address}`) };
 
-    Order.aggregate()
+    await Order.aggregate()
       .lookup({
         from: "customers",
         localField: "customerId",
@@ -438,6 +438,7 @@ router.get("/18", async (req, res, next) => {
             {
               $match: {
                 $expr: { $eq: ["$$id", "$categoryId"] },
+                active: true, // Add the condition here
               },
             },
           ],
@@ -448,13 +449,8 @@ router.get("/18", async (req, res, next) => {
         $addFields: { numberOfProducts: { $sum: "$products.stock" } },
       },
     ];
+
     Category.aggregate(aggregate)
-      // .group({
-      //   _id: "$_id",
-      //   name: "$name",
-      //   description: "$description",
-      //   numberOfProducts: "$numberOfProducts",
-      // })
       .project({
         _id: 1,
         name: 1,
@@ -483,6 +479,7 @@ router.get("/19", async (req, res, next) => {
             {
               $match: {
                 $expr: { $eq: ["$$id", "$supplierId"] },
+                active: true, // Add the condition here
               },
             },
           ],
@@ -1503,4 +1500,39 @@ router.get("/34", function (req, res, next) {
     res.sendStatus(500);
   }
 });
+
+router.get("/sold", async (req, res) => {
+  try {
+    Order.aggregate()
+      .unwind("$orderDetails")
+      .lookup({
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "productSold",
+      })
+      .unwind("$productSold")
+      .group({
+        _id: "$productSold._id",
+        productName: { $first: "$productSold.name" },
+        price: { $first: "$productSold.price" },
+        totalQuantity: { $sum: "$orderDetails.quantity" },
+      })
+      .project({
+        _id: 1,
+        productName: 1,
+        price: 1,
+        totalQuantity: 1,
+      })
+      .then((result) => {
+        res.send(result);
+      })
+      .catch((err) => {
+        res.status(400).send({ message: err.message });
+      });
+  } catch (error) {
+    res.sendStatus(500);
+  }
+});
+
 module.exports = router;

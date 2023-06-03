@@ -11,6 +11,7 @@ import {
   Popconfirm,
   Row,
   Typography,
+  Upload,
   message,
 } from "antd";
 import axios from "axios";
@@ -20,6 +21,7 @@ import {
   HomeOutlined,
   MailOutlined,
   PhoneOutlined,
+  UploadOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import router from "next/router";
@@ -27,6 +29,8 @@ import router from "next/router";
 type Props = {};
 const { Text } = Typography;
 const AccountInformation = (props: Props) => {
+  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
   const [refresh, setRefresh] = useState(0);
   const { auth } = useAuthStore((state: any) => state);
 
@@ -36,14 +40,12 @@ const AccountInformation = (props: Props) => {
   const [updateData, setUpdateData] = useState<any>();
   const [updateForm] = Form.useForm();
 
-  const [loadingData, setLoadingDate] = useState<any>(true);
+  const [loading, setLoading] = useState<any>(true);
   setTimeout(() => {
-    setLoadingDate(false);
+    setLoading(false);
   }, 1000);
-  const onChange = (key: string | string[]) => {
-    console.log(key);
-  };
-  const E_URL = `http://localhost:9000/customers/${auth.payload._id}`;
+
+  const E_URL = `${URL_ENV}/customers/${auth?.payload._id}`;
 
   useEffect(() => {
     axios
@@ -60,13 +62,13 @@ const AccountInformation = (props: Props) => {
     if (updateData) {
       if (selectItem === "password") {
         axios
-          .post(`http://localhost:9000/customers/login`, {
+          .post(`${URL_ENV}/customers/login`, {
             email: user.email,
             password: updateData["checkPassword"],
           })
           .then(() => {
             axios
-              .patch(`http://localhost:9000/customers/${auth.payload._id}`, {
+              .patch(`${URL_ENV}/customers/${auth.payload._id}`, {
                 password: updateData["newPassword"],
               })
               .then((res) => {
@@ -89,10 +91,7 @@ const AccountInformation = (props: Props) => {
           });
       } else {
         axios
-          .patch(
-            `http://localhost:9000/customers/${auth.payload._id}`,
-            confirmData
-          )
+          .patch(`${URL_ENV}/customers/${auth.payload._id}`, confirmData)
           .then((res) => {
             console.log(res);
             setRefresh((f) => f + 1);
@@ -113,16 +112,42 @@ const AccountInformation = (props: Props) => {
         style={{ backgroundColor: "white" }}
       >
         <Col xs={24} xl={7}>
-          <Card loading={loadingData} bordered={true} style={{ width: "100%" }}>
+          <Card loading={loading} bordered={true} style={{ width: "100%" }}>
             <div className="text-center">
-              <Avatar
-                size={64}
-                src={`http://localhost:9000${user?.imageUrl}`}
-              />
+              <Avatar size={64} src={`${URL_ENV}${user?.imageUrl}`} />
+              <div className="py-2">
+                <Upload
+                  showUploadList={false}
+                  name="file"
+                  action={`${URL_ENV}/upload/customers/${auth?.payload._id}/image`}
+                  headers={{ authorization: "authorization-text" }}
+                  onChange={(info) => {
+                    if (info.file.status !== "uploading") {
+                      console.log(info.file);
+                    }
+
+                    if (info.file.status === "done") {
+                      message.success(
+                        `${info.file.name} file uploaded successfully`
+                      );
+
+                      setTimeout(() => {
+                        console.log("««««« run »»»»»");
+                        setRefresh(refresh + 1);
+                      }, 1000);
+                    } else if (info.file.status === "error") {
+                      message.error(`${info.file.name} file upload failed.`);
+                    }
+                  }}
+                >
+                  <Button icon={<UploadOutlined />} />
+                </Upload>
+              </div>
               <p className="py-2">
                 {user?.firstName} {user?.lastName}
               </p>
             </div>
+
             <div className="text-left">
               {" "}
               <p>
@@ -141,10 +166,10 @@ const AccountInformation = (props: Props) => {
           </Card>
         </Col>
         <Col xs={24} xl={14} title="Cài đặt tài khoản">
-          <Card loading={loadingData} bordered={true}>
+          <Card loading={loading} bordered={true}>
             <Form form={updateForm} name="updateForm" onFinish={setUpdateData}>
               <div>
-                <Collapse accordion onChange={onChange}>
+                <Collapse accordion>
                   <Collapse.Panel header="First Name" key="1">
                     <Form.Item
                       name="firstName"

@@ -11,32 +11,34 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper.min.css";
 import "swiper/css/pagination";
 import { Pagination } from "swiper";
+import Slides from "@/compenents/Mainpage/Slides/Slides";
+import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
+import { Divider } from "antd";
+import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
 
-// import { img } from "../imgBanner";
+import Backgroundhot from "../compenents/Mainpage/Hotdeal/top_img_01_pc_watch_191226.jpg";
+import Backgroundmonth from "../compenents/Mainpage/Topmonth/pexels-leah-kelley-691046.jpg";
+import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
+import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-type Props = {
-  allProduct: any;
-  // product: any;
-};
-
-const imgBanner = [
-  "31-trangchu-tskc-1175x375.jpg",
-  "32-trangchu-tscuoi-471x675.jpg",
-  "33-trangchu-dojiwatch-580x350.jpg",
-  "/Upload/banner/2023/02/bannerweb/32-trangchu-tscuoi-471x675.jpg",
-];
-
-export default function Home({ allProduct }: Props) {
-  const imageLoader = (src: any) => {
-    return `localhost:9000${src}}`;
+export default function Home(props: any) {
+  const { topMonth } = props;
+  const { hotTrend } = props;
+  const { hotDeal } = props;
+  const hotStyle = {
+    backgroundSize: "cover",
+    backgroundImage: `url(${Backgroundhot.src})`,
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   };
-  imageLoader(
-    `/uploads/products/641b0dfdb5b1ca7f1713e8ea/img-1682533076800-1682568987131--1-.jpg`
-  );
-  const router = useRouter();
-  const handlePageId = (path: any) => {
-    // router.push(`products/${product._id}`);
+  const monthStyle = {
+    backgroundSize: "cover",
+    backgroundImage: `url(${Backgroundmonth.src})`,
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   };
+
   return (
     <>
       <Head>
@@ -46,47 +48,39 @@ export default function Home({ allProduct }: Props) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <main>
-        hello shop Index
-        {/* <Image
-          src="http://localhost:9000/uploads/products/641b0dfdb5b1ca7f1713e8f0/9g4z1sbr-wallha-com.png"
-          alt="Picture of the author"
-          width={500}
-          height={500}
-        /> */}
-        <div className="container">
-          <div className="p-4 " style={{ height: "300px" }}>
-            <Swiper
-              slidesPerView={3}
-              spaceBetween={30}
-              pagination={{
-                clickable: true,
-              }}
-              modules={[Pagination]}
-              className=" w-100"
-            >
-              {imgBanner?.map((items: any, index: any) => {
-                if (index <= 20)
-                  return (
-                    <>
-                      <SwiperSlide className="m-3 w-25 ">
-                        <Image
-                          src={`http://localhost:9000/${items.imageUrl}`}
-                          // src={items}
-                          alt="Description of the image"
-                          width={200}
-                          height={200}
-                          className="w-100 h-25"
-                          onClick={() => handlePageId(`/products/${items._id}`)}
-                          style={{ maxHeight: "180px", minHeight: "80px" }}
-                        ></Image>
-                        <p className="fs-6 ">{items.name}</p>
-                      </SwiperSlide>
-                    </>
-                  );
-              })}
-            </Swiper>
+      <main className="container">
+        <Slides />
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
+          <h3 className=" py-2 text-center">Phương thức thanh toán</h3>
+
+          <CheckoutMethod />
+        </div>
+        <Divider>
+          <h3>Danh mục yêu thích</h3>
+        </Divider>
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
+          <div className="container">
+            <Searchtrend hotTrend={hotTrend} />
           </div>
+        </div>
+        <Divider>
+          <h3>Số lượng mua nhiều nhất trong tháng</h3>
+        </Divider>
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
+          <div className="container">
+            <Topmoth topMonth={topMonth} />
+          </div>
+        </div>
+        <Divider>
+          <h3> Ưu đãi hấp dẫn </h3>
+        </Divider>
+        <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
+          <div className="container">
+            <Hotdeal hotDeal={hotDeal} />
+          </div>
+        </div>
+        <div className="container">
+          <div className="p-4 " style={{ height: "300px" }}></div>
           <div></div>
           <div></div>
         </div>
@@ -95,14 +89,28 @@ export default function Home({ allProduct }: Props) {
   );
 }
 
-export async function getStaticProps({ params }: any) {
-  // const product = await axios.get(`http://localhost:9000/products/${params}`);
-  const allProduct = await axios
-    .get("http://localhost:9000/products")
-    .then((response) => {
-      return response.data;
-    });
-  return {
-    props: { allProduct: allProduct }, // will be passed to the page component as props
-  };
+export async function getStaticProps(content: any) {
+  try {
+    //GET HOTTREND
+    const dataHottrend = await axios.get(`${URL_ENV}/categories?topMonth=true`);
+
+    //GET TOPMONTH
+    const dataTopMonth = await axios.get(`${URL_ENV}/products?topMonth=true`);
+
+    //GET HOTDEAL
+    const dataHotDeal = await axios.get(`${URL_ENV}/products?hotDeal=true`);
+
+    return {
+      props: {
+        topMonth: dataTopMonth.data.results,
+        hotTrend: dataHottrend.data.results,
+        hotDeal: dataHotDeal.data.results,
+      },
+      revalidate: 24 * 60 * 60,
+    };
+  } catch (error) {
+    return {
+      notFound: true,
+    };
+  }
 }

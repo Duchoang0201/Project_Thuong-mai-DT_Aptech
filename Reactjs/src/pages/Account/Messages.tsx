@@ -43,7 +43,6 @@ const Messages: React.FC<any> = () => {
   //Get Meessage
   const [messages, setMessages] = useState<any[any]>([]);
 
-  const [arrivalMessage, setArrivalMessage] = useState<any>([]);
   //loading
   const [refresh, setRefresh] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -59,49 +58,27 @@ const Messages: React.FC<any> = () => {
 
   const socket = useRef<any>();
 
+  // Get message live socket.io
+
   useEffect(() => {
     socket.current = io(URL_ENV);
-  }, [URL_ENV]);
 
-  useEffect(() => {
     socket.current.on("getMessage", (data: any) => {
-      if (data == null) {
+      setTimeout(() => {
         setRefresh((f) => f + 1);
-      } else {
-        setArrivalMessage({
-          sender: data.senderId,
-          text: data.text,
-          createdAt: Date.now(),
-        });
-        //or setRefresh((f) => f + 1);
-      }
+      }, 3000);
     });
-  }, []);
 
-  // Get message live socket.io
-  useEffect(() => {
-    arrivalMessage &&
-      conversationInfor?.friends._id.includes(arrivalMessage.senderId);
-    setMessages((prev: any) => [...prev, arrivalMessage]);
-  }, [arrivalMessage, conversations, conversationInfor?.friends._id]);
+    // Cleanup the socket connection on component unmount
+  }, [URL_ENV, socket]);
 
-  //Add user for socket.io
+  //Get User Online SOCKET.IO
   useEffect(() => {
-    socket.current.emit("addUser", auth.payload._id);
-  }, [auth]);
-
-  //Get User Online IO
-  useEffect(() => {
-    socket.current.on("userOnline", (users: any) => {
-      setUsersOnline(users);
-    });
-  }, [auth]);
-
-  //Get User Online after disconnect IO
-  useEffect(() => {
-    socket.current.on("userOffline", (users: any) => {
-      setUsersOnline(users);
-      console.log("««««« usersOffline »»»»»", users);
+    socket.current.on("getUsers", (users: any) => {
+      setUsersOnline(
+        users.filter((user: any) => user.userId !== auth.payload._id)
+      );
+      setRefresh((f) => f + 1);
     });
   }, [auth]);
 
@@ -117,8 +94,9 @@ const Messages: React.FC<any> = () => {
       } catch (err) {}
     };
     getAllUsers();
-  }, [auth.payload._id]);
+  }, [URL_ENV, auth.payload._id]);
 
+  /// BƯỚC ĐẦU TIÊN LẤY CONVERSATION VỀ
   //Get conversation
   useEffect(() => {
     const getConversations = async () => {
@@ -126,7 +104,6 @@ const Messages: React.FC<any> = () => {
         const res = await axios.get(
           `${URL_ENV}/conversations/${auth.payload._id}`
         );
-
         setConversations(res.data);
         setLoading(true);
       } catch (err) {}
@@ -134,6 +111,7 @@ const Messages: React.FC<any> = () => {
     getConversations();
   }, [URL_ENV, auth.payload._id, refresh]);
 
+  /// TẠO CONVERSATION ( TẠO ROOM CHAT CHO 2 người )
   //Create a conversation
 
   const handleCreateConversation = async (e: any) => {
@@ -158,6 +136,7 @@ const Messages: React.FC<any> = () => {
     }
   };
 
+  /// Gửi tin nhắn đến socket nhận tín hiệu, đồng thời gửi tin nhắn để lưu vào mongoDB
   //Function send message
   const handleSendMessages = async (e: any) => {
     const messageSend = {
@@ -194,14 +173,13 @@ const Messages: React.FC<any> = () => {
     const getMessages = async () => {
       try {
         const res = await axios.get(
-          `http://localhost:9000/messages/${conversationInfor.conversationId}`
+          `${URL_ENV}/messages/${conversationInfor.conversationId}`
         );
         setMessages(res.data);
-        console.log("««««« res »»»»»", res.data);
       } catch (error) {}
     };
     getMessages();
-  }, [conversationInfor, refresh]);
+  }, [URL_ENV, conversationInfor, refresh]);
 
   /// PART OF CHATBOX
 
@@ -216,20 +194,25 @@ const Messages: React.FC<any> = () => {
   }, [messages]);
   scrollRef?.current?.scrollIntoView({ behavior: "smooth" });
 
+  //frienData là danh sách cuộc hội thoại có với auth
   const [friendData, setFriendData] = useState<any>([]);
 
   useEffect(() => {
     const fetchData = async () => {
+      /// Lấy ra conversation ( room chat của auth với friend, chỉ là bước check lại)
       const conversationsWithAuthMember = conversations.filter((item: any) =>
         item.members.includes(auth.payload._id)
       );
 
+      /// Lấy thông tin của từng friend mà có conversation với auth
       const friendPromises = conversationsWithAuthMember.map(
         async (item: any) => {
+          // Lấy _id của từng friend
           const otherMembers = item.members.filter(
             (member: any) => member !== auth.payload._id
           );
 
+          //Sau khi có Id thì lấy toàn bộ thông tin của của friend, để lấy firstName, lastName hiển thị
           try {
             const response = await axios.get(
               `${URL_ENV}/employees/${otherMembers}`
@@ -257,6 +240,10 @@ const Messages: React.FC<any> = () => {
       );
 
       const friendInfo = await Promise.all(friendPromises);
+      //Hàm Promise.all được sử dụng để kết hợp một mảng các promise thành một promise duy nhất
+      //nó trả về một promise mới sẽ được giải quyết khi tất cả các promise trong mảng đã được giải quyết.
+
+      ///Promise.all(friendPromises) đợi cho tất cả các promise trong mảng friendPromises được giải quyết hoặc bị từ chối. Khi tất cả các promise đã được giải quyết, nó trả về một promise mới.
       setFriendData(friendInfo);
     };
 
@@ -327,6 +314,7 @@ const Messages: React.FC<any> = () => {
                         return {
                           label: `${item.firstName} ${item.lastName}`,
                           value: item._id,
+                          key: `${item._id}-${index}`,
                         };
                       })}
                     />
@@ -338,11 +326,11 @@ const Messages: React.FC<any> = () => {
                 style={{ height: "125px", overflowY: "auto" }}
               >
                 {friendData?.map((friends: any, index: any) => (
-                  <div key={`friend-${index}`}>
+                  <div key={`${friends.friends._id}-${index}`}>
                     <Button
                       onClick={() => setConversationInfor(friends)}
                       className="text-start"
-                      style={{ width: "300px", height: "auto" }}
+                      style={{ width: "250px", height: "auto" }}
                     >
                       {friends?.friends?.firstName} {friends?.friends?.lastName}
                     </Button>
@@ -353,12 +341,13 @@ const Messages: React.FC<any> = () => {
             <Col xs={24} xl={18}>
               {conversationInfor ? (
                 <Card
+                  key={`${conversationInfor.friends._id}`}
                   type="inner"
                   title={`${conversationInfor?.friends.firstName} ${conversationInfor?.friends.lastName} 
                 
                   `}
                   extra={
-                    usersOnline?.users?.some(
+                    usersOnline?.some(
                       (user: any) =>
                         user.userId === conversationInfor.friends._id
                     ) ? (
@@ -384,17 +373,11 @@ const Messages: React.FC<any> = () => {
                     ref={scrollRef}
                     style={{ height: "400px", overflowY: "scroll" }}
                   >
-                    {messages.map((item: any, index: number) => (
-                      <>
+                    {messages?.map((item: any, index: number) => (
+                      <div key={`${item?.employee._id}-${index}`}>
                         {item?.employee?._id === auth.payload._id ? (
-                          <div
-                            key={`${item?._id}-me-${index}`}
-                            className="d-flex flex-row-reverse"
-                          >
-                            <div
-                              key={`${item?._id}-me-${index}`}
-                              className="w-auto"
-                            >
+                          <div className="d-flex flex-row-reverse">
+                            <div className="w-auto">
                               <h6 className="Name text-body-secondary">
                                 <UserOutlined /> Me
                               </h6>
@@ -407,11 +390,11 @@ const Messages: React.FC<any> = () => {
                             </div>
                           </div>
                         ) : (
-                          <div key={`${item?._id}-${index}`} className="d-flex">
-                            <div
-                              key={`${item?._id}-me-${index}`}
-                              className="w-auto"
-                            >
+                          <div
+                            className="d-flex"
+                            key={`${item?.employee._id}-${index}`}
+                          >
+                            <div className="w-auto">
                               <h6 className="Name text-primary">
                                 <UserOutlined /> {item?.employee?.firstName}{" "}
                                 {item?.employee?.lastName}
@@ -425,7 +408,7 @@ const Messages: React.FC<any> = () => {
                             </div>
                           </div>
                         )}
-                      </>
+                      </div>
                     ))}
                   </div>
 
@@ -452,7 +435,10 @@ const Messages: React.FC<any> = () => {
                   </Form>
                 </Card>
               ) : (
-                <Watermark content="Click to user to start conversation">
+                <Watermark
+                  key={`${conversationInfor?.friends._id}`}
+                  content="Click to user to start conversation"
+                >
                   <div style={{ height: 500 }} />
                 </Watermark>
               )}

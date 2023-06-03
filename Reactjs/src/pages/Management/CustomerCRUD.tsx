@@ -89,7 +89,11 @@ function CustomerCRUD() {
 
   //Create data
   const handleCreate = (record: any) => {
-    record.createdBy = auth.payload;
+    record.createdBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.createdDate = new Date().toISOString();
     if (record.Locked === undefined) {
       record.Locked = false;
@@ -109,9 +113,12 @@ function CustomerCRUD() {
           .then((respose) => {
             message.success("Thêm mới thành công!");
             createForm.resetFields();
-            setRefresh((f) => f + 1);
             setOpenCreate(false);
             setFile(null);
+
+            setTimeout(() => {
+              setRefresh((f) => f + 1);
+            }, 2000);
           });
       })
       .catch((err) => {
@@ -133,7 +140,11 @@ function CustomerCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    record.updatedBy = auth.payload;
+    record.updatedBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.updatedDate = new Date().toISOString();
 
     record.birthday = record.birthday.toISOString();
@@ -590,14 +601,12 @@ function CustomerCRUD() {
 
               if (info.file.status === "done") {
                 message.success(`${info.file.name} file uploaded successfully`);
-
-                setTimeout(() => {
-                  console.log("««««« run »»»»»");
-                  setRefresh(refresh + 1);
-                }, 1000);
               } else if (info.file.status === "error") {
                 message.error(`${info.file.name} file upload failed.`);
               }
+              setTimeout(() => {
+                setRefresh(refresh + 1);
+              }, 2000);
             }}
           >
             <Button icon={<UploadOutlined />} />

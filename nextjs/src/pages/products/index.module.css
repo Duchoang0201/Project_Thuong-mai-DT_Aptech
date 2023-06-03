@@ -8,3 +8,40 @@
     top: 8%;
     font-size: larger;
 }
+.items:hover{
+    border: 1px solid blue;
+    border-radius: 2%;
+   height: 280px;
+   
+}
+.guide__tilte{
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bolder;
+    margin-left: 18px;
+}
+.comment{
+    width: 100%;
+    margin-top: 2%;
+}
+
+.scroll__bar{
+    overflow-y: scroll;
+    height: 180px;
+   
+}
+
+@media screen and (max-width: 400px) {
+    .comment{
+        width: 100%;
+    }
+    
+}
+
+@media screen and (min-width: 400px) and (max-width: 900px){
+    .comment{
+        width: 100%;
+  
+    }
+    
+}

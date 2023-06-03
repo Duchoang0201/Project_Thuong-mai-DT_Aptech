@@ -79,7 +79,11 @@ function SupperliersCRUD() {
 
   //Create data
   const handleCreate = (record: any) => {
-    record.createdBy = auth.payload;
+    record.createdBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.createdDate = new Date().toISOString();
     if (record.active === undefined) {
       record.active = false;
@@ -116,7 +120,11 @@ function SupperliersCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    record.updatedBy = auth.payload;
+    record.updatedBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.updatedDate = new Date().toISOString();
     if (record.active === undefined) {
       record.active = false;
@@ -135,6 +143,7 @@ function SupperliersCRUD() {
       })
       .catch((err) => {
         console.log(err);
+        message.error(`${err.response.data.message}`, 2);
       });
   };
 
@@ -145,7 +154,6 @@ function SupperliersCRUD() {
   const [isDelete, setIsDelete] = useState("");
   const [isActive, setIsActive] = useState("");
   const onSearchIsDelete = useCallback((value: any) => {
-    console.log("««««« value »»»»»", value);
     if (value === "active") {
       setIsActive("true");
       setIsDelete("");
@@ -390,16 +398,6 @@ function SupperliersCRUD() {
                   };
                 })}
               />
-              {/* {supplierId && (
-                <span style={{ width: "20%" }}>
-                  <Button
-                    onClick={() => {
-                      setSupplierId("");
-                    }}
-                    icon={<ClearOutlined />}
-                  />
-                </span>
-              )} */}
             </div>
           </>
         );

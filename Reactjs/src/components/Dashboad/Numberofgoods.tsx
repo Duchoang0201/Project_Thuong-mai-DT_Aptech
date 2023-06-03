@@ -90,13 +90,12 @@ const Numberofgoods = (props: Props) => {
 
   return (
     <div>
-      <Divider orientation="left">Genaral Information</Divider>
+      <Divider orientation="left">Number of gooods</Divider>
       <Card>
-        <Row>
+        <Row className="px-1">
           <Col xs={24} xl={12}>
             <Card
               type="inner"
-              style={{ width: "90%" }}
               title={"Số lượng hàng hóa trên mỗi danh mục"}
               bordered={false}
             >
@@ -106,7 +105,6 @@ const Numberofgoods = (props: Props) => {
           <Col xs={24} xl={12}>
             <Card
               type="inner"
-              style={{ width: "90%" }}
               title={"Số lượng hàng hóa trên mỗi nhà cung cấp"}
             >
               <Pie {...config2} />

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import GoogleMapReact from "google-map-react";
 import axios from "axios";
+import { Divider } from "antd";
 
 const Address = () => {
   const [positions, setPositions] = useState<any[]>([]);
@@ -10,7 +11,6 @@ const Address = () => {
     const fetchLocation = async () => {
       try {
         const response = await axios.get(`${URL_ENV}/orders`);
-        console.log("««««« response »»»»»", response);
         const fetchedPositions = response?.data?.map(
           (item: any, index: any) => ({
             name: item.position.name,
@@ -20,7 +20,6 @@ const Address = () => {
             },
           })
         );
-        console.log("««««« Fetched Positions »»»»»", fetchedPositions);
         setPositions(fetchedPositions);
       } catch (error) {
         console.log("Error fetching location:", error);
@@ -50,7 +49,7 @@ const Address = () => {
   return (
     <div className="Address">
       <div className="delivery active">
-        Vị trí khách hàng đã đặt hàng
+        <Divider>Vị trí khách hàng đã đặt hàng</Divider>
         {positions.length > 0 && (
           <div style={{ height: "50vh", width: "100%" }}>
             <GoogleMapReact

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { useAuthStore } from "./hooks/useAuthStore";
-import { Layout, Button, theme } from "antd";
+import { Layout, Button, theme, Divider } from "antd";
 import { io } from "socket.io-client";
 
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
@@ -25,11 +25,14 @@ import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 import SlidesCRUD from "./pages/Management/SlideCRUD";
 import FeaturesCRUD from "./pages/Management/FeaturesCRUD";
 import axios from "axios";
+import { useBreadcrumb } from "./hooks/useBreadcrumb";
 numeral.locale("vi");
 const { Header, Sider, Content } = Layout;
 
 const App: React.FC = () => {
   const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+
+  const { breadCrumb } = useBreadcrumb((state: any) => state);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
@@ -51,16 +54,28 @@ const App: React.FC = () => {
   const { auth } = useAuthStore((state: any) => state);
   const [user, setUser] = useState<any>();
 
-  useEffect(() => {
-    axios.get(`${URL_ENV}/employees/${auth.payload._id}`).then((res) => {
-      setUser(res.data.result);
-    });
-  }, [URL_ENV, auth]);
+  // /// USER ONLINE_OFFLINE
   const socket = useRef<any>();
 
   useEffect(() => {
-    socket.current = io(URL_ENV);
-  }, [URL_ENV]);
+    if (auth) {
+      socket.current = io(URL_ENV);
+    }
+  }, [URL_ENV, auth]);
+
+  useEffect(() => {
+    if (auth) {
+      socket.current.emit("addUser", auth?.payload?._id);
+    }
+  }, [auth]);
+
+  useEffect(() => {
+    if (auth) {
+      axios.get(`${URL_ENV}/employees/${auth.payload._id}`).then((res) => {
+        setUser(res.data.result);
+      });
+    }
+  }, [URL_ENV, auth]);
 
   // Function reresh to clear local storage
 
@@ -82,7 +97,6 @@ const App: React.FC = () => {
               </Routes>
             </Content>
           )}
-
           {auth && (
             <Layout>
               <Sider
@@ -109,8 +123,8 @@ const App: React.FC = () => {
                 />
                 <MainMenu />
               </Sider>
+
               <Layout
-                // className="container"
                 style={{
                   marginLeft: collapsed ? (windowWidth <= 768 ? 0 : 60) : 200,
                 }}
@@ -154,8 +168,15 @@ const App: React.FC = () => {
                     </div>
                   </div>
                 </Header>
-
-                <Content className="mx-5 my-5">
+                <div className="mx-4 my-2 text-danger">
+                  {" "}
+                  {breadCrumb === "Account/Logout" || breadCrumb === null ? (
+                    <Divider>Dashboard/Home</Divider>
+                  ) : (
+                    <Divider>{breadCrumb}</Divider>
+                  )}
+                </div>
+                <Content className="mx-4 my-2">
                   {/* Register routes */}
 
                   <Routes>

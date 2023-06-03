@@ -90,7 +90,11 @@ function EmployeeCRUD() {
 
   //Create data
   const handleCreate = (record: any) => {
-    record.createdBy = auth.payload;
+    record.createdBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.createdDate = new Date().toISOString();
     if (record.Locked === undefined) {
       record.Locked = false;
@@ -134,7 +138,11 @@ function EmployeeCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    record.updatedBy = auth.payload;
+    record.updatedBy = {
+      employeeId: auth.payload._id,
+      firstName: auth.payload.firstName,
+      lastName: auth.payload.lastName,
+    };
     record.updatedDate = new Date().toISOString();
 
     record.birthday = record.birthday.toISOString();
@@ -229,7 +237,6 @@ function EmployeeCRUD() {
     const formattedRecord = record.map((date: any) =>
       dayjs(date).format("YYYY/MM/DD")
     );
-    console.log("««««« formattedRecord »»»»»", formattedRecord);
     if (formattedRecord) {
       setEmployeeBirthdayFrom(formattedRecord[0]);
       setEmployeeBirthdayTo(formattedRecord[1]);
@@ -358,7 +365,7 @@ function EmployeeCRUD() {
           <div>
             {record.imageUrl && (
               <img
-                src={"http://localhost:9000" + record.imageUrl}
+                src={`${URL_ENV}` + record.imageUrl}
                 style={{ height: 60 }}
                 alt="record.imageUrl"
               />
@@ -586,18 +593,17 @@ function EmployeeCRUD() {
           <Upload
             showUploadList={false}
             name="file"
-            action={`${URL_ENV}p://localhost:9000/upload/employees/${record._id}/image`}
+            action={`${URL_ENV}/upload/employees/${record._id}/image`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {
-                console.log(info.file);
+                // console.log(info.file);
               }
 
               if (info.file.status === "done") {
                 message.success(`${info.file.name} file uploaded successfully`);
 
                 setTimeout(() => {
-                  console.log("««««« run »»»»»");
                   setRefresh(refresh + 1);
                 }, 1000);
               } else if (info.file.status === "error") {

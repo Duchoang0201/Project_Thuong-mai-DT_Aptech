@@ -1,71 +1,93 @@
-import React from "react";
-import { Button, Checkbox, Form, Input, Typography, message } from "antd";
+import React, { useEffect, useState } from "react";
+import { useRouter } from "next/router";
+import { Button, Form, Input } from "antd";
+import { UserOutlined, LockOutlined } from "@ant-design/icons";
 import style from "./index.module.css";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
 import { useAuthStore } from "@/hook/useAuthStore";
-import { useRouter } from "next/router";
-import { LockOutlined, UserOutlined } from "@ant-design/icons";
+import Link from "next/link";
 
 const Login = () => {
   const { login } = useAuthStore((state: any) => state);
   const { auth } = useAuthStore((state: any) => state);
-
+  const [refresh, setRefresh] = useState(0);
   const router = useRouter();
   const onLogin = async (values: any) => {
     const { email, password } = values;
     login({ email, password });
-
-    if (auth) {
-      router.push("/"); // Replace '/page' with the actual path to your desired page
-    } else {
-      router.push("/login");
-    }
   };
+  useEffect(() => {}, [refresh]);
 
   return (
-    <div className={`${style.root}`}>
-      <Form
-        className={`${style.form__border}`}
-        name="normal_login"
-        labelCol={{ span: 8 }}
-        initialValues={{ remember: true }}
-        onFinish={onLogin}
-        onFinishFailed={(errorInfo: any) => {
-          console.log("Failed:", errorInfo);
-        }}
-        autoComplete="off"
-      >
-        <Typography.Title className="text-center">Login Form</Typography.Title>
-        <Form.Item
-          name="email"
-          rules={[
-            { type: "email" },
-            { required: true, message: "Please input your username!" },
-          ]}
+    <div className={`${style.root} `}>
+      <div className={style.brand}>
+        <div className={style.title}>JewelShop</div>
+        <div className={style.slogan}>Nâng Tầm thời trang của bạn</div>
+      </div>
+      <div>
+        <Form
+          title="ád"
+          name="basic"
+          className={` login-form ${style.form__border}`}
+          initialValues={{ remember: true }}
+          onFinish={onLogin}
+          onFinishFailed={(errorInfo: any) => {
+            console.log("Failed:", errorInfo);
+          }}
+          autoComplete="off"
         >
-          <Input
-            prefix={<UserOutlined className="site-form-item-icon" />}
-            placeholder="Email"
-          />
-        </Form.Item>
+          <div className="text-center py-2">
+            <h3>Đăng nhập tài khoản</h3>{" "}
+          </div>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            label="Email"
+            name="email"
+            rules={[
+              { type: "email" },
+              { required: true, message: "Please input your username!" },
+            ]}
+          >
+            <Input
+              prefix={<UserOutlined className="site-form-item-icon" />}
+              placeholder="Username"
+            />
+          </Form.Item>
+          <Form.Item
+            labelCol={{
+              span: 7,
+            }}
+            wrapperCol={{
+              span: 16,
+            }}
+            label="Password"
+            name="password"
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input
+              prefix={<LockOutlined className="site-form-item-icon" />}
+              type="password"
+              placeholder="Password"
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="password"
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input
-            prefix={<LockOutlined className="site-form-item-icon" />}
-            type="password"
-            placeholder="Password"
-          />
-        </Form.Item>
-
-        <Form.Item shouldUpdate wrapperCol={{ offset: 8, span: 16 }}>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
+          <Form.Item className="text-end py-3">
+            <Button
+              type="primary"
+              htmlType="submit"
+              className="login-form-button"
+            >
+              Log in
+            </Button>
+            Or <Link href="/register">register now!</Link>
+          </Form.Item>
+        </Form>
+      </div>
     </div>
   );
 };

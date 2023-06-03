@@ -1,31 +1,113 @@
-import { useState, useEffect } from "react";
-import { useRouter } from "next/router";
+import { useState, useRef, useEffect } from "react";
+
+import router, { useRouter } from "next/router";
+
 import axios from "axios";
 import Image from "next/image";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Modal, Rate } from "antd";
+import {
+  Modal,
+  Rate,
+  Collapse,
+  Input,
+  Button,
+  List,
+  Form,
+  message,
+  Divider,
+} from "antd";
 import Style from "./index.module.css";
-import { PhoneFilled, PhoneOutlined } from "@ant-design/icons";
+import { PhoneOutlined } from "@ant-design/icons";
 import { Swiper, SwiperSlide } from "swiper/react";
 
-import "swiper/swiper.min.css";
+const { Panel } = Collapse;
+const { TextArea } = Input;
+import "swiper/swiper-bundle.css";
 import "swiper/css/pagination";
 
-import { Pagination } from "swiper";
-import { Route } from "react-router-dom";
-
+// import { Pagination } from "swiper";
+import { Navigation } from "swiper";
+import { useAuthStore } from "@/hook/useAuthStore";
+import { useCartStore } from "@/hook/useCountStore";
+// import { Route } from "react-router-dom";
+import ReactPlayer from "react-player";
+import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
+import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
 type Props = {
   product: any;
   allProduct: any;
+  productParams: any;
 };
 
-export default function ProductDetails({ product, allProduct }: Props) {
+const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+
+export default function ProductDetails({ product }: Props) {
+  const [commentForm] = Form.useForm();
   const [visible, setVisible] = useState(false);
   const [picture, setPicture] = useState<any>();
-  const [rating, setRating] = useState<number>();
-  const router = useRouter();
+  const [data, setData] = useState<any>(product.rateInfo);
+  const [refresh, setRefresh] = useState<any>(0);
+  const { add, items, increase } = useCartStore((state: any) => state);
+
+  const { auth } = useAuthStore((state: any) => state);
+  //////////////////
+
+  const [productMain, setProductMain] = useState<any>();
+
+  useEffect(() => {
+    axios.get(`${URL_ENV}/products/${product._id}`).then((res) => {
+      setProductMain(res.data);
+      setData(res.data.rateInfo);
+    });
+  }, [product._id, refresh]);
+
+  // useEffect(() => {
+  //   console.log("update data: ", product);
+  //   setData(product.rateInfo);
+  // }, [product]);
+  const onFinish = async (record: any) => {
+    const customer = {
+      customerId: auth.payload?._id,
+      firstName: auth.payload?.firstName,
+      lastName: auth.payload?.lastName,
+      comment: record.comment,
+    };
+
+    const response = await axios.get(`${URL_ENV}/products/${product._id}`);
+    const updateData = response.data;
+
+    if (response.data.rateInfo) {
+      updateData.rateInfo.push({
+        customer: customer,
+        rateNumber: record.rateNumber,
+      });
+    } else {
+      updateData.rateInfo = [];
+      updateData.rateInfo.push({
+        customer: customer,
+        rateNumber: record.rateNumber,
+      });
+    }
+
+    axios
+      .patch(`${URL_ENV}/products/${product._id}`, {
+        rateInfo: updateData.rateInfo,
+      })
+      .then((res) => {
+        commentForm.resetFields();
+        message.success(
+          "Cảm ơn quý khách đã đánh giá sản phẩm của chúng tôi",
+          1.5
+        );
+        setRefresh((f: any) => f + 1);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const handleImageClick = (items: any) => {
+    console.log("click");
     setVisible(true);
     setPicture(items);
   };
@@ -34,13 +116,9 @@ export default function ProductDetails({ product, allProduct }: Props) {
     setVisible(false);
   };
 
-  const handlePageId = (path: any, rateInfor: any) => {
-    router.push(path);
-  };
-
   return (
     <>
-      <div className="container d-flex-column justify-content-center">
+      <div className="container d-flex-column justify-content-center py-3">
         <div className=" w-75" style={{ margin: "0px 12%" }}>
           <div className=" d-flex flex-lg-row justify-content-center flex-column ">
             <div
@@ -49,66 +127,88 @@ export default function ProductDetails({ product, allProduct }: Props) {
             >
               <div>
                 <Image
-                  src={`http://localhost:9000/${product.imageUrl}`}
+                  src={`${URL_ENV}/${productMain?.imageUrl}`}
                   alt="Description of the image"
                   width={200}
                   height={200}
                   className="w-100 img-fluid"
                 ></Image>
               </div>
-              <div className="d-flex flex-row ">
-                {product?.images?.map((items: any) => {
-                  return (
-                    <>
-                      <div className="pt-3 m-1">
-                        <Image
-                          src={`http://localhost:9000/${items}`}
-                          alt="Description of the image"
-                          onClick={() => handleImageClick(items)}
-                          width={100}
-                          height={100}
-                          className="w-100 h-75 border border-dark"
-                        ></Image>
-                        <Modal
-                          visible={visible}
-                          onCancel={handleModalClose}
-                          footer={null}
-                        >
-                          <Image
-                            src={`http://localhost:9000/${picture}`}
-                            alt="Image"
-                            width={500}
-                            height={500}
-                            style={{ width: "100%" }}
-                          />
-                        </Modal>
-                      </div>
-                    </>
-                  );
-                })}
+
+              <div
+                className="d-flex flex-row  mt-2"
+                style={{ width: "200px", height: "100px", marginLeft: "2% " }}
+              >
+                <Swiper
+                  modules={[Navigation]}
+                  className="mySwiper"
+                  navigation={true}
+                  slidesPerView={2}
+                  spaceBetween={30}
+                >
+                  {productMain?.images?.map((items: any, index: any) => {
+                    if (index <= 20)
+                      return (
+                        <>
+                          <SwiperSlide
+                            key={`${items._id}-${index}`}
+                            className="ms-2 w-25"
+                          >
+                            <Image
+                              src={`${URL_ENV}/${items}`}
+                              alt="Description of the image"
+                              width={80}
+                              height={80}
+                              className="border"
+                              onClick={() => handleImageClick(items)}
+                              // style={{ maxHeight: "180px", minHeight: "80px" }}
+                            ></Image>
+                            <Modal
+                              visible={visible}
+                              onCancel={handleModalClose}
+                              footer={null}
+                            >
+                              <Image
+                                src={`${URL_ENV}/${picture}`}
+                                alt="Image"
+                                width={500}
+                                height={500}
+                                style={{ width: "100%" }}
+                              />
+                            </Modal>
+                          </SwiperSlide>
+                        </>
+                      );
+                  })}
+                </Swiper>
               </div>
             </div>
             <div className="p-2 bd-highlight ">
-              <h3 className="fs-5">{product.name}</h3>
-              <div className={Style.rating}>
+              <h3 className="fs-5">{product?.name}</h3>
+              <div>
                 {" "}
-                <Rate allowHalf defaultValue={product.averageRate} />
+                <Rate disabled value={product?.averageRate} />
                 <span className={`${Style.ratingNumber}`}>
-                  ({product.rateInfor.length})
+                  {product?.rateInfor?.length}
                 </span>
               </div>
               <div className="d-sm-flex justify-content-between d-inline-block ">
                 <p>
-                  Mã: <span className="fs-6">{product.categoryId}</span>
+                  Mã: <span className="fs-6">{product?.categoryId}</span>
                 </p>
-                <p>... đã bán</p>
+                <p>{product?.amountSold} đã bán</p>
               </div>
 
               <div>
-                <span className="fs-4">{product.price}đ</span>
+                <span className="fs-4">
+                  {product?.price.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </span>
               </div>
               <div>
-                <b>{product.active === true ? "Còn hàng" : "Hết hàng"}</b>
+                <b>{productMain?.active === true ? "Còn hàng" : "Hết hàng"}</b>
               </div>
               <div className="mt-1 border border-dark border-1 rounded-3 ">
                 <div
@@ -124,15 +224,42 @@ export default function ProductDetails({ product, allProduct }: Props) {
                 </ul>
               </div>
               <div className="mt-1 ">
-                <button className="w-100  border-bottom border-dark  rounded bg-danger bg-gradient text-light">
+                <button
+                  onClick={() => {
+                    if (auth?.payload?._id) {
+                      const productId = productMain?._id;
+
+                      console.log("««««« items »»»»»", items);
+                      const productExists = items.some(
+                        (item: any) => item.product._id === productId
+                      );
+                      console.log("««««« productExists »»»»»", productExists);
+                      if (productExists === true) {
+                        increase(productId);
+                        message.success("Thêm 1 sản phẩm vào giỏ hàng!", 1.5);
+                      } else {
+                        add({ product: product, quantity: 1 });
+                        message.success("Đã thêm sản phẩm vào giỏ hàng!", 1.5);
+                      }
+                    } else {
+                      router.push("/login");
+                      message.warning(
+                        "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
+                        1.5
+                      );
+                    }
+                  }}
+                  className="w-100  border-bottom border-dark  rounded bg-gradient text-light"
+                  style={{ background: "#AD2A36", height: "35px" }}
+                >
                   <b>Đặt hàng ngay</b>
                 </button>
               </div>
-              <div className="w-75 ms-5 d-flex">
-                <div className="">
+              <div className="w-100  d-flex ">
+                <div className="mt-2 ">
                   <PhoneOutlined />
                 </div>
-                <p className="text-center  fw-bolder mt-1">
+                <p className={`${Style.guide__tilte}`}>
                   Liên hệ 1800 000 để được tư vấn miễn phí và các thông tin
                   khuyến mãi
                 </p>
@@ -141,81 +268,117 @@ export default function ProductDetails({ product, allProduct }: Props) {
           </div>
         </div>
         <br />
-
-        <div className="d-none d-sm-block">
-          <p className="fs-4 "> Sản phẩm được yêu thích</p>
-          <div className=" m-5 d-flex justify-content-center ">
-            {allProduct?.results?.map((items: any, index: any) => {
-              if (index <= 3)
-                return (
-                  <div
-                    key={index}
-                    className="m-2 d-flex-column justify-content-center w-25 "
-                  >
-                    <div className="">
-                      <Image
-                        src={`http://localhost:9000/${items.imageUrl}`}
-                        alt="Description of the image"
-                        width={200}
-                        height={200}
-                        className="w-100 rounded "
-                        onClick={() =>
-                          handlePageId(
-                            `/products/${items._id}`,
-                            items.rateInfor
-                          )
-                        }
-                      ></Image>
-                    </div>
-                    <div>
-                      <p style={{ color: "blue" }} className="fs-6 primary">
-                        {" "}
-                        {items.name}
-                      </p>
-                    </div>
-                    <div>{items.price}đ</div>
-                  </div>
-                );
-            })}
+        <div className="  d-flex justify-content-center">
+          <div className="w-75">
+            <Collapse size="small">
+              <Panel header="Thông số và mô tả sản phẩm" key="1">
+                <p>{product.description}</p>
+              </Panel>
+            </Collapse>
           </div>
         </div>
-        <div className=" ms-3 ">
-          <p className="fs-4">Các sản phẩm khác</p>
-          <div className="h-50">
-            <Swiper
-              slidesPerView={3}
-              spaceBetween={30}
-              pagination={{
-                clickable: true,
-              }}
-              modules={[Pagination]}
-              className=" w-100"
-            >
-              {allProduct?.results?.map((items: any, index: any) => {
-                if (index <= 20)
-                  return (
-                    <>
-                      <SwiperSlide className="m-3 w-25">
-                        <Image
-                          src={`http://localhost:9000/${items.imageUrl}`}
-                          alt="Description of the image"
-                          width={200}
-                          height={200}
-                          className="w-100 "
-                          onClick={() =>
-                            handlePageId(
-                              `/products/${items._id}`,
-                              items.rateInfor
-                            )
+        <div className="d-flex justify-content-center">
+          <div className="w-75">
+            <Collapse size="small">
+              <Panel header="Bình luận" key="1">
+                <div className={Style.scroll__bar}>
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={data}
+                    renderItem={(item: any, index) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          key={`${item._id}-${index}`}
+                          title={
+                            <div>
+                              <span style={{ marginRight: "10px" }}>
+                                {item.customer.firstName}
+                              </span>
+                              <Rate allowHalf defaultValue={item.rateNumber} />
+                            </div>
                           }
-                          style={{ maxHeight: "180px", minHeight: "80px" }}
-                        ></Image>
-                        <p className="fs-6">{items.name}</p>
-                      </SwiperSlide>
-                    </>
-                  );
-              })}
-            </Swiper>
+                          description={item.customer.comment}
+                        />
+                      </List.Item>
+                    )}
+                  />
+                </div>
+                <hr style={{ width: "100%" }} />
+                {/* ////////////////////////////////////////// */}
+                {auth && (
+                  <>
+                    <Form
+                      form={commentForm}
+                      name="commentForm"
+                      labelCol={{ span: 6 }}
+                      wrapperCol={{ span: 14 }}
+                      onFinish={onFinish}
+                      autoComplete="off"
+                      className={Style.comment}
+                    >
+                      <Form.Item
+                        label={"Đánh giá"}
+                        name="rateNumber"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập đánh giá!",
+                          },
+                        ]}
+                      >
+                        <Rate />
+                      </Form.Item>
+                      <Form.Item
+                        label={"Bình luận"}
+                        name="comment"
+                        rules={[
+                          {
+                            required: true,
+                            message: "Vui lòng nhập bình luận!",
+                          },
+                        ]}
+                      >
+                        <TextArea showCount maxLength={100} />
+                      </Form.Item>
+
+                      <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
+                        <Button type="primary" htmlType="submit">
+                          Submit
+                        </Button>
+                      </Form.Item>
+                    </Form>
+                  </>
+                )}
+
+                {/* //////////////////////////////////////////////////// */}
+              </Panel>
+            </Collapse>
+          </div>
+        </div>
+        <Divider>
+          <h3>Sản phẩm yêu thích </h3>
+        </Divider>
+        <div
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(208,206,191,1) 19%, rgba(222,221,202,1) 56%, rgba(160,167,151,1) 86%)",
+          }}
+        >
+          <div className="container">
+            <Topmoth />
+          </div>
+        </div>
+        <Divider>
+          <h3>Sản phẩm yêu thích </h3>
+        </Divider>
+        <div
+          style={{
+            background:
+              "linear-gradient(90deg, rgba(208,206,191,1) 19%, rgba(222,221,202,1) 56%, rgba(160,167,151,1) 86%)",
+          }}
+        >
+          <div className="container">
+            <Hotdeal />
           </div>
         </div>
       </div>
@@ -225,19 +388,19 @@ export default function ProductDetails({ product, allProduct }: Props) {
 
 export async function getStaticPaths() {
   const products = await axios
-    .get("http://localhost:9000/products")
+    .get(`${URL_ENV}/products?active=true`)
     .then((response) => {
       return response.data;
     });
 
-  console.log(products);
+  // console.log(products);
 
   const paths = products?.results?.map((items: any) => ({
     params: { id: `${items._id}` },
   }));
 
   // { fallback: false } means other routes should 404
-  console.log("listpaths:", paths);
+  // console.log("listpaths:", paths);
   return { paths, fallback: false };
 }
 
@@ -245,17 +408,26 @@ export async function getStaticPaths() {
 export async function getStaticProps({ params }: any) {
   // params contains the post `id`.
   // If the route is like /posts/1, then params.id is 1
+
+  const productParams = params;
   const product = await axios
-    .get(`http://localhost:9000/products/${params.id}`)
+    .get(`${URL_ENV}/products/${params.id}`)
     .then((response) => {
       return response.data;
     });
+
   const allProduct = await axios
-    .get("http://localhost:9000/products")
+    .get(`${URL_ENV}/products?active=true`)
     .then((response) => {
       return response.data;
     });
 
   // Pass post data to the page via props
-  return { props: { product: product, allProduct: allProduct } };
+  return {
+    props: {
+      product: product,
+      allProduct: allProduct,
+      productParams: productParams,
+    },
+  };
 }

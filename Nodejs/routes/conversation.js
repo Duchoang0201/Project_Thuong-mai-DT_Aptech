@@ -4,11 +4,23 @@ const { Conversation } = require("../models");
 //new conv
 
 router.post("/", async (req, res) => {
-  const newConversation = new Conversation({
-    members: [req.body.senderId, req.body.receiverId],
-  });
+  const senderId = req.body.senderId;
+  const receiverId = req.body.receiverId;
 
   try {
+    // Check if conversation with the same members already exists
+    const existingConversation = await Conversation.findOne({
+      members: { $all: [senderId, receiverId] },
+    });
+
+    if (existingConversation) {
+      return res.status(400).json({ error: "Conversation already exists." });
+    }
+
+    const newConversation = new Conversation({
+      members: [senderId, receiverId],
+    });
+
     const savedConversation = await newConversation.save();
     res.status(200).json(savedConversation);
   } catch (err) {

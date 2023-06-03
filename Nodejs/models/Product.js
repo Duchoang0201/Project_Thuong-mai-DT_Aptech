@@ -2,11 +2,26 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const mongooseLeanVirtuals = require("mongoose-lean-virtuals");
 
-const rateSchema = Schema({
-  customer: { type: Object },
-  rateNumber: { type: Number, min: 1, max: 5 },
+const customerRateSchema = new Schema({
+  customer: {
+    customerId: { type: Schema.Types.ObjectId, ref: "Customer", require: true },
+    firstName: { type: String },
+    lastName: { type: String },
+    comment: { type: String },
+  },
+  rateNumber: { type: Number },
 });
 
+const createdBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
+const updatedBySchema = new Schema({
+  employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
 const productSchema = Schema(
   {
     name: { type: String, required: true },
@@ -27,12 +42,12 @@ const productSchema = Schema(
     active: { type: Boolean },
     isDeleted: { type: Boolean },
     createdDate: { type: Date },
-    createdBy: { type: Object },
+    createdBy: createdBySchema,
     updatedDate: { type: Date },
-    updatedBy: { type: Object },
+    updatedBy: updatedBySchema,
     note: { type: String },
     images: { type: Array },
-    rateInfo: [rateSchema],
+    rateInfo: [customerRateSchema],
     promotionPosition: { type: Array },
   },
   {
@@ -47,8 +62,8 @@ productSchema.virtual("total").get(function () {
 
 // Average rate of Product
 productSchema.virtual("averageRate").get(function () {
-  if (this.rateInfor && this.rateInfor.length > 0) {
-    const rates = this.rateInfor
+  if (this.rateInfo && this.rateInfo.length > 0) {
+    const rates = this.rateInfo
       .map((item) => item.rateNumber)
       .filter((rate) => rate !== null && rate !== undefined); // Extracting all rateNumbers
 

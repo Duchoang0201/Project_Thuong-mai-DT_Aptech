@@ -13,7 +13,23 @@ const validateSchema = (schema) => async (req, res, next) => {
     return res.status(400).json({ type: err.name, message: err.message });
   }
 };
-
+const productBodySchema = yup.object({
+  body: yup.object({
+    name: yup.string().required().max(50),
+    price: yup.number().required().positive(),
+    discount: yup.number().required().positive().min(0).max(75),
+    stock: yup.number().required().positive().integer(),
+  }),
+});
+const productIdSchema = yup.object({
+  params: yup.object({
+    id: yup
+      .string()
+      .test("validate ObjectId", "${path} is not a valid ObjectId", (value) => {
+        return ObjectId.isValid(value);
+      }),
+  }),
+});
 const getProductsSchema = yup.object({
   query: yup.object({
     categoryId: yup
@@ -72,4 +88,9 @@ const getProductsSchema = yup.object({
   }),
 });
 
-module.exports = { validateSchema, getProductsSchema };
+module.exports = {
+  validateSchema,
+  getProductsSchema,
+  productIdSchema,
+  productBodySchema,
+};
