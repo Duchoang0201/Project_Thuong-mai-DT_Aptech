@@ -15,6 +15,48 @@ var router = express.Router();
 
 var WEBSHOP_URL = process.env.WEB_SHOP_URL || `http://localhost:4444`;
 // GET
+
+/// GET MUTIPLE
+router.get("/", async (req, res, next) => {
+  try {
+    const {
+      active,
+      isDeleted,
+      name,
+      description,
+      skip,
+      limit,
+      hotDeal,
+      topMonth,
+    } = req.query;
+
+    const query = {
+      $and: [
+        active === "true" ? { active: true, isDeleted: false } : null,
+        active === "false" ? { active: false, isDeleted: false } : null,
+        isDeleted === "true" ? { isDeleted: true } : null,
+        name ? { name: { $regex: new RegExp(name, "i") } } : null,
+        description
+          ? { description: { $regex: new RegExp(description, "i") } }
+          : null,
+        hotDeal ? { promotionPosition: "DEAL" } : null,
+        topMonth ? { promotionPosition: "TOP-MONTH" } : null,
+      ].filter(Boolean),
+    };
+
+    let results = await Category.find(query)
+      .sort({ isDeleted: 1 })
+      .skip(Number(skip))
+      .limit(Number(limit));
+
+    let amountResults = await Category.countDocuments(query);
+
+    res.json({ results, amountResults });
+  } catch (error) {
+    res.status(500).json({ ok: false, error });
+  }
+});
+
 router.get("/", function (req, res, next) {
   try {
     Order.find()
