@@ -168,6 +168,7 @@ function DongHo({ products, categories, supplier }: Props) {
                           alt="Description of the image"
                           width={200}
                           height={200}
+                          className={` ${Style.imgItems}`}
                           onClick={() => {
                             handleClick(`/products/${items._id}`);
                           }}

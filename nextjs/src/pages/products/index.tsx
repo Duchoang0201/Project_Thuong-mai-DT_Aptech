@@ -155,18 +155,23 @@ function Products({ products, categories, supplier }: Props) {
                 data?.map((items: any, index: any) => {
                   return (
                     <li key={index} className={` ${Style.items}`}>
-                      <div className="d-flex justify-content-center align-items-center pt-3">
+                      <div
+                        className={`d-flex justify-content-center align-items-center pt-3 `}
+                      >
                         <Image
                           src={`${URL_ENV}/${items.imageUrl}`}
                           alt="Description of the image"
                           width={200}
                           height={200}
+                          className={` ${Style.imgItems}`}
                           onClick={() => {
                             handleClick(`/products/${items._id}`);
                           }}
                         ></Image>
                       </div>
-                      <div className="d-flex justify-content-center align-items-center">
+                      <div
+                        className={`d-flex justify-content-center align-items-center`}
+                      >
                         <div className={Style.name}>{items.name}</div>
                         <div className={Style.price}>
                           <div>{items.price}đ</div>
