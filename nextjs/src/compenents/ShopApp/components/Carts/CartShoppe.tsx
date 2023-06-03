@@ -149,6 +149,7 @@ export default function CartShoppe() {
                       className="btn btn-outline-dark"
                       onClick={() => {
                         remove(item.product._id);
+                        removeCheck(item.product._id);
                       }}
                     >
                       Xóa

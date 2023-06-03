@@ -24,7 +24,7 @@ import {
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
 // Date Picker
@@ -165,13 +165,17 @@ function CustomerCRUD() {
   //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
 
   const [isLocked, setIsLocked] = useState("");
-  const onSearchIsLocked = useCallback((value: any) => {
-    if (value) {
-      setIsLocked(value);
-    } else {
-      setIsLocked("");
-    }
-  }, []);
+
+  const onSearchIsLocked = useMemo(
+    () => (value: any) => {
+      if (value) {
+        setIsLocked(value);
+      } else {
+        setIsLocked("");
+      }
+    },
+    []
+  );
 
   //SEARCH DEPEN ON NAME
   const [customerEmail, setCustomerEmail] = useState("");

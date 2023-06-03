@@ -88,6 +88,7 @@ export const useCartStore = create(
 
         decrease: async (id: any) => {
           const items = get().items;
+          const itemsCheckout = get().itemsCheckout;
           const cartId = get().cartId;
           for (let i = 0; i < items.length; i++) {
             items[i].product.productId = items[i].product._id;
@@ -98,12 +99,19 @@ export const useCartStore = create(
               const newItems = items.filter(
                 (x: any) => x.product._id !== found.product._id
               );
+              const newItemsCheckout = itemsCheckout.filter(
+                (x: any) => x.product._id !== found.product._id
+              );
               const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
                 products: newItems,
               });
-              return set({ items: [...newItems] }, false, {
-                type: "carts/decrease",
-              });
+              return set(
+                { items: [...newItems], itemsCheckout: [...newItemsCheckout] },
+                false,
+                {
+                  type: "carts/decrease",
+                }
+              );
             } else {
               found.quantity--;
               const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {

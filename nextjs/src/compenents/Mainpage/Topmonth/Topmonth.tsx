@@ -21,7 +21,6 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function Topmoth({ topMonth }: any) {
   const [hotDeals, setHotDeals] = useState([]);
-  const swiperRef = useRef<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -37,17 +36,6 @@ export default function Topmoth({ topMonth }: any) {
     fetchData();
   }, [topMonth]);
 
-  useEffect(() => {
-    const autoplayTimeout = setTimeout(() => {
-      if (swiperRef.current) {
-        swiperRef.current.autoplay.start();
-      }
-    }, 1000);
-
-    return () => {
-      clearTimeout(autoplayTimeout);
-    };
-  }, []);
   return (
     <>
       <div>
@@ -67,7 +55,6 @@ export default function Topmoth({ topMonth }: any) {
           pagination={true}
           modules={[Autoplay, EffectCoverflow, Pagination]}
           speed={3000}
-          // className="Top_Month py-4 px-4 text-center"
           breakpoints={{
             0: {
               slidesPerView: 1,
@@ -82,7 +69,6 @@ export default function Topmoth({ topMonth }: any) {
               centeredSlides: true,
             },
           }}
-          onSwiper={(swiper) => (swiperRef.current = swiper)}
         >
           {hotDeals.length > 0 &&
             hotDeals.map((item: any, index: any) => (

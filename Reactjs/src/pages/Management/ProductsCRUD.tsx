@@ -215,8 +215,6 @@ function ProductsCRUD() {
     }
   }, []);
 
-  console.log("««««« isActive »»»»»", isActive);
-
   //Search on CategoryID
   const [categoryId, setCategoryId] = useState("");
 

@@ -1,55 +1,49 @@
-const { CONNECTION_STRING } = require("../constants/dbSettings");
-const { default: mongoose } = require("mongoose");
 var ObjectId = require("mongodb").ObjectId;
 const axios = require("axios");
 const crypto = require("crypto");
 const moment = require("moment");
 const { Order } = require("../models");
-// MONGOOSE
-mongoose.set("strictQuery", false);
-mongoose.connect(CONNECTION_STRING);
 
 var express = require("express");
 
 var router = express.Router();
 
 var WEBSHOP_URL = process.env.WEB_SHOP_URL || `http://localhost:4444`;
-// GET
 
 /// GET MUTIPLE
 router.get("/", async (req, res, next) => {
   try {
     const {
-      active,
-      isDeleted,
-      name,
-      description,
+      customerId,
+      methodPay,
+      status,
+      shippingAddress,
+      employee,
       skip,
       limit,
-      hotDeal,
-      topMonth,
     } = req.query;
 
     const query = {
       $and: [
-        active === "true" ? { active: true, isDeleted: false } : null,
-        active === "false" ? { active: false, isDeleted: false } : null,
-        isDeleted === "true" ? { isDeleted: true } : null,
-        name ? { name: { $regex: new RegExp(name, "i") } } : null,
-        description
-          ? { description: { $regex: new RegExp(description, "i") } }
-          : null,
-        hotDeal ? { promotionPosition: "DEAL" } : null,
-        topMonth ? { promotionPosition: "TOP-MONTH" } : null,
+        customerId && { customerId },
+        methodPay && { paymentType: methodPay },
+        status && { status },
+        shippingAddress && { shippingAddress },
+        employee && { employee },
       ].filter(Boolean),
     };
 
-    let results = await Category.find(query)
-      .sort({ isDeleted: 1 })
+    let results = await Order.find(query)
       .skip(Number(skip))
-      .limit(Number(limit));
+      .limit(Number(limit))
+      .populate({
+        path: "orderDetails.product",
+        populate: { path: "category" },
+      })
+      .populate("customer")
+      .populate("employee");
 
-    let amountResults = await Category.countDocuments(query);
+    let amountResults = await Order.countDocuments(query);
 
     res.json({ results, amountResults });
   } catch (error) {
@@ -57,25 +51,27 @@ router.get("/", async (req, res, next) => {
   }
 });
 
-router.get("/", function (req, res, next) {
-  try {
-    Order.find()
-      .populate({
-        path: "orderDetails.product",
-        populate: { path: "category" },
-      })
-      .populate("customer")
-      .populate("employee")
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        res.status(400).send({ message: err.message });
-      });
-  } catch (err) {
-    res.sendStatus(500);
-  }
-});
+// GET
+
+// router.get("/", function (req, res, next) {
+//   try {
+//     Order.find()
+//       .populate({
+//         path: "orderDetails.product",
+//         populate: { path: "category" },
+//       })
+//       .populate("customer")
+//       .populate("employee")
+//       .then((result) => {
+//         res.send(result);
+//       })
+//       .catch((err) => {
+//         res.status(400).send({ message: err.message });
+//       });
+//   } catch (err) {
+//     res.sendStatus(500);
+//   }
+// });
 
 // GET PERSONAL ORDERS
 router.get("/personal/:id", async (req, res, next) => {
