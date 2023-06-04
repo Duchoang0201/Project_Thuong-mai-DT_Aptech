@@ -131,7 +131,6 @@ function NavBar() {
         <div
           onClick={() => {
             logout();
-            router.push("/");
             setUser(null);
           }}
         >
@@ -361,9 +360,9 @@ function NavBar() {
             </Menu.Item>
           </Menu>
 
-          <Form form={findForm}>
+          <Form className="my-2" form={findForm}>
             <Search
-              placeholder="input search text"
+              placeholder="Nhập sản phẩm ..."
               onSearch={handleFind}
               style={{ width: 200 }}
               allowClear

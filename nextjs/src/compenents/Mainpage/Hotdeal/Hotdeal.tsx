@@ -55,14 +55,17 @@ export default function App({ hotDeal }: any) {
           0: {
             slidesPerView: 1,
             centeredSlides: true,
+            initialSlide: 3,
           },
           900: {
             slidesPerView: 2,
             centeredSlides: true,
+            initialSlide: 3,
           },
           1200: {
             slidesPerView: 3,
             centeredSlides: true,
+            initialSlide: 3,
           },
         }}
         modules={[Pagination, Navigation, Autoplay]}

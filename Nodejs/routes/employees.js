@@ -182,7 +182,7 @@ router.post("/", async (req, res, next) => {
         const newItem = req.body;
         let data = new Employee(newItem);
         let found = await data.save();
-        return res.status(200).json({ oke: true, newItem: found });
+        return res.status(200).json({ oke: true, result: found });
       } catch (error) {
         res.status(500).json({ error: error });
       }

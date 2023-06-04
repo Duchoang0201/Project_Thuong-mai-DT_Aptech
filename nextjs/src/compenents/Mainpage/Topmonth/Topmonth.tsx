@@ -45,7 +45,6 @@ export default function Topmoth({ topMonth }: any) {
           grabCursor={true}
           slidesPerView={4}
           spaceBetween={50}
-          initialSlide={3}
           coverflowEffect={{
             rotate: 0,
             stretch: 0,
@@ -59,14 +58,17 @@ export default function Topmoth({ topMonth }: any) {
             0: {
               slidesPerView: 1,
               centeredSlides: true,
+              initialSlide: 3,
             },
             900: {
               slidesPerView: 2,
               centeredSlides: true,
+              initialSlide: 3,
             },
             1200: {
               slidesPerView: 3,
               centeredSlides: true,
+              initialSlide: 3,
             },
           }}
         >

@@ -104,22 +104,35 @@ function CustomerCRUD() {
       .then((res) => {
         // UPLOAD FILE
         const { _id } = res.data.result;
-
+        console.log("««««« res.data »»»»»", res.data);
         const formData = new FormData();
         formData.append("file", file);
 
-        axios
-          .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
-          .then((respose) => {
-            message.success("Thêm mới thành công!");
-            createForm.resetFields();
-            setOpenCreate(false);
-            setFile(null);
+        if (file?.uid && file?.type) {
+          message.loading("On Updating picture on data!!", 1.5);
+          axios
+            .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
+            .then((respose) => {
+              message.success("Created Successfully!!", 1.5);
+              createForm.resetFields();
+              setOpenCreate(false);
+              setFile(null);
 
-            setTimeout(() => {
-              setRefresh((f) => f + 1);
-            }, 2000);
-          });
+              setTimeout(() => {
+                setRefresh((f) => f + 1);
+              }, 2000);
+            });
+        } else {
+          createForm.resetFields();
+
+          setOpenCreate(false);
+          setFile(null);
+
+          setTimeout(() => {
+            setRefresh((f) => f + 1);
+          }, 1000);
+          message.success("Created Successfully!!", 1.5);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -241,7 +254,6 @@ function CustomerCRUD() {
     const formattedRecord = record.map((date: any) =>
       dayjs(date).format("YYYY/MM/DD")
     );
-    console.log("««««« formattedRecord »»»»»", formattedRecord);
     if (formattedRecord) {
       setCustomerBirthdayFrom(formattedRecord[0]);
       setCustomerBirthdayTo(formattedRecord[1]);
@@ -400,7 +412,7 @@ function CustomerCRUD() {
             <Search
               allowClear
               onSearch={onSearchCustomerEmail}
-              placeholder="input search text"
+              placeholder="Enter email"
               style={{ width: 200 }}
             />
           </div>
@@ -427,7 +439,7 @@ function CustomerCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="input search text"
+              placeholder="Enter first name"
               onSearch={onSearchCustomerFirstName}
               style={{ width: 200 }}
             />
@@ -456,7 +468,7 @@ function CustomerCRUD() {
             <Search
               allowClear
               onSearch={onSearchCustomerLastName}
-              placeholder="input search text"
+              placeholder="Enter last name"
               style={{ width: 200 }}
             />
           </div>
@@ -484,7 +496,7 @@ function CustomerCRUD() {
             <Search
               onSearch={onSearchCustomerPhoneNumber}
               allowClear
-              placeholder="input search text"
+              placeholder="Enter phone number"
               style={{ width: 200 }}
             />
           </div>
@@ -512,7 +524,7 @@ function CustomerCRUD() {
             <Search
               allowClear
               onSearch={onSearchCustomerAddress}
-              placeholder="input search text"
+              placeholder="Enter address"
               style={{ width: 200 }}
             />
           </div>
@@ -601,16 +613,19 @@ function CustomerCRUD() {
             onChange={(info) => {
               if (info.file.status !== "uploading") {
                 console.log(info.file);
+                message.loading("On Updating picture on data!!", 1.5);
               }
 
               if (info.file.status === "done") {
-                message.success(`${info.file.name} file uploaded successfully`);
+                setTimeout(() => {
+                  setRefresh(refresh + 1);
+                  message.success(
+                    `${info.file.name} file uploaded successfully`
+                  );
+                }, 2000);
               } else if (info.file.status === "error") {
                 message.error(`${info.file.name} file upload failed.`);
               }
-              setTimeout(() => {
-                setRefresh(refresh + 1);
-              }, 2000);
             }}
           >
             <Button icon={<UploadOutlined />} />
@@ -966,7 +981,7 @@ function CustomerCRUD() {
             </FormItem>
             <Form.Item
               labelCol={{
-                span: 7,
+                span: 8,
               }}
               wrapperCol={{
                 span: 16,

@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useEffect } from "react";
 import { useState } from "react";
 import style from "./index.module.css";
-import { Col, Row, Card } from "antd";
+import { Col, Row, Card, message } from "antd";
 import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
 
 import { Button, DatePicker, Form, Input, Upload } from "antd";
@@ -31,28 +31,40 @@ function Register({}: customertype) {
   const API_URL = `${URL_ENV}/customers`;
   const [registerForm] = Form.useForm();
 
-  const handleCreate = (value: any) => {
-    const newData = {
-      ...value,
-      birthday: `${value.birthday.$y}-${value.birthday.$M + 1}-${
-        value.birthday.$D
-      }`,
-    };
+  const handleCreate = (record: any) => {
+    record.createdDate = new Date().toISOString();
+
     axios
-      .post(API_URL, newData)
-      .then((res) => {
+      .post(API_URL, record)
+      .then(async (res) => {
         // UPLOAD FILE
-        const { _id, email, password } = res.data.result;
+
+        const { _id, firstName, lastName, email, password } = res.data.result;
+
+        await axios.patch(`${API_URL}/${_id}`, {
+          createdBy: {
+            customerId: _id,
+            firstName: firstName,
+            lastName: lastName,
+          },
+        });
+
         const formData = new FormData();
         formData.append("file", file);
-        axios
-          .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
-          .then((response) => {
-            login({ email, password });
-          })
-          .catch((error: any) => {
-            console.log(error);
-          });
+        if (file && file.uid && file.type) {
+          await axios
+            .post(`${URL_ENV}/upload/customers/${_id}/image`, formData)
+            .then((response) => {
+              login({ email, password });
+              message.success("Đăng ký thành công !!", 1.5);
+            })
+            .catch((error: any) => {
+              console.log(error);
+            });
+        } else {
+          login({ email, password });
+          message.success("Đăng ký thành công !!", 1.5);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -71,19 +83,20 @@ function Register({}: customertype) {
                 style={{ width: "100%", margin: "5% 0%" }}
               >
                 <Form
-                  initialValues={{ remember: true }}
                   className={`container ${style.form}`}
                   form={registerForm}
                   name="registerForm"
                   onFinish={handleCreate}
+                  onFinishFailed={(res) => {
+                    console.log("««««« res »»»»»", res);
+                  }}
                   labelCol={{ span: 6 }}
                   wrapperCol={{ span: 14 }}
                   layout="horizontal"
-                  // style={{ width: 500 }}
                 >
                   <div className="row ">
                     <Form.Item
-                      label="first name"
+                      label="Họ"
                       name="firstName"
                       hasFeedback
                       rules={[{ required: true, message: "Enter first name" }]}
@@ -94,8 +107,8 @@ function Register({}: customertype) {
                       <Input placeholder="First name" />
                     </Form.Item>
                     <Form.Item
-                      name="LastName"
-                      label="Last name"
+                      label="Tên"
+                      name="lastName"
                       hasFeedback
                       rules={[{ required: true, message: "Enter last name" }]}
                     >
@@ -114,7 +127,20 @@ function Register({}: customertype) {
                     </Form.Item>
                     <Form.Item
                       hasFeedback
-                      label="Password"
+                      label="Địa chỉ"
+                      name="address"
+                      rules={[
+                        {
+                          required: true,
+                          message: "Please enter your Address",
+                        },
+                      ]}
+                    >
+                      <Input />
+                    </Form.Item>
+                    <Form.Item
+                      hasFeedback
+                      label="Mật khẩu"
                       name="password"
                       rules={[
                         {
@@ -124,11 +150,11 @@ function Register({}: customertype) {
                         },
                       ]}
                     >
-                      <Input />
+                      <Input.Password />
                     </Form.Item>
                     <Form.Item
                       hasFeedback
-                      label="Phone"
+                      label="Số điện thoại"
                       name="phoneNumber"
                       rules={[
                         {
@@ -142,13 +168,13 @@ function Register({}: customertype) {
 
                     <Form.Item
                       hasFeedback
-                      label="Birthday"
+                      label="Ngày sinh"
                       name="birthday"
                       rules={[
                         { required: true, message: "Please enter Birthday" },
                       ]}
                     >
-                      <DatePicker />
+                      <DatePicker placement="bottomLeft" format="DD/MM/YYYY" />
                     </Form.Item>
                     <Form.Item label="Ảnh" name="file">
                       <Upload
@@ -179,9 +205,9 @@ function Register({}: customertype) {
                     <Button
                       type="primary"
                       htmlType="submit"
-                      style={{ margin: "0 30%", width: "100%" }}
+                      className="login-form-button"
                     >
-                      Submit
+                      Đăng ký
                     </Button>
                   </Form.Item>
                 </Form>
@@ -215,35 +241,27 @@ function Register({}: customertype) {
               layout="horizontal"
               style={{ width: " 100%" }}
             >
-              <div className={`row ${style.table} `}>
+              <div className={`row ${style.table}`}>
                 <Form.Item
+                  label="Họ"
                   name="firstName"
-                  label=" first name"
                   hasFeedback
-                  rules={[{ required: true, message: "Enter password" }]}
+                  rules={[{ required: true, message: "Enter first name" }]}
+                  style={{
+                    width: "calc(100% - 0px)",
+                  }}
                 >
                   <Input placeholder="First name" />
                 </Form.Item>
-
                 <Form.Item
-                  name="LastName"
-                  label=" last name"
+                  label="Tên"
+                  name="lastName"
                   hasFeedback
-                  rules={[{ required: true, message: "Enter password" }]}
+                  rules={[{ required: true, message: "Enter last name" }]}
                 >
                   <Input placeholder="Last name" />
                 </Form.Item>
 
-                {/* ///////////////// */}
-
-                <Form.Item
-                  hasFeedback
-                  label="Password"
-                  name="password"
-                  rules={[{ required: true, message: "Enter password" }]}
-                >
-                  <Input />
-                </Form.Item>
                 <Form.Item
                   hasFeedback
                   label="Email"
@@ -256,7 +274,34 @@ function Register({}: customertype) {
                 </Form.Item>
                 <Form.Item
                   hasFeedback
-                  label="Phone"
+                  label="Địa chỉ"
+                  name="address"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please enter your Address",
+                    },
+                  ]}
+                >
+                  <Input />
+                </Form.Item>
+                <Form.Item
+                  hasFeedback
+                  label="Mật khẩu"
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+
+                      message: "Enter password",
+                    },
+                  ]}
+                >
+                  <Input.Password />
+                </Form.Item>
+                <Form.Item
+                  hasFeedback
+                  label="Số điện thoại"
                   name="phoneNumber"
                   rules={[
                     {
@@ -270,11 +315,11 @@ function Register({}: customertype) {
 
                 <Form.Item
                   hasFeedback
-                  label="Birthday"
+                  label="Ngày sinh"
                   name="birthday"
                   rules={[{ required: true, message: "Please enter Birthday" }]}
                 >
-                  <DatePicker />
+                  <DatePicker placement="bottomLeft" format="DD/MM/YYYY" />
                 </Form.Item>
                 <Form.Item label="Ảnh" name="file">
                   <Upload
@@ -305,9 +350,9 @@ function Register({}: customertype) {
                 <Button
                   type="primary"
                   htmlType="submit"
-                  style={{ width: "50%" }}
+                  className="login-form-button"
                 >
-                  Submit
+                  Đăng ký
                 </Button>
               </Form.Item>
             </Form>

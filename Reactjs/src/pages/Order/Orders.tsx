@@ -268,8 +268,8 @@ export default function Orders() {
 
         // Iterate over the orders array
         listCustomer?.forEach((item: any) => {
-          const value = item.customer._id;
-          const label = `${item.customer.firstName} ${item.customer.lastName}`;
+          const value = item?.customer?._id;
+          const label = `${item.customer?.firstName} ${item.customer?.lastName}`;
 
           // If the value doesn't exist in the map, add it with the label
           if (!mergedMap.has(value)) {

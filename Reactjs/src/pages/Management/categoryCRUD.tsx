@@ -87,8 +87,8 @@ function CategoryCRUD() {
       lastName: auth.payload.lastName,
     };
     record.createdDate = new Date().toISOString();
-    if (record.Locked === undefined) {
-      record.Locked = false;
+    if (record.active === undefined) {
+      record.active = false;
     }
 
     axios
@@ -96,19 +96,34 @@ function CategoryCRUD() {
       .then((res) => {
         // UPLOAD FILE
         const { _id } = res.data.result;
-
         const formData = new FormData();
         formData.append("file", file);
 
-        axios
-          .post(`${URL_ENV}/upload/categories/${_id}/image`, formData)
-          .then((respose) => {
-            message.success("Thêm mới thành công!");
-            createForm.resetFields();
+        if (file?.uid && file?.type) {
+          message.loading("On Updating picture on data!!", 1.5);
+          axios
+            .post(`${URL_ENV}/upload/categories/${_id}/image`, formData)
+            .then((respose) => {
+              message.success("Created Successfully!!", 1.5);
+              createForm.resetFields();
+              setOpenCreate(false);
+              setFile(null);
+
+              setTimeout(() => {
+                setRefresh((f) => f + 1);
+              }, 2000);
+            });
+        } else {
+          createForm.resetFields();
+
+          setOpenCreate(false);
+          setFile(null);
+
+          setTimeout(() => {
             setRefresh((f) => f + 1);
-            setOpenCreate(false);
-            setFile(null);
-          });
+          }, 1000);
+          message.success("Created Successfully!!", 1.5);
+        }
       })
       .catch((err) => {
         console.log(err);
@@ -364,7 +379,7 @@ function CategoryCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="input search text"
+              placeholder="Enter name"
               onSearch={onSearchCategoriesName}
               style={{ width: 200 }}
             />
@@ -393,7 +408,7 @@ function CategoryCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="input search text"
+              placeholder="Enter description"
               onSearch={onSearchCategoryDescription}
               style={{ width: 200 }}
             />
@@ -447,17 +462,19 @@ function CategoryCRUD() {
             onChange={(info) => {
               if (info.file.status !== "uploading") {
                 console.log(info.file);
+                message.loading("On Updating picture on data!!", 1.5);
               }
 
               if (info.file.status === "done") {
-                message.success(`${info.file.name} file uploaded successfully`);
+                setTimeout(() => {
+                  setRefresh(refresh + 1);
+                  message.success(
+                    `${info.file.name} file uploaded successfully`
+                  );
+                }, 2000);
               } else if (info.file.status === "error") {
                 message.error(`${info.file.name} file upload failed.`);
               }
-              setTimeout(() => {
-                console.log("««««« run »»»»»");
-                setRefresh(refresh + 1);
-              }, 3000);
             }}
           >
             <Button icon={<UploadOutlined />} />

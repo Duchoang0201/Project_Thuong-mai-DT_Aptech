@@ -93,7 +93,6 @@ function SupperliersCRUD() {
     axios
       .post(API_URL, record)
       .then((res) => {
-        console.log(res.data);
         setRefresh((f) => f + 1);
         setOpenCreate(false);
 
@@ -110,7 +109,6 @@ function SupperliersCRUD() {
     axios
       .delete(API_URL + "/" + record._id)
       .then((res) => {
-        console.log(res.statusText);
         message.success(" Delete item sucessfully!!", 1.5);
         setRefresh((f) => f + 1);
       })
@@ -135,7 +133,6 @@ function SupperliersCRUD() {
     axios
       .patch(API_URL + "/" + updateId, record)
       .then((res) => {
-        console.log(res);
         setOpen(false);
         setOpenCreate(false);
         setRefresh((f) => f + 1);
@@ -176,7 +173,6 @@ function SupperliersCRUD() {
   const [supplierName, setSuplierName] = useState("");
 
   const onSearchSupplierName = useCallback((value: any) => {
-    console.log(value);
     if (value) {
       setSuplierName(value);
     } else {
@@ -348,7 +344,7 @@ function SupperliersCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="input search text"
+              placeholder="Enter email"
               onSearch={onSearchProductEmail}
               style={{ width: 200 }}
             />
@@ -423,7 +419,7 @@ function SupperliersCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="input search text"
+              placeholder="Enter phone number"
               onSearch={onSearchProductPhone}
               style={{ width: 200 }}
             />
@@ -451,7 +447,7 @@ function SupperliersCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="input search text"
+              placeholder="Enter address"
               onSearch={onSearchProductAddress}
               style={{ width: 200 }}
             />
