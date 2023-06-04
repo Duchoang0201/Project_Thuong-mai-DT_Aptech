@@ -114,7 +114,11 @@ const AccountInformation = (props: Props) => {
         <Col xs={24} xl={7}>
           <Card loading={loading} bordered={true} style={{ width: "100%" }}>
             <div className="text-center">
-              <Avatar size={64} src={`${URL_ENV}${user?.imageUrl}`} />
+              <Avatar
+                shape="square"
+                size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                src={`${URL_ENV}${user?.imageUrl}`}
+              />
               <div className="py-2">
                 <Upload
                   showUploadList={false}
