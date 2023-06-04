@@ -27,7 +27,9 @@
     position: relative;
     background: rgb(235, 235, 235);
     background: linear-gradient(to bottom,#fff 0%,#f7f7f7 100%);
-    transition: background 0.5s ease-in-out;
+    transition: background 0.5s;
+    border: 1px solid white;
+    /* transition:  border 1s ; */
 }
 
 
@@ -35,6 +37,20 @@
 .items:hover{
     cursor: pointer;
     background: rgb(241, 246, 248);
+    border: 1px solid rgb(247, 236, 95);
+    box-shadow:  2px 5px 20px rgba(0, 0, 0, 0.2);
+}
+
+.imgItems{
+    width: 200px;
+    height: 200px;
+    transition: 0.5s;
+}
+
+.items .imgItems:hover{
+    width: 240px;
+    height: 240px;
+    
 }
 .name{
     position: absolute;

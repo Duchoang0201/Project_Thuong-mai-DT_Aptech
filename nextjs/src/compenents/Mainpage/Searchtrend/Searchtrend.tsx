@@ -40,14 +40,17 @@ export default function App({ hotTrend }: any) {
           0: {
             slidesPerView: 2,
             centeredSlides: true,
+            initialSlide: 2,
           },
           900: {
             slidesPerView: 3,
             centeredSlides: true,
+            initialSlide: 2,
           },
           1200: {
             slidesPerView: 4,
             centeredSlides: true,
+            initialSlide: 2,
           },
         }}
       >

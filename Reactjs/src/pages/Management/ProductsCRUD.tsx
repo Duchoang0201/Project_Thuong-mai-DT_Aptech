@@ -192,6 +192,16 @@ function ProductsCRUD() {
 
   //SEARCH ISDELETE ITEM
 
+  // KEEP UPDATE ID:
+
+  useEffect(() => {
+    // Check if the selected order exists in the updated dataResource
+    const updatedSelectedOrder = productsTEST.find(
+      (product: any) => product._id === updateId?._id
+    );
+    setUpdateId(updatedSelectedOrder || null);
+  }, [productsTEST, updateId]);
+
   //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
 
   const [isDelete, setIsDelete] = useState("");
@@ -214,8 +224,6 @@ function ProductsCRUD() {
       setIsDelete("");
     }
   }, []);
-
-  console.log("««««« isActive »»»»»", isActive);
 
   //Search on CategoryID
   const [categoryId, setCategoryId] = useState("");
@@ -732,7 +740,7 @@ function ProductsCRUD() {
     },
     //Discount
     {
-      width: "1%",
+      width: "2%",
 
       title: () => {
         return (
@@ -1412,16 +1420,16 @@ function ProductsCRUD() {
               onChange={(info) => {
                 if (info.file.status !== "uploading") {
                   console.log(info.file);
+                  message.loading("On Updating picture on data!!", 1.5);
                 }
 
                 if (info.file.status === "done") {
-                  message.success(
-                    `${info.file.name} file uploaded successfully`
-                  );
-
                   setTimeout(() => {
                     setRefresh(refresh + 1);
-                  }, 1000);
+                    message.success(
+                      `${info.file.name} file uploaded successfully`
+                    );
+                  }, 2000);
                 } else if (info.file.status === "error") {
                   message.error(`${info.file.name} file upload failed.`);
                 }
@@ -1446,42 +1454,45 @@ function ProductsCRUD() {
                   url: `${URL_ENV}${item}`,
                 }))}
                 onChange={(record: any) => {
+                  console.log("««««« record »»»»»", record);
                   if (record.file.status !== "uploading") {
-                    console.log(record.file);
+                    message.loading("On Updating picture on data!!", 1.5);
                   }
-                  if (record.file.status === "removed") {
+                  if (record.file.status === "uploading") {
+                    message.loading("On Updating picture on data!!", 1.5);
+
+                    updateId?.images?.push({ images: record.file.url });
+
+                    setTimeout(() => {
+                      setRefresh((f) => f + 1);
+                      message.success(
+                        `${record.file.name} file uploaded successfully`
+                      );
+                    }, 2500);
+                  } else if (record.file.status === "removed") {
                     const newlistPicture = updateId?.images?.filter(
                       (item: any) => `${URL_ENV}${item}` !== record.file.url
                     );
-                    console.log("««««« newlistPicture »»»»»", newlistPicture);
                     axios
                       .patch(API_URL + "/" + updateId._id, {
                         images: newlistPicture,
                       })
                       .then((res) => {
-                        message.success(
-                          `Delete Picture product successfully!!`,
-                          3
-                        );
                         setTimeout(() => {
                           setRefresh(refresh + 1);
-                        }, 500);
+                          message.success(
+                            `Delete Picture product successfully!!`,
+                            3
+                          );
+                        }, 1000);
                       });
-                  }
-                  if (record.file.status === "done") {
-                    updateId?.images?.push({ images: record.file.url });
-                    message.success(
-                      `${record.file.name} file uploaded successfully`
-                    );
-                    setTimeout(() => {
-                      setRefresh(refresh + 1);
-                    }, 3000);
                   } else if (record.file.status === "error") {
                     message.error(`${record.file.name} file upload failed.`);
                   }
+
                   setTimeout(() => {
-                    setRefresh(refresh + 1);
-                  }, 3000);
+                    // console.log("««««« record »»»»»", record.file.status);
+                  }, 2000);
                 }}
               >
                 {updateId?.images?.length >= 5 ? null : <UploadOutlined />}

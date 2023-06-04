@@ -11,7 +11,6 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function App({ hotDeal }: any) {
   const [hotDeals, setHotDeals] = useState([]);
-  const swiperRef = useRef<any>(null);
   const [autoplayConfig, setAutoplayConfig] = useState({
     delay: 3000,
     disableOnInteraction: false,
@@ -32,18 +31,6 @@ export default function App({ hotDeal }: any) {
     fetchData();
   }, [hotDeal]);
 
-  useEffect(() => {
-    const autoplayTimeout = setTimeout(() => {
-      if (swiperRef.current) {
-        swiperRef.current.autoplay.start();
-      }
-    }, 2000);
-
-    return () => {
-      clearTimeout(autoplayTimeout);
-    };
-  }, []);
-
   const handleReachEnd = () => {
     setAutoplayConfig((prevConfig) => ({
       ...prevConfig,
@@ -57,6 +44,7 @@ export default function App({ hotDeal }: any) {
         speed={3000}
         centeredSlides={true}
         slidesPerView={3}
+        initialSlide={3}
         navigation={true}
         pagination={{
           clickable: true,
@@ -67,21 +55,22 @@ export default function App({ hotDeal }: any) {
           0: {
             slidesPerView: 1,
             centeredSlides: true,
+            initialSlide: 3,
           },
           900: {
             slidesPerView: 2,
             centeredSlides: true,
+            initialSlide: 3,
           },
           1200: {
             slidesPerView: 3,
             centeredSlides: true,
+            initialSlide: 3,
           },
         }}
         modules={[Pagination, Navigation, Autoplay]}
         autoplay={autoplayConfig}
-        loop={false}
-        onSwiper={(swiper) => (swiperRef.current = swiper)}
-        onReachEnd={handleReachEnd}
+        loop={true}
       >
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
