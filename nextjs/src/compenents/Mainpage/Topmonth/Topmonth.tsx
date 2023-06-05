@@ -40,10 +40,10 @@ export default function Topmoth({ topMonth }: any) {
     <>
       <div>
         <Swiper
+          loop={true}
           autoplay={{ delay: 3000, disableOnInteraction: false }}
           effect={"coverflow"}
           grabCursor={true}
-          slidesPerView={4}
           spaceBetween={50}
           coverflowEffect={{
             rotate: 0,
@@ -58,17 +58,17 @@ export default function Topmoth({ topMonth }: any) {
             0: {
               slidesPerView: 1,
               centeredSlides: true,
-              initialSlide: 3,
+              // initialSlide: 3,
             },
             900: {
               slidesPerView: 2,
               centeredSlides: true,
-              initialSlide: 3,
+              // initialSlide: 3,
             },
             1200: {
               slidesPerView: 3,
               centeredSlides: true,
-              initialSlide: 3,
+              // initialSlide: 3,
             },
           }}
         >

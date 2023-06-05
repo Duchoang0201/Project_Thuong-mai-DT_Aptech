@@ -31,13 +31,6 @@ export default function App({ hotDeal }: any) {
     fetchData();
   }, [hotDeal]);
 
-  const handleReachEnd = () => {
-    setAutoplayConfig((prevConfig) => ({
-      ...prevConfig,
-      reverseDirection: false,
-    }));
-  };
-
   return (
     <>
       <Swiper

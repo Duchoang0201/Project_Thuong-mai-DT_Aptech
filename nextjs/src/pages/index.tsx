@@ -20,6 +20,7 @@ import Backgroundhot from "../compenents/Mainpage/Hotdeal/top_img_01_pc_watch_19
 import Backgroundmonth from "../compenents/Mainpage/Topmonth/pexels-leah-kelley-691046.jpg";
 import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
+import Products from "@/compenents/Mainpage/Product/Products";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function Home(props: any) {
@@ -80,10 +81,13 @@ export default function Home(props: any) {
             <Hotdeal hotDeal={hotDeal} />
           </div>
         </div>
+        <Divider>
+          <h3> Xem thêm</h3>
+        </Divider>
         <div className="container">
-          <div className="p-4 " style={{ height: "300px" }}></div>
-          <div></div>
-          <div></div>
+          <div className="p-4 ">
+            <Products />
+          </div>
         </div>
       </main>
     </>
