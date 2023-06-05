@@ -5,7 +5,7 @@ import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination, Navigation, Autoplay } from "swiper";
 import axios from "axios";
-import { Button, Card, Divider, Rate, Image } from "antd";
+import { Button, Card, Divider, Rate, Image, Badge } from "antd";
 import router from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
@@ -75,44 +75,67 @@ export default function App({ hotDeal }: any) {
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
             <SwiperSlide key={`${item._id}-${index + 1}`}>
-              <Card
-                className="border rounded-4 "
-                bordered={false}
-                style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
+              <Badge.Ribbon
+                key={`${item._id}-${index}`}
+                text={item.discount > 5 ? "Giảm giá " : ""}
               >
                 <Card
-                  className="border rounded-4 text-center"
-                  style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
+                  className="border rounded-4 "
+                  bordered={false}
+                  style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
                 >
-                  {" "}
-                  <Image alt={item.name} src={`${URL_ENV}/${item.imageUrl}`} />
-                </Card>
-                <p style={{ height: 40 }} className="text-center">
-                  {item.name}
-                </p>
-                <p className="text-center" style={{ color: "#c48c46" }}>
-                  <strong>
-                    {item.price.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}{" "}
-                  </strong>
-                </p>
-                <p className="text-center">Đã bán: {item.amountSold} cái</p>
-                <p className="text-center">
-                  <Rate disabled defaultValue={item.averageRate} />
-                </p>
-                <Divider>
-                  <Button
-                    type="primary"
-                    onClick={() => {
-                      router.push(`/products/${item._id}`);
-                    }}
+                  <Card
+                    className="border rounded-4 text-center"
+                    style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
                   >
-                    Chi tiết
-                  </Button>
-                </Divider>
-              </Card>
+                    {" "}
+                    <Image
+                      alt={item.name}
+                      src={`${URL_ENV}/${item.imageUrl}`}
+                      style={{
+                        width: "100%",
+                        transition: "transform 1s",
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = "scale(1.1)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = "scale(1)";
+                      }}
+                    />
+                  </Card>
+                  <div style={{ height: 40 }} className="text-center">
+                    {item.name}
+                  </div>
+                  <div
+                    className="text-center py-2"
+                    style={{ color: "#c48c46" }}
+                  >
+                    <strong>
+                      {item.price.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}{" "}
+                    </strong>
+                  </div>
+                  <div className="text-center">
+                    Đã bán: {item.amountSold} cái
+                  </div>
+                  <div className="text-center">
+                    <Rate disabled defaultValue={item.averageRate} />
+                  </div>
+                  <Divider>
+                    <Button
+                      type="primary"
+                      onClick={() => {
+                        router.push(`/products/${item._id}`);
+                      }}
+                    >
+                      Chi tiết
+                    </Button>
+                  </Divider>
+                </Card>
+              </Badge.Ribbon>
             </SwiperSlide>
           ))}
       </Swiper>

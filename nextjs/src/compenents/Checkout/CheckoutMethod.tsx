@@ -18,8 +18,13 @@ const CheckoutMethod = (props: Props) => {
     <div className="container">
       {" "}
       <Row className="py-3 ">
-        {methodPay?.map((item: any) => (
-          <Col style={{ width: "90%" }} key={item._id} xs={24} xl={8}>
+        {methodPay?.map((item: any, index: any) => (
+          <Col
+            style={{ width: "90%" }}
+            key={`${item._id}-${index + 1}`}
+            xs={24}
+            xl={8}
+          >
             {" "}
             <Card className="border mx-4 ">
               <div className="d-flex justify-content-between">
