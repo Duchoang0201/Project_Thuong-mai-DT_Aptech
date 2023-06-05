@@ -19,15 +19,7 @@ import {
 const { Search } = Input;
 import { useCartStore } from "../../hook/useCountStore";
 
-type Props = {
-  data: any;
-};
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-// const API_URL_Product = `${URL_ENV}/products/${}`;
-
-/////////////search <ant design> ///////////////////////////////
-
-////////////////////////////////////////////////
 
 function NavBar() {
   const { auth }: any = useAuthStore((state: any) => state);

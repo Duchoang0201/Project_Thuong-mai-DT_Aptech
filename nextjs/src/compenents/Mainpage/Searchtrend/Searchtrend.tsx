@@ -11,16 +11,18 @@ import "swiper/css/navigation";
 import { Pagination, Navigation } from "swiper";
 import axios from "axios";
 import { Card, Image } from "antd";
+import { PropsSearch } from "@/compenents/Navbar/PropsSearch";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function App({ hotTrend }: any) {
   const [hotDeals, setHotDeals] = useState([]);
+  const { searchCategory } = PropsSearch((state: any) => state);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${URL_ENV}/categories?topMonth=true`);
+        const response = await axios.get(`${URL_ENV}/categories`);
         const data = response.data.results;
         setHotDeals(data);
       } catch (error) {
@@ -40,33 +42,37 @@ export default function App({ hotTrend }: any) {
           0: {
             slidesPerView: 2,
             centeredSlides: true,
-            initialSlide: 2,
+            initialSlide: 3,
           },
           900: {
             slidesPerView: 3,
             centeredSlides: true,
-            initialSlide: 2,
+            initialSlide: 3,
           },
           1200: {
             slidesPerView: 4,
             centeredSlides: true,
-            initialSlide: 2,
+            initialSlide: 4,
           },
         }}
       >
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
             <>
-              <SwiperSlide>
+              <SwiperSlide
+                onClick={() => {
+                  searchCategory(item._id);
+                }}
+              >
                 <Card
-                  className=" rounded-4 text-center"
+                  className="  text-center"
                   bordered={false}
                   style={{
                     background: `rgba(245,245,245,0.1)`,
                   }}
                 >
                   <Card
-                    className="border  rounded-circle"
+                    className="border  "
                     style={{ backgroundColor: "rgba(0,0,0,0.3)" }}
                   >
                     {" "}

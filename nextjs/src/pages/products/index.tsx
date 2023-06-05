@@ -174,7 +174,12 @@ function Products({ products, categories, supplier }: Props) {
                       >
                         <div className={Style.name}>{items.name}</div>
                         <div className={Style.price}>
-                          <div>{items.price}đ</div>
+                          <div>
+                            {items.price.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </div>
                         </div>
                         <div className={Style.button}>
                           <Button

@@ -1,6 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
+const bcrypt = require("bcryptjs");
 
 const { Employee } = require("../models");
 const yup = require("yup");
@@ -9,26 +10,12 @@ const {
   validateSchema,
   loginSchema,
   getEmployeeChema,
+  employeeBodySchema,
+  employeeIdSchema,
 } = require("../validation/employee");
 const encodeToken = require("../helpers/jwtHelper");
 
 const ObjectId = require("mongodb").ObjectId;
-// let data = [
-//   { id: 1, name: 'Mary', email: 'mary@gmail.com', gender: 'female' },
-//   { id: 2, name: 'Honda', email: 'honda@gmail.com', gender: 'male' },
-//   { id: 3, name: 'Suzuki', email: 'suzuki@gmail.com', gender: 'male' },
-// ];
-// Methods: POST / PATCH / GET / DELETE / PUT
-
-// GET ALL DATA
-// router.get("/", async (req, res, next) => {
-//   try {
-//     let data = await Employee.find();
-//     res.status(200).json(data);
-//   } catch (error) {
-//     res.status(500).json({ error: error });
-//   }
-// });
 
 // Get all on Multiple conditions
 router.get(
@@ -123,152 +110,77 @@ router.get(
 );
 
 // GET A DATA
-router.get("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
-
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Employee.findById(itemId);
-      if (found) {
-        return res.status(200).json({ oke: true, result: found });
-      }
-      return res.status(410).json({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
+router.get("/:id", validateSchema(employeeIdSchema), async (req, res, next) => {
+  const itemId = req.params.id;
+  let found = await Employee.findById(itemId);
+  if (found) {
+    return res.status(200).json({ oke: true, result: found });
+  }
+  return res.status(410).json({ oke: false, message: "Object not found" });
 });
 // POST DATA
-router.post("/", async (req, res, next) => {
-  const validationSchema = yup.object({
-    body: yup.object({
-      firstName: yup.string().required().max(50),
-      lastName: yup.string().required().max(50),
-      phoneNumber: yup
-        .string()
-        .matches(
-          /^(0?)(3[2-9]|5[6|8|9]|7[0|6-9]|8[0-6|8|9]|9[0-4|6-9])[0-9]{7}$/,
-          "Phone number is not valid"
-        ),
-      address: yup.string().required().max(500),
-      birthday: yup.date().nullable().min(new Date(1900, 0, 1)),
-      email: yup.string().email().required().max(50),
-    }),
-  });
-
-  validationSchema
-    .validate({ body: req.body }, { abortEarly: false })
-    .then(async () => {
-      try {
-        const newItem = req.body;
-        let data = new Employee(newItem);
-        let found = await data.save();
-        return res.status(200).json({ oke: true, result: found });
-      } catch (error) {
-        res.status(500).json({ error: error });
-      }
-    })
-    .catch((err) => {
-      return res.status(500).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "yup",
-      });
-    });
+router.post("/", validateSchema(employeeBodySchema), async (req, res, next) => {
+  try {
+    const newItem = req.body;
+    let data = new Employee(newItem);
+    let found = await data.save();
+    return res.status(200).json({ oke: true, result: found });
+  } catch (error) {
+    res.status(500).json({ error: error });
+  }
 });
 
-router.delete("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
-
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      let found = await Employee.findByIdAndDelete(itemId);
-      if (found) {
-        return res.status(200).json({ oke: true, result: found });
-      }
-      return res.status(410).json({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
+router.delete(
+  "/:id",
+  validateSchema(employeeIdSchema),
+  async (req, res, next) => {
+    const itemId = req.params.id;
+    let found = await Employee.findByIdAndDelete(itemId);
+    if (found) {
+      return res.status(200).json({ oke: true, result: found });
+    }
+    return res.status(410).json({ oke: false, message: "Object not found" });
+  }
+);
 
 // PATCH DATA
+router.patch(
+  "/:id",
+  validateSchema(employeeIdSchema),
 
-router.patch("/:id", async (req, res, next) => {
-  const validationSchema = yup.object().shape({
-    params: yup.object({
-      id: yup
-        .string()
-        .test(
-          "validate ObjectId",
-          "${path} is not a valid ObjectId",
-          (value) => {
-            return ObjectId.isValid(value);
-          }
-        ),
-    }),
-  });
+  async (req, res, next) => {
+    const itemId = req.params.id;
+    const itemBody = req.body;
 
-  validationSchema
-    .validate({ params: req.params }, { abortEarly: false })
-    .then(async () => {
-      const itemId = req.params.id;
-      const itemBody = req.body;
-      let found = await Employee.findByIdAndUpdate(itemId, { $set: itemBody });
-      if (found) {
-        return res.status(200).json({ oke: true, result: found });
+    try {
+      // Check if the "password" field is present in the request body
+      //Mã hóa password
+      if (itemBody.password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashPass = await bcrypt.hash(itemBody.password, salt);
+        itemBody.password = hashPass;
       }
-      return res.status(410).json({ oke: false, message: "Object not found" });
-    })
-    .catch((err) => {
-      return res.status(400).json({
-        type: err.name,
-        errors: err.errors,
-        message: err.message,
-        provider: "Yup",
-      });
-    });
-});
+
+      const updatedItem = await Employee.findByIdAndUpdate(
+        itemId,
+        ///$set : the $set operator is used to update the specified fields of a document. ( chỉ cập nhật trườn chỉ định
+        // mà không cập nhật các trường khác)
+        { $set: itemBody },
+        { new: true }
+      );
+
+      if (updatedItem) {
+        return res.status(200).json({ oke: true, result: updatedItem });
+      } else {
+        return res
+          .status(410)
+          .json({ oke: false, message: "Object not found" });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
 
 router.post(
   "/login",

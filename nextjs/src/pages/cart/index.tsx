@@ -71,16 +71,18 @@ export default function CounterApp() {
               </div>
               <div className="col-lg-4">
                 <Dropdown
-                  trigger={windowWidth < 900 ? ["click"] : ["hover"]}
+                  trigger={windowWidth < 900 ? ["contextMenu"] : ["hover"]}
                   className="text-center"
-                  overlayStyle={{ zIndex: 100000000000 }}
+                  overlayStyle={{
+                    zIndex: 100000000000,
+                  }}
                   placement="topRight"
                   overlay={
                     <Menu>
                       {itemsCheckout?.length > 0 &&
                         itemsCheckout?.map((item: any) => (
                           <Menu.Item key={item.product?._id}>
-                            <div className="d-flex justify-content-between">
+                            <div className="d-flex justify-content-between ">
                               <div className="w-75 text-truncate py-3">
                                 <Badge color="blue" count={item.quantity}>
                                   <Avatar
