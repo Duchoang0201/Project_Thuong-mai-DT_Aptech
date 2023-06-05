@@ -1017,7 +1017,16 @@ function ProductsCRUD() {
             label="Price"
             rules={[{ required: true, message: "Please enter Price" }]}
           >
-            <InputNumber style={{ width: 150 }} min={1} />
+            <InputNumber
+              style={{ width: 150 }}
+              min={1}
+              formatter={(value) =>
+                `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+              }
+              parser={(value: any) =>
+                value!.replace(/\s?d|(\.*)/g, "").replace(/\./g, "")
+              }
+            />
           </Form.Item>{" "}
           <Form.Item
             labelCol={{

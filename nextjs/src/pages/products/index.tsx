@@ -75,6 +75,21 @@ function Products({ products, categories, supplier }: Props) {
     .filter(Boolean)
     .join("&");
 
+  const [scroll, setScroll] = useState<number>(10);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setScroll(window.scrollY);
+    };
+
+    handleResize(); // Set initial window width
+    window.addEventListener("scroll", handleResize);
+
+    return () => {
+      window.removeEventListener("scroll", handleResize);
+    };
+  }, []);
+
   useEffect(() => {
     axios.get(`${API_URL_Product}?${queryParams}`).then((respones: any) => {
       // console.log(respones.data.results);
@@ -248,42 +263,60 @@ function Products({ products, categories, supplier }: Props) {
                   <Select
                     allowClear
                     autoClearSearchValue={!categoryId ? true : false}
-                    defaultValue={"None"}
+                    defaultValue={"Chọn danh mục"}
                     style={{ width: 180 }}
                     onChange={handleDataChange}
                     options={categories?.results?.map((items: any) => ({
                       label: items.name,
                       value: items._id,
                     }))}
+                    dropdownStyle={{
+                      position: "fixed",
+                      top: scroll > 90 ? 210 : 250,
+                    }}
                   />
 
                   <h5>Hãng sản phẩm</h5>
                   <Select
                     allowClear
                     autoClearSearchValue={!supplierId ? true : false}
-                    defaultValue={"None"}
+                    defaultValue={"Chọn nhà cung cấp"}
                     style={{ width: 180 }}
                     onChange={handleChangeSupplier}
                     options={supplier?.results?.map((items: any) => ({
                       label: items.name,
                       value: items._id,
                     }))}
+                    dropdownStyle={{
+                      position: "fixed",
+                      top: scroll > 90 ? 290 : 330,
+                    }}
                   />
                   <h5>Lọc giá</h5>
                   <div className="d-flex">
                     <InputNumber
-                      defaultValue={"0"}
                       placeholder="Enter From"
                       min={0}
                       onChange={handleFromPrice}
                       style={{ margin: "0 5px" }}
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      }
+                      parser={(value: any) =>
+                        value!.replace(/\s?d|(\.*)/g, "").replace(/\./g, "")
+                      }
                     />
 
                     <InputNumber
-                      defaultValue={"0"}
                       placeholder="Enter to"
                       // max={}
                       onChange={handleToPrice}
+                      formatter={(value) =>
+                        `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                      }
+                      parser={(value: any) =>
+                        value!.replace(/\s?d|(\.*)/g, "").replace(/\./g, "")
+                      }
                     />
                   </div>
                   <h5>Mức giảm giá</h5>
@@ -326,6 +359,9 @@ function Products({ products, categories, supplier }: Props) {
           </Affix>
 
           <Drawer
+            style={{
+              marginTop: scroll > 60 ? 130 : 0,
+            }}
             width={250}
             title="Lọc sản phẩm"
             placement="left"
@@ -342,6 +378,10 @@ function Products({ products, categories, supplier }: Props) {
                   label: items.name,
                   value: items._id,
                 }))}
+                dropdownStyle={{
+                  position: "fixed",
+                  top: scroll > 60 ? 285 : 155,
+                }}
               />
               <h5>Hãng sản phẩm</h5>
               <Select
@@ -352,23 +392,36 @@ function Products({ products, categories, supplier }: Props) {
                   label: items.name,
                   value: items._id,
                 }))}
+                dropdownStyle={{
+                  position: "fixed",
+                  top: scroll > 60 ? 365 : 235,
+                }}
               />
             </Space>
             <h5>Lọc giá</h5>
             <div className="d-flex mt-3">
               <InputNumber
-                defaultValue="0"
                 placeholder="Enter From"
                 min={0}
                 onChange={handleFromPrice}
                 style={{ margin: "0 5px" }}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value: any) =>
+                  value!.replace(/\s?d|(\.*)/g, "").replace(/\./g, "")
+                }
               />
 
               <InputNumber
-                defaultValue="0"
                 placeholder="Enter to"
-                max={1000}
                 onChange={handleToPrice}
+                formatter={(value) =>
+                  `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ".")
+                }
+                parser={(value: any) =>
+                  value!.replace(/\s?d|(\.*)/g, "").replace(/\./g, "")
+                }
               />
             </div>
             <h5>Mức giảm giá</h5>

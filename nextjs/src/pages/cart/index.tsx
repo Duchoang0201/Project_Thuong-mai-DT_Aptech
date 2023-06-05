@@ -77,43 +77,44 @@ export default function CounterApp() {
                     zIndex: 100000000000,
                   }}
                   placement="topRight"
-                  overlay={
-                    <Menu>
-                      {itemsCheckout?.length > 0 &&
-                        itemsCheckout?.map((item: any) => (
-                          <Menu.Item key={item.product?._id}>
-                            <div className="d-flex justify-content-between ">
-                              <div className="w-75 text-truncate py-3">
-                                <Badge color="blue" count={item.quantity}>
-                                  <Avatar
-                                    shape="square"
-                                    size="large"
-                                    src={`${URL_ENV}${item.product?.imageUrl}`}
-                                  />
-                                </Badge>
-                                <span> {item.product?.name}</span>
-                              </div>
+                  menu={{
+                    items: itemsCheckout.map((item: any, index: number) => ({
+                      key: index.toString(),
+                      label: (
+                        <div
+                          onClick={(e) => e.preventDefault()}
+                          className="d-flex justify-content-between  "
+                        >
+                          <div className="w-75 text-truncate py-3">
+                            <span> {item.product?.name}</span>
+                          </div>
 
-                              <div className="py-3">
-                                {item.product?.price?.toLocaleString("vi-VN", {
-                                  style: "currency",
-                                  currency: "VND",
-                                })}
-                              </div>
-                            </div>
-                          </Menu.Item>
-                        ))}
-                    </Menu>
-                  }
+                          <div className="py-3">
+                            {item.product?.price?.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </div>
+                        </div>
+                      ),
+                      icon: (
+                        <Badge color="blue" count={item.quantity}>
+                          <Avatar
+                            shape="square"
+                            size="large"
+                            src={`${URL_ENV}${item.product?.imageUrl}`}
+                          />
+                        </Badge>
+                      ),
+                    })),
+                  }}
                 >
                   <div className="text-center">
-                    {" "}
                     <Badge
                       className="text-center"
                       count={itemsCheckout?.length}
                     >
                       <div className="py-1 text-center">
-                        {" "}
                         Tổng số sản phẩm đã chọn
                       </div>
                     </Badge>
