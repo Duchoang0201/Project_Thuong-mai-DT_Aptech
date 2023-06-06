@@ -101,7 +101,7 @@ export default function App({ hotDeal }: any) {
                     {item.name}
                   </div>
                   <div
-                    className="text-center py-2"
+                    className="text-center py-3"
                     style={{ color: "#c48c46" }}
                   >
                     <strong>
