@@ -1,5 +1,5 @@
 import { StarOutlined } from "@ant-design/icons";
-import { Badge, Button, Card, Col, Divider, Image, Rate, Row } from "antd";
+import { Badge, Button, Card, Col, Divider, Rate, Image, Row } from "antd";
 import axios from "axios";
 import router from "next/router";
 import React, { useEffect, useState } from "react";
@@ -11,7 +11,19 @@ type Props = {};
 
 const Products = (props: Props) => {
   const [hotDeals, setHotDeals] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(0);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it initially to set the initial state
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -34,7 +46,11 @@ const Products = (props: Props) => {
         {hotDeals.length > 0 &&
           hotDeals.map((item: any, index: any) => (
             <Col key={`${item._id}-${index + 1}`} sm={24} md={12} lg={6}>
-              <SwiperSlide>
+              <SwiperSlide
+                onClick={() => {
+                  router.push(`/products/${item._id}`);
+                }}
+              >
                 <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
                   <Card
                     className="border rounded-4"
@@ -46,11 +62,12 @@ const Products = (props: Props) => {
                       style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
                     >
                       <Image
+                        preview={false}
                         alt={item.name}
                         src={`${URL_ENV}/${item.imageUrl}`}
                         style={{
                           width: "100%",
-                          transition: "transform 1s",
+                          transition: " 0.5s ",
                         }}
                         onMouseEnter={(e) => {
                           e.currentTarget.style.transform = "scale(1.1)";
@@ -60,7 +77,12 @@ const Products = (props: Props) => {
                         }}
                       />
                     </Card>
-                    <div style={{ height: 40 }} className="text-center">
+                    <div
+                      style={{ height: 40 }}
+                      className={`text-center ${
+                        windowWidth < 1400 ? "text-truncate" : ""
+                      }`}
+                    >
                       {item.name}
                     </div>
                     <div
