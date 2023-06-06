@@ -21,7 +21,19 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function Topmoth({ topMonth }: any) {
   const [hotDeals, setHotDeals] = useState([]);
+  const [windowWidth, setWindowWidth] = useState(0);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it initially to set the initial state
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -97,7 +109,12 @@ export default function Topmoth({ topMonth }: any) {
                         }}
                       />
                     </Card>
-                    <div style={{ height: 40 }} className="text-center">
+                    <div
+                      style={{ height: 40 }}
+                      className={`text-center ${
+                        windowWidth < 1400 ? "text-truncate" : ""
+                      }`}
+                    >
                       {item.name}
                     </div>
                     <div
