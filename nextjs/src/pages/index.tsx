@@ -16,8 +16,6 @@ import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
 import { Divider } from "antd";
 import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
 
-import Backgroundhot from "../compenents/Mainpage/Hotdeal/top_img_01_pc_watch_191226.jpg";
-import Backgroundmonth from "../compenents/Mainpage/Topmonth/pexels-leah-kelley-691046.jpg";
 import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import Products from "@/compenents/Mainpage/Product/Products";
@@ -27,18 +25,6 @@ export default function Home(props: any) {
   const { topMonth } = props;
   const { hotTrend } = props;
   const { hotDeal } = props;
-  const hotStyle = {
-    backgroundSize: "cover",
-    backgroundImage: `url(${Backgroundhot.src})`,
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  };
-  const monthStyle = {
-    backgroundSize: "cover",
-    backgroundImage: `url(${Backgroundmonth.src})`,
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-  };
 
   return (
     <>
@@ -66,7 +52,7 @@ export default function Home(props: any) {
           </div>
         </div>
         <Divider>
-          <h3>Số lượng mua nhiều nhất trong tháng</h3>
+          <h3>Hot trong tháng</h3>
         </Divider>
         <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
           <div className="container">

@@ -361,7 +361,7 @@ function CustomerCRUD() {
 
                   {
                     value: "true",
-                    label: "Deleted",
+                    label: "Locked",
                   },
                 ]}
               />

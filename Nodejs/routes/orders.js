@@ -135,7 +135,7 @@ router.post("/", function (req, res, next) {
     newItem
       .save()
       .then((result) => {
-        res.send(result);
+        res.send({ oke: true, result: result });
       })
       .catch((err) => {
         res.status(400).send({ message: err.message });

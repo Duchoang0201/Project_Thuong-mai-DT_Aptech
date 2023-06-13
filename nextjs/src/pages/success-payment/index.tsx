@@ -1,16 +1,18 @@
 import React from "react";
 import { Button, Result } from "antd";
 import router from "next/router";
+import { useSaveOrderId } from "@/hook/useSaveOrderId";
 
 type Props = {};
 
 const CheckoutPayment = (props: Props) => {
+  const { orderId } = useSaveOrderId((state: any) => state);
   return (
     <>
       <Result
         status="success"
-        title="Successfully Purchased Cloud Server ECS!"
-        subTitle="Order number: 2017182818828182881 Cloud server configuration takes 1-5 minutes, please wait."
+        title="Cảm ơn quý khách đã mua hàng, đơn hàng thành công đang trong giai đoạn xử lý!"
+        subTitle={`Order number: ${orderId}  Cloud server configuration takes 1-5 minutes, please wait.`}
         extra={[
           <Button
             type="primary"

@@ -16,16 +16,18 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useCartStore } from "@/hook/useCountStore";
 import { useAuthStore } from "@/hook/useAuthStore";
-import router from "next/router";
 import Image from "next/image";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
-
+import { useRouter } from "next/router";
+import { useSaveOrderId } from "@/hook/useSaveOrderId";
 const { Option } = Select;
 type Props = {};
 
 const CheckoutPayment = (props: Props) => {
   const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+  const router = useRouter();
 
+  const { saveOrderId } = useSaveOrderId((state: any) => state);
   const [cities, setCities] = useState<any>([]);
   const [districts, setDistricts] = useState<any>([]);
   const [wards, setWards] = useState<any>([]);
@@ -158,11 +160,12 @@ const CheckoutPayment = (props: Props) => {
 
       const payPost = async () => {
         const found: any = await axios.post(`${URL_ENV}/orders`, orderData);
-        console.log("««««« found »»»»»", found);
+
+        saveOrderId(found?.data?.result?._id);
         if (found) {
           //Change stock of product :
           const handleChangeStock = await axios
-            .post(`${URL_ENV}/products/orderp/${found?.data._id}/stock`)
+            .post(`${URL_ENV}/products/orderp/${found?.data?.result._id}/stock`)
             .then((response) => {
               console.log(response.data.message);
             })
@@ -191,7 +194,9 @@ const CheckoutPayment = (props: Props) => {
           if (postOder) {
             //Change stock of product :
             const handleChangeStock = await axios
-              .post(`${URL_ENV}/products/orderp/${postOder?.data?._id}/stock`)
+              .post(
+                `${URL_ENV}/products/orderp/${postOder?.data?.result?._id}/stock`
+              )
               .then((response) => {
                 console.log(response.data.message);
               })
@@ -204,7 +209,6 @@ const CheckoutPayment = (props: Props) => {
               { amount: amount }
             );
 
-            console.log("««««« found »»»»»", found.data);
             window.location.href = found.data.urlPay;
           }
         } catch (error) {

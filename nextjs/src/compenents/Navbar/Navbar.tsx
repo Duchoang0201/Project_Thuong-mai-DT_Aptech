@@ -154,7 +154,7 @@ function NavBar() {
             <li
               className={Style.listTopItem2}
               onClick={() => {
-                handleNavigation("/Branch");
+                handleNavigation("/branch");
               }}
             >
               <div className="mb-2">
