@@ -17,6 +17,7 @@ import {
   InputNumber,
   Affix,
   FloatButton,
+  Pagination,
 } from "antd";
 import { useCartStore } from "@/hook/useCountStore";
 import Hotdeal from "../../compenents/Mainpage/Topmonth/Topmonth";
@@ -51,6 +52,11 @@ function Products({ products, categories, supplier }: Props) {
   const [toDiscount, setToDiscount] = useState<any>("");
   const [isActive, setIsActive] = useState<boolean>(true);
 
+  const [pages, setPages] = useState();
+  const [skip, setSkip] = useState(0);
+  const [limit, setLimit] = useState<any>(10);
+  const [currentPage, setCurrentPage] = useState(1);
+
   const router = useRouter();
   const [top, setTop] = useState(30);
 
@@ -59,8 +65,6 @@ function Products({ products, categories, supplier }: Props) {
     items: itemsCart,
     increase,
   } = useCartStore((state: any) => state);
-
-  const { auth }: any = useAuthStore((state) => state);
 
   //CALL API PRODUCT FILLTER
   const queryParams = [
@@ -71,11 +75,20 @@ function Products({ products, categories, supplier }: Props) {
     toPrice && `toPrice=${toPrice}`,
     fromDiscount && `fromDiscount=${fromDiscount}`,
     isActive && `active=${isActive}`,
+    skip && `skip=${skip}`,
+    limit && `limit=${limit}`,
   ]
     .filter(Boolean)
     .join("&");
 
+  const { auth }: any = useAuthStore((state) => state);
+
   const [scroll, setScroll] = useState<number>(10);
+
+  const slideCurrent = (value: any) => {
+    setSkip(value * 10 - 10);
+    setFetchData((prev) => prev + 1);
+  };
 
   useEffect(() => {
     const handleResize = () => {
@@ -94,6 +107,7 @@ function Products({ products, categories, supplier }: Props) {
     axios.get(`${API_URL_Product}?${queryParams}`).then((respones: any) => {
       // console.log(respones.data.results);
       setData(respones.data.results);
+      setPages(respones.data.amountResults);
     });
   }, [fetchData]);
 
@@ -110,6 +124,7 @@ function Products({ products, categories, supplier }: Props) {
   };
   const handleDataChange = (value: any) => {
     setCategoryId(value);
+
     // setFetchData((pre) => pre + 1);
   };
 
@@ -141,6 +156,8 @@ function Products({ products, categories, supplier }: Props) {
   // console.log("data: ", data);
   const handleSubmit = useCallback((value: any) => {
     setFetchData((pre) => pre + 1);
+    setLimit(0);
+    setSkip(0);
   }, []);
 
   const handleClearSubmit = useCallback(() => {
@@ -150,6 +167,8 @@ function Products({ products, categories, supplier }: Props) {
     setToDiscount("");
     setToPrice("");
     setSupplierId("");
+    setLimit(10);
+    setSkip(10);
     setFetchData((pre) => pre + 1);
   }, []);
 
@@ -210,10 +229,7 @@ function Products({ products, categories, supplier }: Props) {
                                 const productExists = itemsCart.some(
                                   (item: any) => item.product._id === productId
                                 );
-                                console.log(
-                                  "««««« productExists »»»»»",
-                                  productExists
-                                );
+
                                 if (productExists === true) {
                                   increase(productId);
                                   message.success(
@@ -248,6 +264,12 @@ function Products({ products, categories, supplier }: Props) {
                   );
                 })}
             </ul>
+            <Pagination
+              className="py-4 container text-end "
+              onChange={(e) => slideCurrent(e)}
+              defaultCurrent={1}
+              total={pages}
+            />
           </div>
           <div className="mb-5">
             <h3>Sản phẩm nổi bật</h3>
@@ -323,7 +345,6 @@ function Products({ products, categories, supplier }: Props) {
                   <div className="d-flex">
                     <InputNumber
                       placeholder="Enter From"
-                      defaultValue={"0"}
                       min={0}
                       onChange={handleFromDiscount}
                       style={{ margin: "0 5px" }}
@@ -331,7 +352,6 @@ function Products({ products, categories, supplier }: Props) {
 
                     <InputNumber
                       placeholder="Enter to"
-                      defaultValue={"0"}
                       max={90}
                       onChange={handleToDiscount}
                     />

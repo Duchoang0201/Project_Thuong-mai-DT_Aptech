@@ -12,7 +12,7 @@ const CheckoutPayment = (props: Props) => {
       <Result
         status="success"
         title="Cảm ơn quý khách đã mua hàng, đơn hàng thành công đang trong giai đoạn xử lý!"
-        subTitle={`Order number: ${orderId}  Cloud server configuration takes 1-5 minutes, please wait.`}
+        subTitle={`Order number: ${orderId} Cloud server configuration takes 1-5 minutes, please wait.`}
         extra={[
           <Button
             type="primary"

@@ -121,12 +121,26 @@ router.get("/:id", validateSchema(employeeIdSchema), async (req, res, next) => {
 // POST DATA
 router.post("/", validateSchema(employeeBodySchema), async (req, res, next) => {
   try {
-    const newItem = req.body;
-    let data = new Employee(newItem);
-    let found = await data.save();
-    return res.status(200).json({ oke: true, result: found });
+    const { email, phoneNumber } = req.body;
+
+    const customerExists = await Employee.findOne({
+      $or: [{ email }, { phoneNumber }],
+    });
+
+    if (customerExists) {
+      return res
+        .status(400)
+        .send({ oke: false, message: "Email or Phone Number already exists" });
+    } else {
+      const newItem = req.body;
+      const data = new Employee(newItem);
+      let result = await data.save();
+      return res
+        .status(200)
+        .send({ oke: true, message: "Created succesfully", result: result });
+    }
   } catch (error) {
-    res.status(500).json({ error: error });
+    return res.status(500).json({ error: error.message });
   }
 });
 

@@ -139,6 +139,7 @@ function EmployeeCRUD() {
       })
       .catch((err) => {
         console.log(err);
+        message.error(`${err?.response?.data?.message}`);
       });
   };
   //Delete a Data
@@ -363,7 +364,7 @@ function EmployeeCRUD() {
 
                   {
                     value: "true",
-                    label: "Deleted",
+                    label: "Locked",
                   },
                 ]}
               />

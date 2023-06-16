@@ -53,30 +53,6 @@ const CheckoutMethod = (props: Props) => {
             </Card>
           </Col>
         ))}
-
-        {/* <Col xs={24} xl={8}>
-          {" "}
-          <Card className="border border-primary" style={{ width: "100%" }}>
-            <div className="d-flex justify-content-between">
-              <div className="content">
-                {" "}
-                <Space>
-                  <Statistic title="Tiền mặt" value={"Thanh toán đơn giản"} />
-                </Space>
-              </div>
-              <Button
-                icon={
-                  <Image
-                    alt=""
-                    src=""
-                    style={{ fontSize: "24px", color: "white" }}
-                  />
-                }
-                style={{ height: 60, width: 60, backgroundColor: "#1890ff" }}
-              />
-            </div>
-          </Card>
-        </Col> */}
       </Row>
     </div>
   );

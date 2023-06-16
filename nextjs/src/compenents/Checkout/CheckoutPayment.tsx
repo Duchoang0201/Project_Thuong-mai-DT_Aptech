@@ -16,23 +16,29 @@ import {
 import "bootstrap/dist/css/bootstrap.min.css";
 import { useCartStore } from "@/hook/useCountStore";
 import { useAuthStore } from "@/hook/useAuthStore";
-import router from "next/router";
-import { DollarOutlined } from "@ant-design/icons";
 import Image from "next/image";
-
+import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
+import { useRouter } from "next/router";
+import { useSaveOrderId } from "@/hook/useSaveOrderId";
 const { Option } = Select;
 type Props = {};
 
-const CheckoutPayment = (props: Props) => {
+const CheckoutContent = (props: Props) => {
   const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+  const router = useRouter();
 
+  const { saveOrderId } = useSaveOrderId((state: any) => state);
   const [cities, setCities] = useState<any>([]);
   const [districts, setDistricts] = useState<any>([]);
   const [wards, setWards] = useState<any>([]);
 
   const [payMethod, setPayMethod] = useState<any>("shipCod");
+  const [position, setPosition] = useState<any>();
 
-  const { items } = useCartStore((state: any) => state);
+  // const handleChangePayMethod = (value: any) => {
+  //   setPayMethod(value);
+  // };
+  const { itemsCheckout } = useCartStore((state: any) => state);
   const { auth }: any = useAuthStore((state: any) => state);
   useEffect(() => {
     const fetchData = async () => {
@@ -41,6 +47,18 @@ const CheckoutPayment = (props: Props) => {
           "https://raw.githubusercontent.com/kenzouno1/DiaGioiHanhChinhVN/master/data.json"
         );
         setCities(response.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchData();
+  }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get("http://ip-api.com/json");
+        setPosition(response.data);
       } catch (error) {
         console.log(error);
       }
@@ -120,26 +138,40 @@ const CheckoutPayment = (props: Props) => {
     orderData.description = values.description;
     orderData.shippingAddress = values.address;
     orderData.status = "WAITING";
-    orderData.orderDetails = items.map((item: any) => ({
+    orderData.orderDetails = itemsCheckout.map((item: any) => ({
       productId: item.product._id,
       quantity: item.quantity,
     }));
     orderData.contactInformation = {
-      address: values.address,
-      email: values.email,
+      address: orderData.shippingAddress,
       firstName: values.firstName,
       lastName: values.lastName,
       phoneNumber: values.phoneNumber,
     };
     orderData.customerId = `${auth.payload._id}`;
+    orderData.position = {
+      name: position.regionName,
+      lat: position.lat,
+      lng: position.lon,
+    };
 
-    console.log("««««« oderData »»»»»", orderData);
     if (payMethod === "shipCod") {
       orderData.paymentType = "CASH";
 
       const payPost = async () => {
-        const found = await axios.post(`${URL_ENV}/orders`, orderData);
+        const found: any = await axios.post(`${URL_ENV}/orders`, orderData);
+
+        saveOrderId(found?.data?.result?._id);
         if (found) {
+          //Change stock of product :
+          const handleChangeStock = await axios
+            .post(`${URL_ENV}/products/orderp/${found?.data?.result._id}/stock`)
+            .then((response) => {
+              console.log(response.data.message);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
           router.push("/success-payment");
         }
       };
@@ -148,18 +180,35 @@ const CheckoutPayment = (props: Props) => {
     if (payMethod === "momo") {
       orderData.paymentType = "MOMO";
 
-      const amount = items
-        .map((item: any) => item.product.price)
-        .reduce((acc: any, curr: any) => acc + curr, 0);
+      const amount = itemsCheckout
+        .map((item: any) => item.product.price * item.quantity)
+        .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
 
       const payPost = async () => {
         try {
-          const postCheck = await axios.post(`${URL_ENV}/orders`, orderData);
-          if (postCheck) {
+          const postOder: any = await axios.post(
+            `${URL_ENV}/orders`,
+            orderData
+          );
+
+          if (postOder) {
+            //Change stock of product :
+            const handleChangeStock = await axios
+              .post(
+                `${URL_ENV}/products/orderp/${postOder?.data?.result?._id}/stock`
+              )
+              .then((response) => {
+                console.log(response.data.message);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+
             const found = await axios.post(
               `${URL_ENV}/orders/pay/create_momo_url`,
               { amount: amount }
             );
+
             window.location.href = found.data.urlPay;
           }
         } catch (error) {
@@ -171,18 +220,28 @@ const CheckoutPayment = (props: Props) => {
     if (payMethod === "vnpay") {
       orderData.paymentType = "VNPAY";
 
-      const amount = items
-        .map((item: any) => item.product.price)
-        .reduce((acc: any, curr: any) => acc + curr, 0);
+      const amount = itemsCheckout
+        .map((item: any) => item.product.price * item.quantity)
+        .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
 
       const payPost = async () => {
         try {
-          const postCheck = await axios.post(`${URL_ENV}/orders`, orderData);
-          if (postCheck) {
+          const postOder = await axios.post(`${URL_ENV}/orders`, orderData);
+          if (postOder) {
+            const handleChangeStock = await axios
+              .post(`${URL_ENV}/products/orderp/${postOder?.data?._id}/stock`)
+              .then((response) => {
+                console.log(response.data.message);
+              })
+              .catch((error) => {
+                console.error(error);
+              });
+
             const found = await axios.post(
               `${URL_ENV}/orders/pay/create_vnpay_url`,
               { amount: amount }
             );
+
             window.location.href = found.data.urlPay;
           }
         } catch (error) {
@@ -207,33 +266,44 @@ const CheckoutPayment = (props: Props) => {
       return null;
     }
 
-    if (items) {
+    if (itemsCheckout) {
       return (
         <>
-          {items.map((i: any, index: any) => {
+          {itemsCheckout.map((i: any, index: any) => {
             return (
-              <>
-                <div
-                  key={i.product._id}
-                  className="d-flex justify-content-between"
-                >
-                  <div key={index} className="w-75">
+              <React.Fragment key={i.product.id}>
+                <div className="d-flex justify-content-between">
+                  <div className="w-75">
                     <span>{i.product.name}</span> x{" "}
                     <span className="text-danger">{i.quantity}</span>
                   </div>
-                  <span>{i.product.price}</span>
+                  <span>
+                    {(i.product.price * i.quantity).toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })}
+                  </span>
                 </div>
-                <Divider key={`${index}-${i.product._id}`}></Divider>
-              </>
+                <Divider key={i.product.id}></Divider>
+              </React.Fragment>
             );
           })}
+
           <div className="d-flex justify-content-between">
             <strong>Tổng</strong>
             <strong>
-              {items.length > 0
-                ? items
-                    .map((item: any) => item.product.price)
-                    .reduce((acc: any, curr: any) => acc + curr, 0)
+              {itemsCheckout.length > 0
+                ? itemsCheckout
+                    .map((item: any) => item.product.price * item.quantity)
+                    .reduce(
+                      (accumulator: any, subtotal: any) =>
+                        accumulator + subtotal,
+                      0
+                    )
+                    .toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    })
                 : 0}
             </strong>
           </div>
@@ -244,16 +314,24 @@ const CheckoutPayment = (props: Props) => {
 
   return (
     <>
+      <div style={{ background: "rgb(245,245,245)" }}>
+        <div className="container">
+          <h3 className=" py-2 text-center">Thủ tục thanh toán</h3>
+          <Divider orientation="left"> Phương thức thanh toán cho phép</Divider>
+        </div>
+
+        <CheckoutMethod />
+      </div>
+
       <div className="container ">
         <Row>
-          <Col
-            xs={24}
-            xl={8}
-            className="px-3 py-2"
-            style={{ backgroundColor: "grey" }}
-          >
+          <Col xs={24} xl={10} className="px-3 py-2 rounded-start ">
             {" "}
-            <Card title="Thông tin thanh toán" style={{ width: "100%" }}>
+            <Card
+              className="border border-primary"
+              title="Thông tin thanh toán"
+              style={{ width: "100%" }}
+            >
               <div className="d-flex justify-content-between border-bottom">
                 <strong>Sản phẩm</strong>
                 <strong>Tạm tính</strong>
@@ -325,22 +403,19 @@ const CheckoutPayment = (props: Props) => {
             </Card>
           </Col>
 
-          <Col
-            xs={24}
-            xl={14}
-            className="py-2 px-3"
-            style={{ backgroundColor: "grey" }}
-          >
+          <Col xs={24} xl={14} className="py-2 px-3 rounded-end ">
             {" "}
-            <Card title="Đơn hàng của bạn" style={{ width: "100%" }}>
+            <Card
+              className="border border-primary"
+              title="Đơn hàng của bạn"
+              style={{ width: "100%" }}
+            >
               <Form
                 layout="vertical"
                 name="payForm"
                 onFinish={handlePaySubmit}
                 onFinishFailed={onFinishFailed}
                 autoComplete="off"
-                // action={payMethod}
-                // method="POST"
               >
                 <Row>
                   <Col xs={24} xl={12}>
@@ -444,9 +519,9 @@ const CheckoutPayment = (props: Props) => {
                 <Form.Item label="Ghi chú" name="description">
                   <Input />
                 </Form.Item>
-                <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
+                <Form.Item wrapperCol={{ offset: 16, span: 16 }}>
                   <Button type="primary" htmlType="submit">
-                    Submit
+                    Thanh toán
                   </Button>
                 </Form.Item>
               </Form>
@@ -454,9 +529,8 @@ const CheckoutPayment = (props: Props) => {
           </Col>
         </Row>
       </div>
-      <div></div>
     </>
   );
 };
 
-export default CheckoutPayment;
+export default CheckoutContent;

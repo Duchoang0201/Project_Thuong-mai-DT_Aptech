@@ -23,7 +23,9 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 function NavBar() {
   const { auth }: any = useAuthStore((state: any) => state);
-  const { items: itemsCart }: any = useCartStore((state: any) => state);
+  const { items: itemsCart, removeAllCheck }: any = useCartStore(
+    (state: any) => state
+  );
   const { search }: any = PropsSearch((state) => state);
 
   const [user, setUser] = useState<any>();
@@ -32,9 +34,6 @@ function NavBar() {
   const [fresh, setFresh] = useState<number>(0);
   const [scroll, setScroll] = useState<number>(10);
   const [windowWidth, setWindowWidth] = useState<number>(0);
-  const [inputValue, setInputValue] = useState<string>("");
-
-  const [searchValue, setSearchValue] = useState("");
 
   const { logout } = useAuthStore((state: any) => state);
   const router = useRouter();
@@ -96,11 +95,6 @@ function NavBar() {
     router.push(`/searchpage`);
   };
 
-  const handleReset = () => {
-    setSearchValue("");
-  };
-  ////////////////////////////////////////////////search///////////////////////////
-
   const itemsAccount = [
     {
       key: "information",
@@ -122,6 +116,7 @@ function NavBar() {
       label: (
         <div
           onClick={() => {
+            removeAllCheck();
             logout();
             setUser(null);
           }}
