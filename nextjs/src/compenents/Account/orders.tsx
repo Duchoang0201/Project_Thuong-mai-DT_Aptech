@@ -222,7 +222,7 @@ const AccountOrders = (props: Props) => {
     <div>
       <div className="container rounded-end-circle ">
         <Table
-          scroll={{ x: "max-content", y: "max-content" }}
+          scroll={{ x: "max-content", y: 200 }}
           loading={loadingTable}
           rowKey={"_id"}
           dataSource={userOrders}

@@ -32,15 +32,16 @@ const passportConfigLocal = new LocalStrategy(
     try {
       const user = await Employee.findOne({ email });
 
-      if (!user) return done(null, false);
+      if (!user) return done(null, false, { message: "User not found" });
 
       const isCorrectPass = await user.isValidPass(password);
 
-      if (!isCorrectPass) return done(null, false);
+      if (!isCorrectPass)
+        return done(null, false, { message: "Invalid password" });
 
       return done(null, user);
     } catch (error) {
-      done(error, false);
+      return done(null, false, { message: error.message });
     }
   }
 );

@@ -12,7 +12,7 @@ const CheckoutPay = (props: Props) => {
       {itemsCheckout.length > 0 &&
         itemsCheckout.map((i: any, index: any) => {
           return (
-            <div key={i.product.id}>
+            <div key={i.product._id}>
               <div className="d-flex justify-content-between">
                 <div className="w-75">
                   <span>{i.product.name}</span> x{" "}

@@ -522,7 +522,9 @@ const CheckoutPayment = () => {
                   >
                     <Select
                       placeholder="Chọn tỉnh thành"
-                      onChange={(cityId) => handleCityChange(cityId)}
+                      onChange={(cityId) => {
+                        handleCityChange(cityId);
+                      }}
                     >
                       {renderCity()}
                     </Select>
