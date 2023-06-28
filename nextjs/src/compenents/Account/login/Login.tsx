@@ -65,7 +65,7 @@ const Login = () => {
             wrapperCol={{
               span: 16,
             }}
-            label="Password"
+            label="Mật khẩu"
             name="password"
             rules={[{ required: true, message: "Please input your password!" }]}
           >

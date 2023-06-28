@@ -1,39 +1,77 @@
-const { CONNECTION_STRING } = require("../constants/dbSettings");
-const { default: mongoose } = require("mongoose");
 var ObjectId = require("mongodb").ObjectId;
 const axios = require("axios");
 const crypto = require("crypto");
 const moment = require("moment");
 const { Order } = require("../models");
-// MONGOOSE
-mongoose.set("strictQuery", false);
-mongoose.connect(CONNECTION_STRING);
 
 var express = require("express");
 
 var router = express.Router();
 
 var WEBSHOP_URL = process.env.WEB_SHOP_URL || `http://localhost:4444`;
-// GET
-router.get("/", function (req, res, next) {
+
+/// GET MUTIPLE
+router.get("/", async (req, res, next) => {
   try {
-    Order.find()
+    const {
+      customerId,
+      methodPay,
+      status,
+      shippingAddress,
+      employee,
+      skip,
+      limit,
+    } = req.query;
+
+    const query = {
+      $and: [
+        customerId && { customerId },
+        methodPay && { paymentType: methodPay },
+        status && { status },
+        shippingAddress && { shippingAddress },
+        employee && { employee },
+      ].filter(Boolean),
+    };
+
+    let results = await Order.find(query)
+      .skip(Number(skip))
+      .limit(Number(limit))
       .populate({
         path: "orderDetails.product",
         populate: { path: "category" },
       })
       .populate("customer")
-      .populate("employee")
-      .then((result) => {
-        res.send(result);
-      })
-      .catch((err) => {
-        res.status(400).send({ message: err.message });
-      });
-  } catch (err) {
-    res.sendStatus(500);
+      .populate("employee");
+
+    let amountResults = await Order.countDocuments(query);
+
+    res.json({ results, amountResults });
+  } catch (error) {
+    res.status(500).json({ ok: false, error });
   }
 });
+
+// GET
+
+// router.get("/", function (req, res, next) {
+//   try {
+//     Order.find()
+//       .populate({
+//         path: "orderDetails.product",
+//         populate: { path: "category" },
+//       })
+//       .populate("customer")
+//       .populate("employee")
+//       .then((result) => {
+//         res.send(result);
+//       })
+//       .catch((err) => {
+//         res.status(400).send({ message: err.message });
+//       });
+//   } catch (err) {
+//     res.sendStatus(500);
+//   }
+// });
 
 // GET PERSONAL ORDERS
 router.get("/personal/:id", async (req, res, next) => {
@@ -97,7 +135,7 @@ router.post("/", function (req, res, next) {
     newItem
       .save()
       .then((result) => {
-        res.send(result);
+        res.send({ oke: true, result: result });
       })
       .catch((err) => {
         res.status(400).send({ message: err.message });

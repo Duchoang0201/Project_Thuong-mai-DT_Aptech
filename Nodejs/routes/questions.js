@@ -772,14 +772,15 @@ router.get("/23", function (req, res, next) {
   }
 });
 
-router.get("/23b", function (req, res, next) {
+router.post("/23b", function (req, res, next) {
+  const { year } = req.body;
   try {
     Order.aggregate([
       {
         $match: {
           createdDate: {
-            $gte: new Date("2023-01-01"),
-            $lt: new Date("2024-01-01"),
+            $gte: new Date(`${year}-01-01`),
+            $lt: new Date(`${year + 1}-01-01`),
           },
         },
       },
@@ -1179,9 +1180,16 @@ router.get("/27", function (req, res, next) {
     res.sendStatus(500);
   }
 });
-router.get("/27b", function (req, res, next) {
+router.post("/27b", function (req, res, next) {
+  const { year } = req.body;
   try {
     Order.aggregate()
+      .match({
+        createdDate: {
+          $gte: new Date(`${year}-01-01`),
+          $lt: new Date(`${year + 1}-01-01`),
+        },
+      })
       .unwind("orderDetails")
       .lookup({
         from: "products",
@@ -1221,6 +1229,8 @@ router.get("/27b", function (req, res, next) {
         firstName: { $arrayElemAt: ["$employee.firstName", 0] },
         lastName: { $arrayElemAt: ["$employee.lastName", 0] },
       })
+      //The "month" field is derived using the $dateToString operator, which converts the "createdDate" field (assumed to be a date or timestamp field) to a string representation of the month.
+      //The format option "%m" specifies that only the numeric representation of the month (e.g., "01" for January) should be included in the result. (Chuyển tháng 1 ra 01, January to 01 )
       .addFields({
         month: {
           $dateToString: {
@@ -1229,6 +1239,7 @@ router.get("/27b", function (req, res, next) {
           },
         },
       })
+
       .group({
         _id: "$employeeId",
         firstName: { $first: "$firstName" },

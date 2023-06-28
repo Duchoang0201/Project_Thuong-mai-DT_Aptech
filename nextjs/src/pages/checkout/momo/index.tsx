@@ -21,7 +21,7 @@ const momoCheckout = (props: Props) => {
                   method="POST"
                   target="_blank"
                   encType="application/x-www-form-urlencoded"
-                  action={`${URL_ENV}:9000/orders/pay/create_momo_url`}
+                  action={`${URL_ENV}/orders/pay/create_momo_url`}
                 >
                   <div className="row">
                     <div className="col-md-4">

@@ -4,6 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 import { message } from "antd";
 import router from "next/router";
+import { useCartStore } from "./useCountStore";
 interface isLogin {
   email: string;
   password: string;
@@ -45,13 +46,12 @@ export const useAuthStore = create(
           },
           logout: async () => {
             // Use the loginData in the logout function
-
+            localStorage.clear();
             if (loginData && loginData.payload && loginData.payload._id) {
               axios.patch(`${URL_ENV}/customers/${loginData.payload._id}`, {
                 lastActivity: new Date(),
               });
             }
-            localStorage.clear();
 
             return set({ auth: null }, false, { type: "auth/logout-success" });
           },

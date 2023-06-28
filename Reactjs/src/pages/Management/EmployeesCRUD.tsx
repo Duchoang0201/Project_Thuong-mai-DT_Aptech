@@ -106,22 +106,40 @@ function EmployeeCRUD() {
         // UPLOAD FILE
         const { _id } = res.data.result;
 
-        console.log("««««« res »»»»»", res);
+        ///FormData() giúp sumbit form mà k có nút sumbit
+        //Túm váy lại, với FormData, chúng ta có thể submit dữ liệu lên server thông qua AJAX như là đang submit form bình thường.
         const formData = new FormData();
+        //Phương thức append cho phép chúng ta chèn thêm một cặp key => value vào trong FormData
         formData.append("file", file);
 
-        axios
-          .post(`${URL_ENV}/upload/employees/${_id}/image`, formData)
-          .then((respose) => {
-            message.success("Thêm mới thành công!");
-            createForm.resetFields();
+        if (file?.uid && file?.type) {
+          message.loading("On Updating picture on data!!", 1.5);
+          axios
+            .post(`${URL_ENV}/upload/employees/${_id}/image`, formData)
+            .then((respose) => {
+              message.success("Created Successfully!!", 1.5);
+              createForm.resetFields();
+              setOpenCreate(false);
+              setFile(null);
+              setTimeout(() => {
+                setRefresh((f) => f + 1);
+              }, 2000);
+            });
+        } else {
+          createForm.resetFields();
+
+          setOpenCreate(false);
+          setFile(null);
+
+          setTimeout(() => {
             setRefresh((f) => f + 1);
-            setOpenCreate(false);
-          });
+          }, 1000);
+          message.success("Created Successfully!!", 1.5);
+        }
       })
       .catch((err) => {
         console.log(err);
-        message.error(err.response.data.message);
+        message.error(`${err?.response?.data?.message}`);
       });
   };
   //Delete a Data
@@ -146,7 +164,9 @@ function EmployeeCRUD() {
     record.updatedDate = new Date().toISOString();
 
     record.birthday = record.birthday.toISOString();
-    console.log("««««« record »»»»»", record);
+    if (record.isAdmin === undefined) {
+      record.isAdmin = false;
+    }
     axios
       .patch(API_URL + "/" + updateId._id, record)
       .then((res) => {
@@ -344,7 +364,7 @@ function EmployeeCRUD() {
 
                   {
                     value: "true",
-                    label: "Deleted",
+                    label: "Locked",
                   },
                 ]}
               />
@@ -362,7 +382,7 @@ function EmployeeCRUD() {
       dataIndex: "imageUrl",
       render: (text: any, record: any, index: any) => {
         return (
-          <div>
+          <div className="">
             {record.imageUrl && (
               <img
                 src={`${URL_ENV}` + record.imageUrl}
@@ -597,15 +617,17 @@ function EmployeeCRUD() {
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {
-                // console.log(info.file);
+                console.log(info.file);
+                message.loading("On Updating picture on data!!", 1.5);
               }
 
               if (info.file.status === "done") {
-                message.success(`${info.file.name} file uploaded successfully`);
-
                 setTimeout(() => {
                   setRefresh(refresh + 1);
-                }, 1000);
+                  message.success(
+                    `${info.file.name} file uploaded successfully`
+                  );
+                }, 2000);
               } else if (info.file.status === "error") {
                 message.error(`${info.file.name} file upload failed.`);
               }
@@ -962,9 +984,23 @@ function EmployeeCRUD() {
             >
               <Switch />
             </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="isAdmin"
+              name="isAdmin"
+              valuePropName="checked"
+            >
+              <Switch />
+            </FormItem>
             <Form.Item
               labelCol={{
-                span: 7,
+                span: 8,
               }}
               wrapperCol={{
                 span: 16,

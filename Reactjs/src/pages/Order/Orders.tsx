@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   Table,
   Button,
@@ -8,39 +8,23 @@ import {
   Divider,
   Row,
   Col,
+  Select,
+  Space,
+  Popconfirm,
+  message,
 } from "antd";
 import numeral from "numeral";
 import axios from "axios";
 import { axiosClient } from "../../libraries/axiosClient";
+import { RestOutlined, SearchOutlined } from "@ant-design/icons";
 
 export default function Orders() {
   const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
+  let API_URL = `${URL_ENV}/orders`;
 
   const [refresh, setRefresh] = useState(0);
   const [addProductsModalVisible, setAddProductsModalVisible] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  // Products
-  const [products, setProducts] = useState<any>([]);
-  useEffect(() => {
-    axios.get(`${URL_ENV}/products`).then((response) => {
-      setProducts(response.data.results);
-    });
-  }, [URL_ENV, refresh]);
-
-  const [orders, setOrders] = useState<any>([]);
-  useEffect(() => {
-    axiosClient.get("/orders").then((response) => {
-      setOrders(response.data);
-    });
-  }, [refresh]);
-
-  useEffect(() => {
-    // Check if the selected order exists in the updated dataResource
-    const updatedSelectedOrder = orders.find(
-      (order: any) => order.id === selectedOrder?.id
-    );
-    setSelectedOrder(updatedSelectedOrder || null);
-  }, [orders, selectedOrder]);
 
   const handleDelete = async (record: any, index: any) => {
     const currentProduct = record;
@@ -57,6 +41,91 @@ export default function Orders() {
     setRefresh((f) => f + 1);
   };
 
+  //SEARCH CUSTOMER
+  const [customerId, setCustomerId] = useState("");
+
+  const onSearchCustomerName = useMemo(() => {
+    return (record: any) => {
+      if (record) {
+        setCustomerId(record);
+      } else {
+        setCustomerId("");
+      }
+    };
+  }, []);
+
+  //SEARCH METHOD PAY
+
+  const [methodPay, setMethodPay] = useState("");
+
+  const onSearchMethodPay = useMemo(() => {
+    return (record: any) => {
+      if (record) {
+        setMethodPay(record);
+      } else {
+        setMethodPay("");
+      }
+    };
+  }, []);
+
+  //SEARCH METHOD PAY
+
+  const [status, setStatus] = useState("");
+
+  const onSearchStatus = useMemo(() => {
+    return (record: any) => {
+      if (record) {
+        setStatus(record);
+      } else {
+        setStatus("");
+      }
+    };
+  }, []);
+
+  // Products
+  const [products, setProducts] = useState<any>([]);
+  useEffect(() => {
+    axios.get(`${URL_ENV}/products`).then((response) => {
+      setProducts(response.data.results);
+    });
+  }, [URL_ENV, refresh]);
+
+  const URL_FILTER = `${API_URL}?${[
+    customerId && `&customerId=${customerId}`,
+    methodPay && `&methodPay=${methodPay}`,
+    status && `&status=${status}`,
+  ]
+    .filter(Boolean)
+    .join("")}&limit=10`;
+
+  //GET ORDER
+  const [orders, setOrders] = useState<any>([]);
+
+  const listCustomerRef = useRef<any>(null);
+
+  if (orders.length > 0 && !listCustomerRef.current) {
+    listCustomerRef.current = orders;
+  }
+
+  const listCustomer = listCustomerRef.current;
+
+  // Create an array of merged items
+
+  useEffect(() => {
+    axios.get(URL_FILTER).then((response) => {
+      setOrders(response.data.results);
+    });
+  }, [URL_FILTER, refresh]);
+
+  useEffect(() => {
+    // Check if the selected order exists in the updated dataResource
+    const updatedSelectedOrder = orders.find(
+      (order: any) => order.id === selectedOrder?.id
+    );
+    setSelectedOrder(updatedSelectedOrder || null);
+  }, [orders, selectedOrder]);
+
+  /// ORDERDETAILS
   const productColumns = [
     {
       title: "Số lượng",
@@ -90,6 +159,7 @@ export default function Orders() {
                 orderDetails,
               });
               setRefresh((f) => f + 1);
+              message.success("Plus a product sucessfully!!", 1.5);
             }}
           >
             +
@@ -118,12 +188,17 @@ export default function Orders() {
                   orderDetails,
                 });
                 setRefresh((f) => f + 1);
+                message.success(
+                  "Remove a product out of order sucessfully!!",
+                  1.5
+                );
               } else {
                 found.quantity -= 1;
                 await axiosClient.patch("orders/" + selectedOrder._id, {
                   orderDetails,
                 });
                 setRefresh((f) => f + 1);
+                message.success("Minus a product sucessfully!!", 1.5);
               }
             }}
           >
@@ -196,24 +271,122 @@ export default function Orders() {
           </strong>
         );
       },
+      filterDropdown: () => {
+        /// GET LIST OF CUSTOMERID
+        // Create a map to store merged items
+        const mergedMap = new Map();
+
+        // Iterate over the orders array
+        listCustomer?.forEach((item: any) => {
+          const value = item?.customer?._id;
+          const label = `${item.customer?.firstName} ${item.customer?.lastName}`;
+
+          // If the value doesn't exist in the map, add it with the label
+          if (!mergedMap.has(value)) {
+            mergedMap.set(value, { value, label });
+          }
+        });
+        let mergedOrders = Array.from(mergedMap.values());
+
+        return (
+          <div style={{ width: "150px" }}>
+            <Select
+              allowClear
+              showSearch
+              style={{ width: "100%" }}
+              placeholder="Select a product"
+              optionFilterProp="children"
+              onChange={onSearchCustomerName}
+              filterOption={(input: any, option: any) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+              options={mergedOrders}
+            />
+          </div>
+        );
+      },
     },
     {
+      width: "15%",
+
       title: "Hình thức thanh toán",
       dataIndex: "paymentType",
       key: "paymentType",
+      filterDropdown: () => {
+        return (
+          <div style={{ width: "150px" }}>
+            <Select
+              allowClear
+              showSearch
+              style={{ width: "100%" }}
+              placeholder="Select a product"
+              optionFilterProp="children"
+              onChange={onSearchMethodPay}
+              filterOption={(input: any, option: any) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+              options={[
+                { label: "CASH", value: "CASH" },
+                { label: "MOMO", value: "MOMO" },
+                { label: "VNPAY", value: "VNPAY" },
+              ]}
+            />
+          </div>
+        );
+      },
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
+      render: (text: any, record: any) => {
+        return text === "WAITING" ? (
+          <div className="text-primary">{text}</div>
+        ) : text === "COMPLETED" ? (
+          <div className="text-success">{text}</div>
+        ) : (
+          <div className="text-danger">{text}</div>
+        );
+      },
+      filterDropdown: () => {
+        return (
+          <div style={{ width: "150px" }}>
+            <Select
+              allowClear
+              showSearch
+              style={{ width: "100%" }}
+              placeholder="Select a product"
+              optionFilterProp="children"
+              onChange={onSearchStatus}
+              filterOption={(input: any, option: any) =>
+                (option?.label ?? "")
+                  .toLowerCase()
+                  .indexOf(input.toLowerCase()) >= 0
+              }
+              options={[
+                { label: "WAITING", value: "WAITING" },
+                { label: "COMPLETED", value: "COMPLETED" },
+                { label: "CANCELED", value: "CANCELED" },
+              ]}
+            />
+          </div>
+        );
+      },
     },
     {
+      width: "20%",
       title: "Địa chỉ giao hàng",
       dataIndex: "shippingAddress",
       key: "shippingAddress",
     },
 
     {
+      width: "10%",
+
       title: "Nhân viên",
       dataIndex: "employee",
       key: "employee",
@@ -253,13 +426,46 @@ export default function Orders() {
       key: "actions",
       render: (text: any, record: any, index: any) => {
         return (
-          <Button
-            onClick={() => {
-              setSelectedOrder(record);
-            }}
-          >
-            Select
-          </Button>
+          <Space className="text-end">
+            <Button
+              onClick={() => {
+                setSelectedOrder(record);
+              }}
+              shape="circle"
+              icon={<SearchOutlined />}
+            />
+            <Popconfirm
+              okText="Delete"
+              okType="danger"
+              onConfirm={async () => {
+                const handleCanceled: any = await axios.patch(
+                  `${URL_ENV}/orders/${record._id}`,
+                  {
+                    status: "CANCELED",
+                  }
+                );
+
+                if (handleCanceled?.data?._id) {
+                  await axios
+                    .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                    .then((response) => {
+                      setTimeout(() => {
+                        setRefresh((f) => f + 1);
+                        message.success("Hủy đơn hàng thành công !!", 1.5);
+                      }, 2000);
+                    })
+                    .catch((error) => {
+                      console.error(error);
+                    });
+                } else {
+                  message.error(`SYSTEM ERROR !!!`);
+                }
+              }}
+              title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
+            >
+              <Button danger icon={<RestOutlined />}></Button>
+            </Popconfirm>
+          </Space>
         );
       },
     },
@@ -311,7 +517,10 @@ export default function Orders() {
                       orderDetails,
                     });
                     setRefresh((f) => f + 1);
-
+                    message.success(
+                      `Add product: "${p.name}"  into order sucessfully!!`,
+                      1.5
+                    );
                     // setAddProductsModalVisible(false);
 
                     // RELOAD //

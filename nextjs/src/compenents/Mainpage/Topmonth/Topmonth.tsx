@@ -11,7 +11,7 @@ import "swiper/css/navigation";
 import { Autoplay, EffectCoverflow, Pagination } from "swiper";
 
 import axios from "axios";
-import { Button, Card, Divider, Rate, Image } from "antd";
+import { Button, Card, Divider, Rate, Image, Badge } from "antd";
 
 // import Image from "next/image";
 
@@ -21,8 +21,19 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function Topmoth({ topMonth }: any) {
   const [hotDeals, setHotDeals] = useState([]);
-  const swiperRef = useRef<any>(null);
+  const [windowWidth, setWindowWidth] = useState(0);
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
 
+    window.addEventListener("resize", handleResize);
+    handleResize(); // Call it initially to set the initial state
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -37,27 +48,15 @@ export default function Topmoth({ topMonth }: any) {
     fetchData();
   }, [topMonth]);
 
-  useEffect(() => {
-    const autoplayTimeout = setTimeout(() => {
-      if (swiperRef.current) {
-        swiperRef.current.autoplay.start();
-      }
-    }, 1000);
-
-    return () => {
-      clearTimeout(autoplayTimeout);
-    };
-  }, []);
   return (
     <>
       <div>
         <Swiper
+          loop={true}
           autoplay={{ delay: 3000, disableOnInteraction: false }}
           effect={"coverflow"}
           grabCursor={true}
-          slidesPerView={4}
           spaceBetween={50}
-          initialSlide={3}
           coverflowEffect={{
             rotate: 0,
             stretch: 0,
@@ -67,60 +66,74 @@ export default function Topmoth({ topMonth }: any) {
           pagination={true}
           modules={[Autoplay, EffectCoverflow, Pagination]}
           speed={3000}
-          // className="Top_Month py-4 px-4 text-center"
           breakpoints={{
             0: {
               slidesPerView: 1,
               centeredSlides: true,
+              // initialSlide: 3,
             },
             900: {
               slidesPerView: 2,
               centeredSlides: true,
+              // initialSlide: 3,
             },
             1200: {
               slidesPerView: 3,
               centeredSlides: true,
+              // initialSlide: 3,
             },
           }}
-          onSwiper={(swiper) => (swiperRef.current = swiper)}
         >
           {hotDeals.length > 0 &&
             hotDeals.map((item: any, index: any) => (
-              <>
-                <SwiperSlide
-                  // className="text-center"
-                  key={`${item._id}-${index + 1}`}
-                >
+              <SwiperSlide key={`${item._id}-${index + 1}-${item.name}`}>
+                <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
                   <Card
                     className="text-center"
-                    key={`${item.name}-${index + 1}`}
                     bordered={false}
                     style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
                   >
                     <Card style={{ backgroundColor: "rgba(0,0,0,0.3)" }}>
-                      {" "}
                       <Image
                         alt={item.name}
                         src={`${URL_ENV}/${item.imageUrl}`}
+                        style={{
+                          width: "100%",
+                          transition: "0.5s",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.transform = "scale(1.1)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.transform = "scale(1)";
+                        }}
                       />
                     </Card>
-
-                    <p style={{ height: 40 }} className="text-center">
+                    <div
+                      style={{ height: 40 }}
+                      className={`text-center ${
+                        windowWidth < 1400 ? "text-truncate" : ""
+                      }`}
+                    >
                       {item.name}
-                    </p>
-                    <p className="text-center" style={{ color: "#c48c46" }}>
+                    </div>
+                    <div
+                      className="text-center py-2"
+                      style={{ color: "#c48c46" }}
+                    >
                       <strong>
                         {item.price.toLocaleString("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         })}{" "}
                       </strong>
-                    </p>
-                    <p className="text-center">Đã bán: {item.amountSold} cái</p>
-
-                    <p className="text-center">
+                    </div>
+                    <div className="text-center">
+                      Đã bán: {item.amountSold} cái
+                    </div>
+                    <div className="text-center">
                       <Rate disabled defaultValue={item.averageRate} />
-                    </p>
+                    </div>
                     <Divider>
                       <Button
                         type="primary"
@@ -132,8 +145,8 @@ export default function Topmoth({ topMonth }: any) {
                       </Button>
                     </Divider>
                   </Card>
-                </SwiperSlide>
-              </>
+                </Badge.Ribbon>
+              </SwiperSlide>
             ))}
         </Swiper>
       </div>

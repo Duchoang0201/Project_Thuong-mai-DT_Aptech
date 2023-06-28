@@ -20,6 +20,9 @@ import {
   SendOutlined,
   UserOutlined,
 } from "@ant-design/icons";
+
+
+//Time stamp 
 import { format } from "timeago.js";
 // Socket;
 import { io } from "socket.io-client";
@@ -115,7 +118,7 @@ const Messages: React.FC<any> = () => {
   //Create a conversation
 
   const handleCreateConversation = async (e: any) => {
-    if (e) {
+    if (e.userId) {
       const conversationCreate = {
         senderId: `${auth.payload._id}`,
         receiverId: `${e.userId}`,
@@ -126,7 +129,9 @@ const Messages: React.FC<any> = () => {
           conversationCreate
         );
         if (res) {
+          setOpenCreateConver(false);
           setRefresh((f) => f + 1);
+          message.success("Create a conversation successfully!!", 1.5);
         }
       } catch (error) {
         console.log("««««« error »»»»»", error);
@@ -217,7 +222,7 @@ const Messages: React.FC<any> = () => {
             const response = await axios.get(
               `${URL_ENV}/employees/${otherMembers}`
             );
-            const friendData = response.data.result; // Assuming the friend data is in the 'result' property
+            const friendData = response.data.result;
             const friendInfo = {
               conversationId: item._id,
               friends: friendData
@@ -257,7 +262,7 @@ const Messages: React.FC<any> = () => {
           <Card style={{ width: 300, marginTop: 16 }} loading={true}></Card>
         ) : (
           <Row>
-            <Col xs={24} xl={6}>
+            <Col xs={24} xl={7}>
               <div>
                 <Button
                   onClick={() => setOpenCreateConver(true)}
@@ -267,13 +272,13 @@ const Messages: React.FC<any> = () => {
                 />{" "}
                 <span className="text-primary">New conversation?</span>
               </div>
+
+              {/* Model create coversation  */}
               <Modal
                 open={openCreateConver}
                 onCancel={() => setOpenCreateConver(false)}
                 onOk={() => {
                   createConversationForm.submit();
-                  setRefresh((f) => f + 1);
-                  setOpenCreateConver(false);
                 }}
                 okText="Create"
               >
@@ -291,14 +296,8 @@ const Messages: React.FC<any> = () => {
                       span: 16,
                     }}
                     hasFeedback
-                    label="userId"
+                    label="Name"
                     name="userId"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Please select a person",
-                      },
-                    ]}
                   >
                     <Select
                       allowClear
@@ -321,16 +320,18 @@ const Messages: React.FC<any> = () => {
                   </Form.Item>{" "}
                 </Form>
               </Modal>
+
+              {/* LIST OF FRIEND */}
               <div
                 className="conversation"
-                style={{ height: "125px", overflowY: "auto" }}
+                style={{ height: "150px", overflowY: "auto" }}
               >
                 {friendData?.map((friends: any, index: any) => (
                   <div key={`${friends.friends._id}-${index}`}>
                     <Button
                       onClick={() => setConversationInfor(friends)}
                       className="text-start"
-                      style={{ width: "250px", height: "auto" }}
+                      style={{ width: "100%", height: "50px" }}
                     >
                       {friends?.friends?.firstName} {friends?.friends?.lastName}
                     </Button>
@@ -338,7 +339,7 @@ const Messages: React.FC<any> = () => {
                 ))}
               </div>
             </Col>
-            <Col xs={24} xl={18}>
+            <Col xs={24} xl={17}>
               {conversationInfor ? (
                 <Card
                   key={`${conversationInfor.friends._id}`}

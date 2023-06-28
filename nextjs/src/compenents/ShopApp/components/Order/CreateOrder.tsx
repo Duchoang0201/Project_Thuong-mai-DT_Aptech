@@ -12,7 +12,15 @@ export default function CreateOrder() {
     if (itemsCheckout.length > 0) {
       router.push("/checkout");
     } else {
-      message.error("Vui lòng chọn sản phẩm vào giỏ hàng", 1.5);
+      message.error(
+        {
+          content: "Vui lòng chọn sản phẩm để thanh toán!",
+          style: {
+            marginTop: 130,
+          },
+        },
+        1.5
+      );
     }
   };
 

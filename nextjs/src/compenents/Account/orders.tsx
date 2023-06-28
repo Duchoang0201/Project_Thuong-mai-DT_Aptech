@@ -60,6 +60,7 @@ const AccountOrders = (props: Props) => {
 
   const ordersColumn = [
     {
+      width: "10%",
       title: "Số lượng",
       dataIndex: "quantity",
       key: "quantity",
@@ -88,6 +89,8 @@ const AccountOrders = (props: Props) => {
       },
     },
     {
+      width: "10%",
+
       title: "Giảm giá",
       dataIndex: "product.discount",
       key: "product.discount",
@@ -115,13 +118,15 @@ const AccountOrders = (props: Props) => {
       responsive: ["lg"],
     },
     {
-      width: "7%",
+      width: "8%",
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (text: any, record: any) => {
         return text === "WAITING" ? (
           <div className="text-primary">{text}</div>
+        ) : text === "COMPLETED" ? (
+          <div className="text-success">{text}</div>
         ) : (
           <div className="text-danger">{text}</div>
         );
@@ -181,28 +186,24 @@ const AccountOrders = (props: Props) => {
               okText="Delete"
               okType="danger"
               onConfirm={async () => {
-                console.log(record._id);
+                const handleCanceled: any = await axios.patch(
+                  `${URL_ENV}/orders/${record._id}`,
+                  {
+                    status: "CANCELED",
+                  }
+                );
 
-                const handleChangeStock: any = await axios
-                  .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
-                  .then((response) => {
-                    console.log(response.data.message);
-                  })
-                  .catch((error) => {
-                    console.error(error);
-                  });
-                if (handleChangeStock?.data) {
+                if (handleCanceled?.data?._id) {
                   await axios
-                    .patch(`${URL_ENV}/orders/${record._id}`, {
-                      status: "CANCELED",
-                    })
-                    .then((res) =>
+                    .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                    .then((response) => {
                       setTimeout(() => {
                         setRefresh((f) => f + 1);
-                      }, 2000)
-                    )
-                    .catch((err) => {
-                      console.log("««««« err »»»»»", err);
+                        message.success("Hủy đơn hàng thành công !!", 1.5);
+                      }, 2000);
+                    })
+                    .catch((error) => {
+                      console.error(error);
                     });
                 } else {
                   message.error(`SYSTEM ERROR !!!`);
@@ -221,7 +222,7 @@ const AccountOrders = (props: Props) => {
     <div>
       <div className="container rounded-end-circle ">
         <Table
-          scroll={{ y: 400 }}
+          scroll={{ x: "max-content", y: 200 }}
           loading={loadingTable}
           rowKey={"_id"}
           dataSource={userOrders}
@@ -265,6 +266,7 @@ const AccountOrders = (props: Props) => {
                 {/* Table include product of orderDetails */}
                 <Table
                   rowKey="_id"
+                  scroll={{ x: "max-content", y: "max-content" }}
                   dataSource={selectedOrder.orderDetails}
                   columns={ordersColumn}
                   pagination={false}

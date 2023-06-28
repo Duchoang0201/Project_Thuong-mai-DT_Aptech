@@ -9,9 +9,6 @@ const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 export default function ShopApp() {
   const [getUser, setGetUser] = useState<any>(null);
 
-  const { items, remove, increase, decrease } = useCartStore(
-    (state: any) => state
-  );
   const { auth } = useAuthStore((state: any) => state);
 
   useEffect(() => {

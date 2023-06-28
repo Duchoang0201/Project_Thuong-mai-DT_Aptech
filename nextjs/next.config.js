@@ -8,6 +8,7 @@ const nextConfig = {
       "vivnpay.vn",
       "encrypted-tbn0.gstatic.com",
       "data-server-shop.onrender.com",
+      "ip-api.com",
     ],
     loader: "default",
   },

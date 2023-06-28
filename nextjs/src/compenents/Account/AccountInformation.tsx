@@ -114,7 +114,11 @@ const AccountInformation = (props: Props) => {
         <Col xs={24} xl={7}>
           <Card loading={loading} bordered={true} style={{ width: "100%" }}>
             <div className="text-center">
-              <Avatar size={64} src={`${URL_ENV}${user?.imageUrl}`} />
+              <Avatar
+                shape="square"
+                size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                src={`${URL_ENV}${user?.imageUrl}`}
+              />
               <div className="py-2">
                 <Upload
                   showUploadList={false}
@@ -308,45 +312,56 @@ const AccountInformation = (props: Props) => {
                     </Popconfirm>
                   </Collapse.Panel>
                   <Collapse.Panel header="Password" key="6">
-                    <div className="d-flex justify-content-evenly">
+                    {" "}
+                    <div>
                       {" "}
-                      <div>
-                        {" "}
-                        <span>Mật khẩu hiện tại: </span>
-                        <Form.Item name="checkPassword" noStyle>
-                          <Input.Password
-                            style={{ width: 160 }}
-                            placeholder={`********`}
-                          />
-                        </Form.Item>
-                      </div>
-                      <div className="px-4">
-                        {" "}
-                        <span>Mật khẩu mới: </span>
-                        <Form.Item name="newPassword" noStyle>
-                          <Input.Password
-                            style={{ width: 160 }}
-                            placeholder={`********`}
-                          />
-                        </Form.Item>
-                        <Popconfirm
-                          title="Edit profile"
-                          description="Are you sure to edit this password?"
-                          okText="Yes"
-                          cancelText="No"
-                          onConfirm={handleUpdate}
-                        >
-                          <Button
-                            style={{ width: "30px", right: "-4px" }}
-                            type="primary"
-                            htmlType="submit"
-                            icon={<EditFilled />}
-                            onClick={() => {
-                              setSelectItem("password");
-                            }}
-                          />
-                        </Popconfirm>
-                      </div>
+                      <Form.Item
+                        labelCol={{
+                          span: 12,
+                        }}
+                        wrapperCol={{
+                          span: 10,
+                        }}
+                        name="checkPassword"
+                        label="Mật khẩu hiện tại:"
+                      >
+                        <Input.Password placeholder={`********`} />
+                      </Form.Item>
+                    </div>
+                    <div className="">
+                      {" "}
+                      <Form.Item
+                        labelCol={{
+                          span: 12,
+                        }}
+                        wrapperCol={{
+                          span: 10,
+                        }}
+                        name="newPassword"
+                        label="Mật khẩu mới:"
+                      >
+                        <Input.Password placeholder={`********`} />
+                      </Form.Item>
+                    </div>
+                    <div className="text-end">
+                      {" "}
+                      <Popconfirm
+                        title="Edit profile"
+                        description="Are you sure to edit this password?"
+                        okText="Yes"
+                        cancelText="No"
+                        onConfirm={handleUpdate}
+                      >
+                        <Button
+                          style={{ width: "30px", right: "-4px" }}
+                          type="primary"
+                          htmlType="submit"
+                          icon={<EditFilled />}
+                          onClick={() => {
+                            setSelectItem("password");
+                          }}
+                        />
+                      </Popconfirm>
                     </div>
                   </Collapse.Panel>
                 </Collapse>

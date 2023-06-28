@@ -7,6 +7,11 @@ const createdBySchema = new Schema({
   firstName: { type: String },
   lastName: { type: String },
 });
+const createdByCustomerSchema = new Schema({
+  customerId: { type: Schema.Types.ObjectId, ref: "Customer", require: true },
+  firstName: { type: String },
+  lastName: { type: String },
+});
 const updatedBySchema = new Schema({
   employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
   firstName: { type: String },
@@ -47,7 +52,7 @@ const customerSchema = Schema(
     createdDate: {
       type: Date,
     },
-    createdBy: createdBySchema,
+    createdBy: createdBySchema || createdByCustomerSchema,
     imageUrl: { type: String },
     updatedDate: {
       type: Date,

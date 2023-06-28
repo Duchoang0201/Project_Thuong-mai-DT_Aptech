@@ -61,4 +61,6 @@ module.exports = {
   validateSchema,
   loginSchema,
   getEmployeeChema,
+  employeeBodySchema,
+  employeeIdSchema,
 };

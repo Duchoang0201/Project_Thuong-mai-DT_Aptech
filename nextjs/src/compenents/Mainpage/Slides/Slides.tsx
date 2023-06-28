@@ -75,11 +75,11 @@ const Slides = () => {
             {slides.length > 0 &&
               slides.map((item: any, index: any) => (
                 <SwiperSlide
+                  key={`${item._id}-${index + 1}`}
                   onClick={() => {
                     router.push(`${item.url}`);
                   }}
                   className="w-100"
-                  key={`${index + 1}`}
                 >
                   <Image
                     width={0}
@@ -88,6 +88,13 @@ const Slides = () => {
                     style={{
                       width: "100%",
                       height: windowWidth < 500 ? 200 : 450,
+                      transition: " 0.5s",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = "scale(1.1)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = "scale(1)";
                     }}
                     alt={item?.summary}
                     src={`${URL_ENV}${item?.imageUrl}`}
@@ -100,7 +107,7 @@ const Slides = () => {
           <div className="d-flex flex-column">
             {slides.length > 0 &&
               slides.map((item: any, index: any) => (
-                <div className="py-3" key={`${index + 1}`}>
+                <div className="py-3" key={`${item._id}-${index + 1}`}>
                   <Image
                     width={0}
                     height={0}
