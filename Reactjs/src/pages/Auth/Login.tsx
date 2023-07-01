@@ -8,7 +8,7 @@ const Login = () => {
 
   const onLogin = async (values: any) => {
     const { email, password } = values;
-    login({ email, password });
+    await login({ email, password });
   };
 
   return (

@@ -214,6 +214,36 @@ router.patch(
 );
 
 /// LOGIN
+// router.post(
+//   "/login",
+
+//   validateSchema(loginSchema),
+
+//   async (req, res, next) => {
+//     try {
+//       const { email, password } = req.body;
+
+//       const customer = await Customer.findOne({ email, password });
+
+//       if (!customer) return res.status(404).send({ message: "Not found" });
+
+//       const { _id, email: empEmail, firstName, lastName } = customer;
+
+//       const token = encodeToken(_id, empEmail, firstName, lastName);
+
+//       console.log(token);
+//       res.status(200).json({
+//         token,
+//         payload: customer,
+//       });
+//     } catch (err) {
+//       res.status(401).json({
+//         statusCode: 401,
+//         message: "Login Unsuccessful",
+//       });
+//     }
+//   }
+// );
 router.post(
   "/login",
 
@@ -225,16 +255,9 @@ router.post(
 
       const customer = await Customer.findOne({ email, password });
 
-      console.log(customer);
       if (!customer) return res.status(404).send({ message: "Not found" });
 
-      const { _id, email: empEmail, firstName, lastName } = customer;
-
-      const token = encodeToken(_id, empEmail, firstName, lastName);
-
-      console.log(token);
       res.status(200).json({
-        token,
         payload: customer,
       });
     } catch (err) {

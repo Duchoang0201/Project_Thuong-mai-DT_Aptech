@@ -2,10 +2,13 @@ const passport = require("passport");
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
-
+const {
+  passportConfigLocal,
+  passportConfig,
+} = require("../middlewares/passport");
 const { Employee } = require("../models");
 const yup = require("yup");
-
+const jwt = require("jsonwebtoken");
 const {
   validateSchema,
   loginSchema,
@@ -13,7 +16,7 @@ const {
   employeeBodySchema,
   employeeIdSchema,
 } = require("../validation/employee");
-const encodeToken = require("../helpers/jwtHelper");
+const { encodeToken, encodeRefreshToken } = require("../helpers/jwtHelper");
 
 const ObjectId = require("mongodb").ObjectId;
 
@@ -196,27 +199,59 @@ router.patch(
   }
 );
 
+const freshTokens = [];
+router.post("/refreshToken", async (req, res, next) => {
+  const refreshToken = req?.body?.token;
+
+  if (!refreshToken) {
+    return res.sendStatus(401);
+  }
+
+  if (!freshTokens.includes(refreshToken)) {
+    return res.sendStatus(403);
+  }
+
+  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
+    if (err) {
+      return res.sendStatus(403);
+    }
+    const { _id, empEmail, firstName, lastName } = data;
+
+    const accessToken = encodeToken(_id, empEmail, firstName, lastName);
+    res.json({ accessToken });
+  });
+});
+
 router.post(
   "/login",
   validateSchema(loginSchema),
-  passport.authenticate("local", { session: false }),
+  // passport.authenticate("local", { session: false }),
+  passport.authenticate(passportConfigLocal(Employee), { session: false }),
   async (req, res, next) => {
     try {
-      const { email, password } = req.body;
+      const { email } = req.body;
 
       const employee = await Employee.findOne({ email });
 
-      console.log(employee);
+      // console.log(employee);
       if (!employee) return res.status(404).send({ message: "Not found" });
 
       const { _id, email: empEmail, firstName, lastName } = employee;
 
       const token = encodeToken(_id, empEmail, firstName, lastName);
 
-      console.log(token);
+      const refreshToken = encodeRefreshToken(
+        _id,
+        empEmail,
+        firstName,
+        lastName
+      );
+      freshTokens.push(refreshToken);
+
       res.status(200).json({
         token,
-        payload: employee,
+        refreshToken,
+        // payload: employee,
       });
     } catch (err) {
       res.status(401).json({
@@ -226,10 +261,30 @@ router.post(
     }
   }
 );
+function authenToken(req, res, next) {
+  const authorizationHeader = req.headers["authorization"];
 
+  const token = authorizationHeader ? authorizationHeader.split(" ")[1] : null;
+  if (!token) {
+    return res
+      .status(401)
+      .json({ oke: false, message: "Token is not defined" });
+  }
+
+  jwt.verify(token, process.env.SECRET, (err, data) => {
+    if (err) {
+      return res.status(403).json({ oke: false, message: "JWT expried" });
+    }
+
+    next();
+  });
+}
 router.get(
-  "/profile",
-  passport.authenticate("jwt", { session: false }),
+  "/login/profile",
+  // passport.authenticate("jwt", { session: false }),
+  authenToken,
+
+  passport.authenticate(passportConfig(Employee), { session: false }),
   async (req, res, next) => {
     try {
       const employee = await Employee.findById(req.user._id);

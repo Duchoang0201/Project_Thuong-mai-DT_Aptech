@@ -66,6 +66,8 @@ const AccountOrders = (props: Props) => {
       key: "quantity",
     },
     {
+      width: "30%",
+
       title: "Tên sản phẩm",
       dataIndex: "product.name",
       key: "product.name",
@@ -74,6 +76,8 @@ const AccountOrders = (props: Props) => {
       },
     },
     {
+      width: "10%",
+
       title: "Giá",
       dataIndex: "product.price",
       key: "product.price",
@@ -222,7 +226,7 @@ const AccountOrders = (props: Props) => {
     <div>
       <div className="container rounded-end-circle ">
         <Table
-          scroll={{ x: "max-content", y: 200 }}
+          scroll={{ x: true, y: 400 }}
           loading={loadingTable}
           rowKey={"_id"}
           dataSource={userOrders}

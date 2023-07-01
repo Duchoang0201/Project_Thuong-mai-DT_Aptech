@@ -14,8 +14,9 @@ const NavbarAccount: React.FC = () => {
   const [trigger, setTrigger] = useState<boolean>(false);
 
   useEffect(() => {
-    const authData = useAuthStore.getState();
-    setAuth(authData);
+    const authData: any = useAuthStore.getState();
+    const { auth } = authData;
+    setAuth(auth);
   }, []);
 
   useEffect(() => {

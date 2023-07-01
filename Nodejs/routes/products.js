@@ -100,14 +100,21 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
     ]);
 
     // Map the amountSold array to create a dictionary of ID-quantity pairs
-    const amountSoldDict = amountSold.reduce((dict, item) => {
+    const amountSoldDict = await amountSold.reduce((dict, item) => {
       dict[item._id.toString()] = item.totalQuantity;
       return dict;
-    }, {});
+    }, []);
 
     // Add the "amountSold" field to each item in the "results" array
     results = results.map((item) => {
       const amountSoldQuantity = amountSoldDict[item._id.toString()] || 0;
+
+      //Tường minh hơn:
+      // item.amountSold = amountSoldQuantity;
+      // Mỗi item đều có một _id tương ứng rồi match vào nhau
+      // item.amountSold = amountSoldDict[item._id.toString()] || 0;
+      // return results;
+
       return {
         ...item,
         amountSold: amountSoldQuantity,
