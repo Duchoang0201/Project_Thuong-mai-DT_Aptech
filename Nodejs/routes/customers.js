@@ -263,7 +263,7 @@ router.post("/refreshToken", async (req, res, next) => {
   }
 
   const checkCustomer = await Customer.findById(id);
-  const customerRefreshToken = checkCustomer.refreshToken;
+  const customerRefreshToken = checkCustomer?.refreshToken;
   if (!customerRefreshToken) {
     return res.sendStatus(403);
   }

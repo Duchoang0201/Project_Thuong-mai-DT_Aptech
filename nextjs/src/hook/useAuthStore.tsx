@@ -9,7 +9,7 @@ interface isLogin {
   email: string;
   password: string;
 }
-const TIME_REFRESH_TOKEN = 30 * 1000;
+const TIME_REFRESH_TOKEN = 2 * 60 * 60 * 1000;
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export const useAuthStore = create(
@@ -78,7 +78,7 @@ export const useAuthStore = create(
                   `${URL_ENV}/customers/refreshToken`,
                   {
                     id: auth.userId,
-                    token: auth?.refreshToken,
+                    refreshToken: auth?.refreshToken,
                   }
                 );
                 auth.token = newToken.data.accessToken;
@@ -102,6 +102,7 @@ export const useAuthStore = create(
                   auth: {
                     token: auth?.token,
                     refreshToken: auth?.refreshToken,
+                    userId: auth?.userId,
                   },
                 },
                 false,

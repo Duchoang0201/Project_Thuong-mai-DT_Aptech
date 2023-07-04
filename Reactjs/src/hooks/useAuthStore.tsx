@@ -7,6 +7,7 @@ interface isLogin {
   email: string;
   password: string;
 }
+const TIME_REFRESH_TOKEN = 30 * 1000;
 
 export const useAuthStore = create(
   devtools(
@@ -76,7 +77,7 @@ export const useAuthStore = create(
                   `${URL_ENV}/employees/refreshToken`,
                   {
                     id: auth.userId,
-                    token: auth?.refreshToken,
+                    refreshToken: auth?.refreshToken,
                   }
                 );
                 auth.token = newToken.data.accessToken;
@@ -120,6 +121,7 @@ export const useAuthStore = create(
                   auth: {
                     token: auth?.token,
                     refreshToken: auth?.refreshToken,
+                    userId: auth?.userId,
                   },
                 },
                 false,
@@ -129,7 +131,7 @@ export const useAuthStore = create(
               );
               // freshToken();
               dataFromToken();
-            }, 2 * 60 * 60 * 1000);
+            }, TIME_REFRESH_TOKEN);
           },
           logout: async () => {
             // Use the loginData in the logout function
