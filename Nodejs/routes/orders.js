@@ -14,6 +14,7 @@ var WEBSHOP_URL = process.env.WEB_SHOP_URL || `http://localhost:4444`;
 router.get("/", async (req, res, next) => {
   try {
     const {
+      orderId,
       customerId,
       methodPay,
       status,
@@ -25,6 +26,7 @@ router.get("/", async (req, res, next) => {
 
     const query = {
       $and: [
+        orderId && { _id: orderId },
         customerId && { customerId },
         methodPay && { paymentType: methodPay },
         status && { status },

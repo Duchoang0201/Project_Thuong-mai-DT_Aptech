@@ -22,7 +22,6 @@ import { useCartStore } from "../../hook/useCountStore";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 function NavBar() {
-  const { auth }: any = useAuthStore((state: any) => state);
   const { items: itemsCart, removeAllCheck }: any = useCartStore(
     (state: any) => state
   );
@@ -38,6 +37,21 @@ function NavBar() {
   const { logout } = useAuthStore((state: any) => state);
   const router = useRouter();
   const [findForm]: any = Form.useForm();
+
+  const { dataFromToken, setLogout, auth } = useAuthStore(
+    (state: any) => state
+  );
+  useEffect(() => {
+    dataFromToken(auth?.token);
+    if (auth?.payload) setUser(auth?.payload);
+
+    const refreshToken = setTimeout(() => {
+      setLogout();
+    }, 2 * 3000);
+    // return () => {
+    //   clearTimeout(refreshToken);
+    // };
+  }, [auth?.token]);
 
   useEffect(() => {
     const handleResize = () => {

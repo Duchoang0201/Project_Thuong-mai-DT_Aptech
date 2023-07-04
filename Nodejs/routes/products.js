@@ -106,7 +106,7 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
     }, []);
 
     // Add the "amountSold" field to each item in the "results" array
-    results = results.map((item) => {
+    resulst = results.map((item) => {
       const amountSoldQuantity = amountSoldDict[item._id.toString()] || 0;
 
       //Tường minh hơn:
@@ -137,6 +137,13 @@ router.get("/:id", validateSchema(productIdSchema), async (req, res, next) => {
     .lean({ virtuals: true });
 
   let amountSold = await Order.aggregate([
+    {
+      $match: {
+        $expr: {
+          $eq: ["$status", "COMPLETED"],
+        },
+      },
+    },
     { $unwind: "$orderDetails" },
     {
       $lookup: {

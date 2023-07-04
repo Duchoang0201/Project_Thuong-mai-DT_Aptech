@@ -124,7 +124,9 @@ const orderSchema = new Schema({
     default: "WAITING",
     validate: {
       validator: (value) => {
-        if (["WAITING", "COMPLETED", "CANCELED"].includes(value)) {
+        if (
+          ["WAITING", "ECONFIRMED", "COMPLETED", "CANCELED"].includes(value)
+        ) {
           return true;
         }
         return false;
@@ -142,6 +144,8 @@ const orderSchema = new Schema({
     lng: { type: String },
     name: { type: String },
   },
+  isConfirm: { type: Boolean },
+  note: { type: String },
 });
 
 // Virtual with Populate

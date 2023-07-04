@@ -1,10 +1,14 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-
+const {
+  passportConfigLocal,
+  passportConfig,
+} = require("../middlewares/passport");
 const { Customer } = require("../models");
-const yup = require("yup");
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { authenToken } = require("../helpers/authenToken");
 const {
   validateSchema,
   loginSchema,
@@ -15,8 +19,7 @@ const {
 } = require("../validation/customer");
 
 const ObjectId = require("mongodb").ObjectId;
-
-const encodeToken = require("../helpers/jwtHelper");
+const { encodeToken, encodeRefreshToken } = require("../helpers/jwtHelper");
 
 // let data = [
 //     {id: 1, name: 'Peter', email: 'peter@gmail.com', address: 'USA'},
@@ -189,31 +192,180 @@ router.delete(
 
 //PATCH DATA
 
+// router.patch(
+//   "/:id",
+//   validateSchema(customerIdSchema),
+//   validateSchema(customerBodyPatchSchema),
+//   async (req, res, next) => {
+//     try {
+//       const itemId = req.params.id;
+//       const itemBody = req.body;
+
+//       if (itemId) {
+//         await Customer.findByIdAndUpdate(itemId, {
+//           $set: itemBody,
+//         });
+//         let itemUpdated = await Customer.findById(itemId);
+//         res
+//           .status(200)
+//           .send({ message: "Updated successfully", result: itemUpdated });
+//       }
+//     } catch (error) {
+//       res.status(500).send(error);
+//     }
+//   }
+// );
 router.patch(
   "/:id",
   validateSchema(customerIdSchema),
   validateSchema(customerBodyPatchSchema),
+
+  async (req, res, next) => {
+    const itemId = req.params.id;
+    const itemBody = req.body;
+
+    try {
+      // Check if the "password" field is present in the request body
+      //Mã hóa password
+      if (itemBody.password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashPass = await bcrypt.hash(itemBody.password, salt);
+        itemBody.password = hashPass;
+      }
+
+      const updatedItem = await Customer.findByIdAndUpdate(
+        itemId,
+        ///$set : the $set operator is used to update the specified fields of a document. ( chỉ cập nhật trườn chỉ định
+        // mà không cập nhật các trường khác)
+        { $set: itemBody },
+        { new: true }
+      );
+
+      if (updatedItem) {
+        return res.status(200).json({ oke: true, result: updatedItem });
+      } else {
+        return res
+          .status(410)
+          .json({ oke: false, message: "Object not found" });
+      }
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+//FRESH TOKEN :
+
+router.post("/refreshToken", async (req, res, next) => {
+  const { refreshToken, id } = req?.body;
+
+  if (!refreshToken) {
+    return res.sendStatus(401);
+  }
+
+  const checkCustomer = await Customer.findById(id);
+  const customerRefreshToken = checkCustomer.refreshToken;
+  if (!customerRefreshToken) {
+    return res.sendStatus(403);
+  }
+
+  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
+    if (err) {
+      return res.sendStatus(403);
+    }
+    const { _id, empEmail, firstName, lastName } = data;
+
+    const accessToken = encodeToken(_id, empEmail, firstName, lastName);
+    res.json({ accessToken });
+  });
+});
+/// LOGIN
+router.post(
+  "/login",
+  validateSchema(loginSchema),
+  // passport.authenticate("local", { session: false }),
+  passport.authenticate(passportConfigLocal(Customer), { session: false }),
   async (req, res, next) => {
     try {
-      const itemId = req.params.id;
-      const itemBody = req.body;
+      const { email } = req.body;
 
-      if (itemId) {
-        await Customer.findByIdAndUpdate(itemId, {
-          $set: itemBody,
-        });
-        let itemUpdated = await Customer.findById(itemId);
-        res
-          .status(200)
-          .send({ message: "Updated successfully", result: itemUpdated });
-      }
-    } catch (error) {
-      res.status(500).send(error);
+      const customer = await Customer.findOne({ email });
+
+      if (!customer) return res.status(404).send({ message: "Not found" });
+
+      const { _id, email: empEmail, firstName, lastName } = customer;
+
+      const token = encodeToken(_id, empEmail, firstName, lastName);
+
+      const refreshToken = encodeRefreshToken(
+        _id,
+        empEmail,
+        firstName,
+        lastName
+      );
+      await Customer.findByIdAndUpdate(customer._id, {
+        refreshToken: refreshToken,
+      });
+      res.status(200).json({
+        token,
+        refreshToken,
+        userId: _id,
+      });
+    } catch (err) {
+      res.status(401).json({
+        statusCode: 401,
+        message: "Login Unsuccessful",
+      });
     }
   }
 );
 
-/// LOGIN
+// function authenToken(req, res, next) {
+//   const authorizationHeader = req.headers["authorization"];
+
+//   const token = authorizationHeader ? authorizationHeader.split(" ")[1] : null;
+//   if (!token) {
+//     return res
+//       .status(401)
+//       .json({ oke: false, message: "Token is not defined" });
+//   }
+
+//   jwt.verify(token, process.env.SECRET, (err, data) => {
+//     if (err) {
+//       return res
+//         .status(403)
+//         .json({ oke: false, message: "JWT's valid", err: err.message });
+//     }
+
+//     next();
+//   });
+// }
+router.get(
+  "/login/profile",
+  // passport.authenticate("jwt", { session: false }),
+  authenToken,
+  passport.authenticate(passportConfig(Customer), { session: false }),
+  async (req, res, next) => {
+    try {
+      const customer = await Customer.findById(req.user._id);
+
+      if (!customer) return res.status(404).send({ message: "Not found" });
+      const responseData = {
+        _id: customer._id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phoneNumber: customer.phoneNumber,
+        address: customer.address,
+        birthday: customer.birthday,
+      };
+
+      res.status(200).json(responseData);
+    } catch (err) {
+      res.sendStatus(500);
+    }
+  }
+);
+
 // router.post(
 //   "/login",
 
@@ -227,13 +379,7 @@ router.patch(
 
 //       if (!customer) return res.status(404).send({ message: "Not found" });
 
-//       const { _id, email: empEmail, firstName, lastName } = customer;
-
-//       const token = encodeToken(_id, empEmail, firstName, lastName);
-
-//       console.log(token);
 //       res.status(200).json({
-//         token,
 //         payload: customer,
 //       });
 //     } catch (err) {
@@ -244,29 +390,5 @@ router.patch(
 //     }
 //   }
 // );
-router.post(
-  "/login",
-
-  validateSchema(loginSchema),
-
-  async (req, res, next) => {
-    try {
-      const { email, password } = req.body;
-
-      const customer = await Customer.findOne({ email, password });
-
-      if (!customer) return res.status(404).send({ message: "Not found" });
-
-      res.status(200).json({
-        payload: customer,
-      });
-    } catch (err) {
-      res.status(401).json({
-        statusCode: 401,
-        message: "Login Unsuccessful",
-      });
-    }
-  }
-);
 
 module.exports = router;

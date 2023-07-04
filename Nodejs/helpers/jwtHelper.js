@@ -31,7 +31,7 @@ const encodeToken = (userId, email, firstName, lastName) => {
     },
     jwtSettings.SECRET,
     {
-      expiresIn: "30s",
+      expiresIn: "2h",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       algorithm: "HS512",
@@ -50,7 +50,7 @@ const encodeRefreshToken = (userId, email, firstName, lastName) => {
     },
     process.env.REFRESH_ACCESS_TOKEN,
     {
-      expiresIn: "10d",
+      expiresIn: "5d",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       algorithm: "HS512",

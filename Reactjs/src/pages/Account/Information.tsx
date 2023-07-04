@@ -100,6 +100,7 @@ const AccountInformation = (props: Props) => {
       message.error(`Vui lòng nhập ${selectItem} để sửa đổi`, 1.5);
     }
   };
+
   return (
     <>
       <Row
@@ -111,7 +112,8 @@ const AccountInformation = (props: Props) => {
             <div className="text-center">
               <Avatar
                 shape="square"
-                size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                // size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
+                size={100}
                 src={`${URL_ENV}${user?.imageUrl}`}
               />
               <div className="py-2">

@@ -57,6 +57,7 @@ const employeeSchema = new Schema(
     createdBy: createdBySchema,
     updatedDate: { type: Date },
     updatedBy: updatedBySchema,
+    refreshToken: { type: String },
   },
   {
     versionKey: false,

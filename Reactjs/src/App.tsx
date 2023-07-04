@@ -90,9 +90,9 @@ const App: React.FC = () => {
     const refreshToken = setTimeout(() => {
       setLogout();
     }, 2 * 3000);
-    return () => {
-      clearTimeout(refreshToken);
-    };
+    // return () => {
+    //   clearTimeout(refreshToken);
+    // };
   }, [auth?.token]);
   // Function reresh to clear local storage
 

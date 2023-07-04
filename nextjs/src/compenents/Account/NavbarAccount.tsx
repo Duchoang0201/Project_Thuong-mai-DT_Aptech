@@ -8,16 +8,15 @@ import AccountInformation from "./AccountInformation";
 const { Content, Sider } = Layout;
 
 const NavbarAccount: React.FC = () => {
-  const [auth, setAuth] = useState<any>(null);
   const [keyActive, setKeyActive] = useState<string>("information");
   const [windowWidth, setWindowWidth] = useState<number>(0);
   const [trigger, setTrigger] = useState<boolean>(false);
 
-  useEffect(() => {
-    const authData: any = useAuthStore.getState();
-    const { auth } = authData;
-    setAuth(auth);
-  }, []);
+  // useEffect(() => {
+  //   const authData: any = useAuthStore.getState();
+  //   const { auth } = authData;
+  //   setAuth(auth);
+  // }, []);
 
   useEffect(() => {
     const handleResize = () => {

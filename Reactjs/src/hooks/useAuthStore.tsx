@@ -55,10 +55,7 @@ export const useAuthStore = create(
                   }
                 );
                 const user = response.data;
-                console.log(
-                  "««««« response?.response?.data?.oke »»»»»",
-                  response?.response?.data?.oke
-                );
+
                 if (user._id) {
                   //lastActivity
 
@@ -78,6 +75,7 @@ export const useAuthStore = create(
                 const newToken = await axios.post(
                   `${URL_ENV}/employees/refreshToken`,
                   {
+                    id: auth.userId,
                     token: auth?.refreshToken,
                   }
                 );

@@ -250,6 +250,9 @@ const AccountOrders = (props: Props) => {
               <div>
                 {/* Description of order */}
                 <Descriptions bordered column={1}>
+                  <Descriptions.Item label="Mã đơn hàng">
+                    {selectedOrder._id}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Trạng thái">
                     {selectedOrder.status}
                   </Descriptions.Item>
