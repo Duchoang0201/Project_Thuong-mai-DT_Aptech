@@ -70,35 +70,22 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
       .sort({ isDeleted: 1 })
       .limit(limit);
 
-    let amountSold = await Order.aggregate([
-      { $unwind: "$orderDetails" },
-      {
-        $lookup: {
-          from: "products",
-          localField: "orderDetails.productId",
-          foreignField: "_id",
-          as: "productSold",
-        },
-      },
-      { $unwind: "$productSold" },
-      {
-        $group: {
-          _id: "$productSold._id",
-          productName: { $first: "$productSold.name" },
-          price: { $first: "$productSold.price" },
-          totalQuantity: { $sum: "$orderDetails.quantity" },
-        },
-      },
-      {
-        $project: {
-          _id: 1,
-          productName: 1,
-          price: 1,
-          totalQuantity: 1,
-        },
-      },
-    ]);
-
+    let amountSold = await Order.aggregate()
+      // .match({ status: "COMPLETED" })
+      .unwind("$orderDetails")
+      .lookup({
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "productSold",
+      })
+      .unwind("$productSold")
+      .group({
+        _id: "$productSold._id",
+        productName: { $first: "$productSold.name" },
+        price: { $first: "$productSold.price" },
+        totalQuantity: { $sum: "$orderDetails.quantity" },
+      });
     // Map the amountSold array to create a dictionary of ID-quantity pairs
     const amountSoldDict = await amountSold.reduce((dict, item) => {
       dict[item._id.toString()] = item.totalQuantity;
@@ -106,7 +93,7 @@ router.get("/", validateSchema(getProductsSchema), async (req, res, next) => {
     }, []);
 
     // Add the "amountSold" field to each item in the "results" array
-    resulst = results.map((item) => {
+    results = results.map((item) => {
       const amountSoldQuantity = amountSoldDict[item._id.toString()] || 0;
 
       //Tường minh hơn:

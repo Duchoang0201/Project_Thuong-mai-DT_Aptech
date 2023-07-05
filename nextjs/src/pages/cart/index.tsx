@@ -48,7 +48,7 @@ export default function CounterApp() {
     };
 
     fetchData();
-  }, [auth?.payload._id]);
+  }, [auth?.payload?._id]);
 
   useEffect(() => {
     const handleResize = () => {

@@ -301,6 +301,7 @@ router.get(
       if (!employee) return res.status(404).send({ message: "Not found" });
       const responseData = {
         _id: employee._id,
+        isAdmin: employee.isAdmin,
         firstName: employee.firstName,
         lastName: employee.lastName,
         email: employee.email,

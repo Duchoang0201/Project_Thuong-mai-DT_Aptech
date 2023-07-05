@@ -1515,6 +1515,7 @@ router.get("/34", function (req, res, next) {
 router.get("/sold", async (req, res) => {
   try {
     Order.aggregate()
+      .match({ status: "COMPLETED" })
       .unwind("$orderDetails")
       .lookup({
         from: "products",

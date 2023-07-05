@@ -7,7 +7,7 @@ interface isLogin {
   email: string;
   password: string;
 }
-const TIME_REFRESH_TOKEN = 30 * 1000;
+const TIME_REFRESH_TOKEN = 2 * 60 * 60 * 1000;
 
 export const useAuthStore = create(
   devtools(

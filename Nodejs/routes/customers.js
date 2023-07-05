@@ -219,40 +219,66 @@ router.patch(
   "/:id",
   validateSchema(customerIdSchema),
   validateSchema(customerBodyPatchSchema),
-
   async (req, res, next) => {
     const itemId = req.params.id;
     const itemBody = req.body;
 
     try {
       // Check if the "password" field is present in the request body
-      //Mã hóa password
+      // Hash password
       if (itemBody.password) {
         const salt = await bcrypt.genSalt(10);
         const hashPass = await bcrypt.hash(itemBody.password, salt);
         itemBody.password = hashPass;
       }
 
+      // Check if the phone number already exists
+      if (itemBody.phoneNumber) {
+        const existingPhoneNumber = await Customer.findOne({
+          phoneNumber: itemBody.phoneNumber,
+          _id: { $ne: itemId }, // Exclude the current customer from the check
+        });
+
+        if (existingPhoneNumber) {
+          return res.status(400).json({
+            ok: false,
+            message: "Phone number already exists",
+          });
+        }
+      }
+
+      // Check if the address already exists
+      if (itemBody.address) {
+        const existingAddress = await Customer.findOne({
+          address: itemBody.address,
+          _id: { $ne: itemId }, // Exclude the current customer from the check
+        });
+
+        if (existingAddress) {
+          return res.status(400).json({
+            ok: false,
+            message: "Address already exists",
+          });
+        }
+      }
+
       const updatedItem = await Customer.findByIdAndUpdate(
         itemId,
-        ///$set : the $set operator is used to update the specified fields of a document. ( chỉ cập nhật trườn chỉ định
-        // mà không cập nhật các trường khác)
         { $set: itemBody },
         { new: true }
       );
 
       if (updatedItem) {
-        return res.status(200).json({ oke: true, result: updatedItem });
+        return res.status(200).json({ ok: true, result: updatedItem });
       } else {
-        return res
-          .status(410)
-          .json({ oke: false, message: "Object not found" });
+        return res.status(410).json({ ok: false, message: "Object not found" });
       }
     } catch (err) {
       next(err);
     }
   }
 );
+
 //FRESH TOKEN :
 
 router.post("/refreshToken", async (req, res, next) => {

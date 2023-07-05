@@ -31,7 +31,7 @@ const encodeToken = (userId, email, firstName, lastName) => {
     },
     jwtSettings.SECRET,
     {
-      expiresIn: "30s",
+      expiresIn: "2h",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       algorithm: "HS512",

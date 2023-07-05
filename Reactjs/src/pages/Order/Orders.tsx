@@ -104,20 +104,20 @@ export default function Orders() {
 
   const [pages, setPages] = useState();
   const [skip, setSkip] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
+  // const [currentPage, setCurrentPage] = useState(1);
   const slideCurrent = (value: any) => {
     setSkip(value * 10 - 10);
-    setCurrentPage(value);
+    // setCurrentPage(value);
   };
 
   // Products
   const [products, setProducts] = useState<any>([]);
   const [skipProducts, setSkipProducts] = useState(0);
-  const [currentPageProducts, setCurrentPageProducts] = useState(1);
+  // const [currentPageProducts, setCurrentPageProducts] = useState(1);
   const [pageProducts, setPageProduts] = useState();
   const slideCurrentProduct = (value: any) => {
     setSkipProducts(value * 10 - 10);
-    setCurrentPageProducts(value);
+    // setCurrentPageProducts(value);
   };
   const queryParams = [skipProducts && `skip=${skipProducts}`]
     .filter(Boolean)
@@ -439,6 +439,7 @@ export default function Orders() {
               }
               options={[
                 { label: "WAITING", value: "WAITING" },
+                { label: "ECONFIRMED", value: "ECONFIRMED" },
                 { label: "COMPLETED", value: "COMPLETED" },
                 { label: "CANCELED", value: "CANCELED" },
               ]}
@@ -688,6 +689,7 @@ export default function Orders() {
                                     1.5
                                   );
                                   setRefresh((f) => f + 1);
+                                  setComponentDisabled(!componentDisabled);
                                 }, 2000);
                               }
                             }}
@@ -789,6 +791,7 @@ export default function Orders() {
 
                   {/* Table include product of orderDetails */}
                   <Table
+                    bordered
                     scroll={{ x: 200 }}
                     rowKey="_id"
                     dataSource={selectedOrder.orderDetails}
