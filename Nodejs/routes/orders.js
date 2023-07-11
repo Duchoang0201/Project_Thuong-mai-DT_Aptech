@@ -2,56 +2,64 @@ var ObjectId = require("mongodb").ObjectId;
 const axios = require("axios");
 const crypto = require("crypto");
 const moment = require("moment");
-const { Order } = require("../models");
+const { Order, Employee, Customer } = require("../models");
 
+const { passportConfig } = require("../middlewares/passport");
 var express = require("express");
+const passport = require("passport");
 
 var router = express.Router();
 
 var WEBSHOP_URL = process.env.WEB_SHOP_URL || `http://localhost:4444`;
 
 /// GET MUTIPLE
-router.get("/", async (req, res, next) => {
-  try {
-    const {
-      orderId,
-      customerId,
-      methodPay,
-      status,
-      shippingAddress,
-      employee,
-      skip,
-      limit,
-    } = req.query;
+router.get(
+  "/",
+  passport.authenticate("jwt", {
+    session: false,
+  }),
+  async (req, res, next) => {
+    try {
+      const {
+        orderId,
+        customerId,
+        methodPay,
+        status,
+        shippingAddress,
+        employee,
+        skip,
+        limit,
+      } = req.query;
 
-    const query = {
-      $and: [
-        orderId && { _id: orderId },
-        customerId && { customerId },
-        methodPay && { paymentType: methodPay },
-        status && { status },
-        shippingAddress && { shippingAddress },
-        employee && { employee },
-      ].filter(Boolean),
-    };
+      const query = {
+        $and: [
+          orderId && { _id: orderId },
+          customerId && { customerId },
+          methodPay && { paymentType: methodPay },
+          status && { status },
+          shippingAddress && { shippingAddress },
+          employee && { employee },
+        ].filter(Boolean),
+      };
 
-    let results = await Order.find(query)
-      .skip(Number(skip))
-      .limit(Number(limit))
-      .populate({
-        path: "orderDetails.product",
-        populate: { path: "category" },
-      })
-      .populate("customer")
-      .populate("employee");
+      let results = await Order.find(query)
+        .skip(Number(skip))
+        .limit(Number(limit))
+        .populate({
+          path: "orderDetails.product",
+          populate: { path: "category" },
+        })
+        .populate("customer")
+        .populate("employee");
 
-    let amountResults = await Order.countDocuments(query);
+      let amountResults = await Order.countDocuments(query);
 
-    res.json({ results, amountResults });
-  } catch (error) {
-    res.status(500).json({ ok: false, error });
+      res.json({ results, amountResults });
+    } catch (error) {
+      res.status(500).json({ ok: false, error });
+    }
   }
-});
+);
 
 // GET
 

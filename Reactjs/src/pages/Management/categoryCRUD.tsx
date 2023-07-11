@@ -71,12 +71,6 @@ function CategoryCRUD() {
 
   const [loadingTable, setLoadingTable] = useState(true);
 
-  useEffect(() => {
-    setTimeout(() => {
-      setLoadingTable(false);
-    }, 1000); // 5000 milliseconds = 5 seconds
-  }, []);
-
   //Text of Tyography:
 
   //Create data
@@ -247,6 +241,7 @@ function CategoryCRUD() {
       .then((res) => {
         setCategoryTEST(res.data.results);
         setPages(res.data.amountResults);
+        setLoadingTable(false);
       })
       .catch((err) => console.log(err));
   }, [URL_FILTER, refresh]);

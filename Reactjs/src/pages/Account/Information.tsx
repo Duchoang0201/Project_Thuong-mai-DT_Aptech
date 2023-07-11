@@ -149,7 +149,7 @@ const Information = (props: Props) => {
                               firstName: e,
                             })
                             .then((res) => {
-                              const count = setTimeout(() => {
+                              setTimeout(() => {
                                 message.success(
                                   `Change fisrt name to ${res.data.firstName} successfully!!`,
                                   1.5
@@ -190,7 +190,7 @@ const Information = (props: Props) => {
                               lastName: e,
                             })
                             .then((res) => {
-                              const count = setTimeout(() => {
+                              setTimeout(() => {
                                 message.success(
                                   `Change last name to ${res.data.lastName} successfully!!`,
                                   1.5
@@ -231,7 +231,7 @@ const Information = (props: Props) => {
                               address: e,
                             })
                             .then((res) => {
-                              const count = setTimeout(() => {
+                              setTimeout(() => {
                                 message.success(
                                   `Change address to ${res.data.address} successfully!!`,
                                   1.5
@@ -275,7 +275,7 @@ const Information = (props: Props) => {
                               message.loading("Changing Phone Number !!", 1.5);
 
                               console.log("««««« res »»»»»", res);
-                              const count = setTimeout(() => {
+                              setTimeout(() => {
                                 message.success(
                                   `Change Phone Number to ${res.data.result.phoneNumber} successfully!!`,
                                   1.5
@@ -320,7 +320,7 @@ const Information = (props: Props) => {
                             .then((res) => {
                               message.loading("Changing Email !!", 1.5);
 
-                              const count = setTimeout(() => {
+                              setTimeout(() => {
                                 message.success(
                                   `Change email to ${res.data.result.email} successfully!!`,
                                   1.5
@@ -390,7 +390,7 @@ const Information = (props: Props) => {
                                     );
                                     setOldPassWord("");
 
-                                    const count = setTimeout(() => {
+                                    setTimeout(() => {
                                       setDisabled(!disabled);
                                       setDisabledNewPassword(false);
                                     }, 2000);
@@ -433,7 +433,7 @@ const Information = (props: Props) => {
                                 .then((res) => {
                                   message.loading("Changing Password !!", 1.5);
 
-                                  const count = setTimeout(() => {
+                                  setTimeout(() => {
                                     message.success(
                                       `Change Password  successfully!!`,
                                       1.5

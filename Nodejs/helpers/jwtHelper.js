@@ -22,9 +22,10 @@ const jwtSettings = require("../constants/jwtSetting");
 
 //New
 //ACCESS-TOKEN
-const encodeToken = (userId, firstName, lastName) => {
+const encodeToken = (userId, firstName, lastName, position) => {
   const token = JWT.sign(
     {
+      position,
       fullName: `${firstName} - ${lastName}`,
     },
     jwtSettings.SECRET,
@@ -40,10 +41,11 @@ const encodeToken = (userId, firstName, lastName) => {
   return token;
 };
 
-const encodeRefreshToken = (userId, firstName, lastName) => {
+const encodeRefreshToken = (userId, firstName, lastName, position) => {
   const token = JWT.sign(
     {
       id: userId,
+      position,
       fullName: `${firstName} - ${lastName}`,
     },
     process.env.REFRESH_ACCESS_TOKEN,

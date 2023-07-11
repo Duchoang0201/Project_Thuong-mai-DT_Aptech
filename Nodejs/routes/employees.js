@@ -58,7 +58,7 @@ const allowRoles = (...roles) => {
 
 router.get(
   "/",
-  passport.authenticate(passportConfig(Employee), { session: false }),
+  passport.authenticate("jwt", { session: false }),
   allowRoles("admin"),
   async (req, res, next) => {
     try {
@@ -151,7 +151,7 @@ router.get(
 // GET A DATA
 router.get(
   "/personal",
-  passport.authenticate(passportConfig(Employee), { session: false }),
+  passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     const bearerToken = req.get("Authorization").replace("Bearer ", "");
 
@@ -351,7 +351,7 @@ router.post("/refreshToken", async (req, res, next) => {
 router.post(
   "/login",
   validateSchema(loginSchema),
-  passport.authenticate(passportConfigLocal(Employee), { session: false }),
+  // passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
       const { email } = req.body;
@@ -365,8 +365,13 @@ router.post(
       const { _id, firstName, lastName } = employee;
       const id = _id.toString();
 
-      const token = encodeToken(id, firstName, lastName);
-      const refreshToken = encodeRefreshToken(id, firstName, lastName);
+      const token = encodeToken(id, firstName, lastName, "Employee");
+      const refreshToken = encodeRefreshToken(
+        id,
+        firstName,
+        lastName,
+        "Employee"
+      );
 
       await Employee.findByIdAndUpdate(id, {
         $set: { refreshToken: refreshToken },
@@ -407,7 +412,7 @@ router.get(
   "/login/profile",
   // passport.authenticate("jwt", { session: false }),
   // authenToken,
-  passport.authenticate(passportConfig(Employee), { session: false }),
+  passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
       const bearerToken = req.get("Authorization").replace("Bearer ", "");
