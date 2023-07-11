@@ -57,7 +57,6 @@ const ExtractJwt = require("passport-jwt").ExtractJwt;
 const { findDocument, findDocuments } = require("../helpers/MongoDbHelper");
 const jwtSettings = require("../constants/jwtSetting");
 const { Employee, Customer } = require("../models");
-const BasicStrategy = require("passport-http").BasicStrategy;
 
 const passportConfig = (model) => {
   return new JwtStrategy(
@@ -67,7 +66,7 @@ const passportConfig = (model) => {
     },
     async (payload, done) => {
       try {
-        const user = await model.findById(payload._id);
+        const user = await model.findById(payload.sub);
 
         if (!user) return done(null, false);
 

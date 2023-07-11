@@ -128,6 +128,8 @@ const AccountOrders = (props: Props) => {
       key: "status",
       render: (text: any, record: any) => {
         return text === "WAITING" ? (
+          <div className="">{text}</div>
+        ) : text === "ECONFIRMED" ? (
           <div className="text-primary">{text}</div>
         ) : text === "COMPLETED" ? (
           <div className="text-success">{text}</div>
@@ -186,37 +188,42 @@ const AccountOrders = (props: Props) => {
               shape="circle"
               icon={<SearchOutlined />}
             />
-            <Popconfirm
-              okText="Delete"
-              okType="danger"
-              onConfirm={async () => {
-                const handleCanceled: any = await axios.patch(
-                  `${URL_ENV}/orders/${record._id}`,
-                  {
-                    status: "CANCELED",
-                  }
-                );
+            {(record.status === "WAITING" ||
+              record.status === "ECONFIRMED") && (
+              <>
+                <Popconfirm
+                  okText="Delete"
+                  okType="danger"
+                  onConfirm={async () => {
+                    const handleCanceled: any = await axios.patch(
+                      `${URL_ENV}/orders/${record._id}`,
+                      {
+                        status: "CANCELED",
+                      }
+                    );
 
-                if (handleCanceled?.data?._id) {
-                  await axios
-                    .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
-                    .then((response) => {
-                      setTimeout(() => {
-                        setRefresh((f) => f + 1);
-                        message.success("Hủy đơn hàng thành công !!", 1.5);
-                      }, 2000);
-                    })
-                    .catch((error) => {
-                      console.error(error);
-                    });
-                } else {
-                  message.error(`SYSTEM ERROR !!!`);
-                }
-              }}
-              title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
-            >
-              <Button danger icon={<RestOutlined />}></Button>
-            </Popconfirm>
+                    if (handleCanceled?.data?._id) {
+                      await axios
+                        .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                        .then((response) => {
+                          setTimeout(() => {
+                            setRefresh((f) => f + 1);
+                            message.success("Hủy đơn hàng thành công !!", 1.5);
+                          }, 2000);
+                        })
+                        .catch((error) => {
+                          console.error(error);
+                        });
+                    } else {
+                      message.error(`SYSTEM ERROR !!!`);
+                    }
+                  }}
+                  title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
+                >
+                  <Button danger icon={<RestOutlined />}></Button>
+                </Popconfirm>
+              </>
+            )}
           </Space>
         );
       },

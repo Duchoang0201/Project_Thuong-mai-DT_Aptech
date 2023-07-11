@@ -346,18 +346,19 @@ const AccountInformation = (props: Props) => {
                     </Col>
                   </Row>
                 </Collapse.Panel>
+
                 <Collapse.Panel header="Password" key="6">
-                  {" "}
+                  Đổi mật khẩu{" "}
+                  <Button
+                    danger={!disabled}
+                    type="dashed"
+                    icon={<EditOutlined />}
+                    onClick={() => {
+                      setDisabled(!disabled);
+                    }}
+                  />{" "}
                   <div>
-                    Đổi mật khẩu{" "}
-                    <Button
-                      danger={!disabled}
-                      type="dashed"
-                      icon={<EditOutlined />}
-                      onClick={() => {
-                        setDisabled(!disabled);
-                      }}
-                    />{" "}
+                    Nhập mật khẩu cũ:
                     <Row gutter={10} className="py-2">
                       <Col span={20}>
                         <Space>

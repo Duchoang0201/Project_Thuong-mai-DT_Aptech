@@ -19,13 +19,49 @@ const {
   employeeIdSchema,
 } = require("../validation/employee");
 const { encodeToken, encodeRefreshToken } = require("../helpers/jwtHelper");
+const { findDocument } = require("../helpers/MongoDbHelper");
 
 const ObjectId = require("mongodb").ObjectId;
 
+//CHECK ROLES
+
+const allowRoles = (...roles) => {
+  // return a middleware
+
+  return (req, res, next) => {
+    const bearerToken = req.get("Authorization").replace("Bearer ", "");
+
+    // DECODE TOKEN
+    const payload = jwt.decode(bearerToken, { json: true });
+
+    // AFTER DECODE TOKEN: GET UID FROM PAYLOAD
+
+    const { sub } = payload;
+
+    findDocument(sub, "employees").then((user) => {
+      if (user && user.roles) {
+        let oke = false;
+        user.roles.forEach((role) => {
+          if (roles.includes(role)) {
+            oke = true;
+            return;
+          }
+        });
+        if (oke) {
+          next();
+        } else {
+          res.status(403).json({ message: "User's not allowed to access " });
+        }
+      } else res.status(403).json({ message: "Forbiden" });
+    });
+  };
+};
 // Get all on Multiple conditions
+
 router.get(
   "/",
-
+  passport.authenticate(passportConfig(Employee), { session: false }),
+  allowRoles("admin"),
   async (req, res, next) => {
     try {
       const {
@@ -164,37 +200,99 @@ router.delete(
 );
 
 // PATCH DATA
+// router.patch(
+//   "/:id",
+//   validateSchema(employeeIdSchema),
+
+//   async (req, res, next) => {
+//     const itemId = req.params.id;
+//     const itemBody = req.body;
+
+//     try {
+//       // Check if the "password" field is present in the request body
+//       //Mã hóa password
+//       if (itemBody.password) {
+//         const salt = await bcrypt.genSalt(10);
+//         const hashPass = await bcrypt.hash(itemBody.password, salt);
+//         itemBody.password = hashPass;
+//       }
+
+//       const updatedItem = await Employee.findByIdAndUpdate(
+//         itemId,
+//         ///$set : the $set operator is used to update the specified fields of a document. ( chỉ cập nhật trườn chỉ định
+//         // mà không cập nhật các trường khác)
+//         { $set: itemBody },
+//         { new: true }
+//       );
+
+//       if (updatedItem) {
+//         return res.status(200).json({ oke: true, result: updatedItem });
+//       } else {
+//         return res
+//           .status(410)
+//           .json({ oke: false, message: "Object not found" });
+//       }
+//     } catch (err) {
+//       next(err);
+//     }
+//   }
+// );
 router.patch(
   "/:id",
   validateSchema(employeeIdSchema),
-
   async (req, res, next) => {
     const itemId = req.params.id;
     const itemBody = req.body;
 
     try {
       // Check if the "password" field is present in the request body
-      //Mã hóa password
+      // Hash password
       if (itemBody.password) {
         const salt = await bcrypt.genSalt(10);
         const hashPass = await bcrypt.hash(itemBody.password, salt);
         itemBody.password = hashPass;
       }
 
+      // Check if the phone number already exists
+      if (itemBody.phoneNumber) {
+        const existingPhoneNumber = await Employee.findOne({
+          phoneNumber: itemBody.phoneNumber,
+          _id: { $ne: itemId }, // Exclude the current Employee from the check
+        });
+
+        if (existingPhoneNumber) {
+          return res.status(400).json({
+            ok: false,
+            message: "Phone number already exists",
+          });
+        }
+      }
+
+      // Check if the email already exists
+      if (itemBody.email) {
+        const existingEmail = await Employee.findOne({
+          email: itemBody.email,
+          _id: { $ne: itemId }, // Exclude the current Employee from the check
+        });
+
+        if (existingEmail) {
+          return res.status(400).json({
+            ok: false,
+            message: "Email already exists",
+          });
+        }
+      }
+
       const updatedItem = await Employee.findByIdAndUpdate(
         itemId,
-        ///$set : the $set operator is used to update the specified fields of a document. ( chỉ cập nhật trườn chỉ định
-        // mà không cập nhật các trường khác)
         { $set: itemBody },
         { new: true }
       );
 
       if (updatedItem) {
-        return res.status(200).json({ oke: true, result: updatedItem });
+        return res.status(200).json({ ok: true, result: updatedItem });
       } else {
-        return res
-          .status(410)
-          .json({ oke: false, message: "Object not found" });
+        return res.status(410).json({ ok: false, message: "Object not found" });
       }
     } catch (err) {
       next(err);
@@ -202,69 +300,76 @@ router.patch(
   }
 );
 
+/// set new Token
 router.post("/refreshToken", async (req, res, next) => {
   const { refreshToken, id } = req?.body;
 
-  if (!refreshToken) {
+  if (!refreshToken || !id) {
     return res.sendStatus(401);
   }
 
-  const checkEmployee = await Employee.findById(id);
-  const EmployeeRefreshToken = checkEmployee.refreshToken;
-  if (!EmployeeRefreshToken) {
-    return res.sendStatus(403);
-  }
+  try {
+    const employee = await Employee.findOne({
+      _id: id,
+      refreshToken: refreshToken,
+    });
 
-  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
-    if (err) {
-      return res.sendStatus(403);
+    if (!employee) {
+      return res
+        .status(401)
+        .json({ message: "refreshToken and id's not match!" });
     }
-    const { _id, empEmail, firstName, lastName } = data;
 
-    const accessToken = encodeToken(_id, empEmail, firstName, lastName);
-    res.json({ accessToken });
-  });
+    jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
+      if (err) {
+        return res
+          .status(401)
+          .json({ message: "refreshToken is not a valid Token" });
+      }
+
+      const { _id, firstName, lastName } = data;
+
+      const accessToken = encodeToken(id, firstName, lastName);
+      res.json({ accessToken });
+    });
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
+  }
 });
 
 router.post(
   "/login",
   validateSchema(loginSchema),
-  // passport.authenticate("local", { session: false }),
   passport.authenticate(passportConfigLocal(Employee), { session: false }),
   async (req, res, next) => {
     try {
       const { email } = req.body;
 
-      console.log("««««« email »»»»»", email);
       const employee = await Employee.findOne({ email });
 
-      if (!employee) return res.status(404).send({ message: "Not found" });
+      if (!employee) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-      const { _id, email: empEmail, firstName, lastName } = employee;
+      const { _id, firstName, lastName } = employee;
+      const id = _id.toString();
 
-      const token = encodeToken(_id, empEmail, firstName, lastName);
+      const token = encodeToken(id, firstName, lastName);
+      const refreshToken = encodeRefreshToken(id, firstName, lastName);
 
-      const refreshToken = encodeRefreshToken(
-        _id,
-        empEmail,
-        firstName,
-        lastName
-      );
-      await Employee.findByIdAndUpdate(employee._id, {
-        refreshToken: refreshToken,
+      await Employee.findByIdAndUpdate(id, {
+        $set: { refreshToken: refreshToken },
       });
 
       res.status(200).json({
         token,
         refreshToken,
-        userId: employee._id,
-        // payload: employee,
+        userId: id,
       });
     } catch (err) {
-      res.status(401).json({
-        statusCode: 401,
-        message: "Login Unsuccessful",
-      });
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );

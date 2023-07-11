@@ -58,6 +58,7 @@ const employeeSchema = new Schema(
     updatedDate: { type: Date },
     updatedBy: updatedBySchema,
     refreshToken: { type: String },
+    roles: [],
   },
   {
     versionKey: false,

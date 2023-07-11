@@ -246,22 +246,20 @@ router.patch(
           });
         }
       }
-
-      // Check if the address already exists
-      if (itemBody.address) {
-        const existingAddress = await Customer.findOne({
-          address: itemBody.address,
+      // Check if the email already exists
+      if (itemBody.email) {
+        const existingEmail = await Customer.findOne({
+          email: itemBody.email,
           _id: { $ne: itemId }, // Exclude the current customer from the check
         });
 
-        if (existingAddress) {
+        if (existingEmail) {
           return res.status(400).json({
             ok: false,
-            message: "Address already exists",
+            message: "Email already exists",
           });
         }
       }
-
       const updatedItem = await Customer.findByIdAndUpdate(
         itemId,
         { $set: itemBody },
