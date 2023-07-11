@@ -1,10 +1,14 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-
+const {
+  passportConfigLocal,
+  passportConfig,
+} = require("../middlewares/passport");
 const { Customer } = require("../models");
-const yup = require("yup");
-
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const { authenToken } = require("../helpers/authenToken");
 const {
   validateSchema,
   loginSchema,
@@ -15,8 +19,7 @@ const {
 } = require("../validation/customer");
 
 const ObjectId = require("mongodb").ObjectId;
-
-const encodeToken = require("../helpers/jwtHelper");
+const { encodeToken, encodeRefreshToken } = require("../helpers/jwtHelper");
 
 // let data = [
 //     {id: 1, name: 'Peter', email: 'peter@gmail.com', address: 'USA'},
@@ -189,61 +192,227 @@ router.delete(
 
 //PATCH DATA
 
+// router.patch(
+//   "/:id",
+//   validateSchema(customerIdSchema),
+//   validateSchema(customerBodyPatchSchema),
+//   async (req, res, next) => {
+//     try {
+//       const itemId = req.params.id;
+//       const itemBody = req.body;
+
+//       if (itemId) {
+//         await Customer.findByIdAndUpdate(itemId, {
+//           $set: itemBody,
+//         });
+//         let itemUpdated = await Customer.findById(itemId);
+//         res
+//           .status(200)
+//           .send({ message: "Updated successfully", result: itemUpdated });
+//       }
+//     } catch (error) {
+//       res.status(500).send(error);
+//     }
+//   }
+// );
 router.patch(
   "/:id",
   validateSchema(customerIdSchema),
   validateSchema(customerBodyPatchSchema),
   async (req, res, next) => {
-    try {
-      const itemId = req.params.id;
-      const itemBody = req.body;
+    const itemId = req.params.id;
+    const itemBody = req.body;
 
-      if (itemId) {
-        await Customer.findByIdAndUpdate(itemId, {
-          $set: itemBody,
-        });
-        let itemUpdated = await Customer.findById(itemId);
-        res
-          .status(200)
-          .send({ message: "Updated successfully", result: itemUpdated });
+    try {
+      // Check if the "password" field is present in the request body
+      // Hash password
+      if (itemBody.password) {
+        const salt = await bcrypt.genSalt(10);
+        const hashPass = await bcrypt.hash(itemBody.password, salt);
+        itemBody.password = hashPass;
       }
-    } catch (error) {
-      res.status(500).send(error);
+
+      // Check if the phone number already exists
+      if (itemBody.phoneNumber) {
+        const existingPhoneNumber = await Customer.findOne({
+          phoneNumber: itemBody.phoneNumber,
+          _id: { $ne: itemId }, // Exclude the current customer from the check
+        });
+
+        if (existingPhoneNumber) {
+          return res.status(400).json({
+            ok: false,
+            message: "Phone number already exists",
+          });
+        }
+      }
+      // Check if the email already exists
+      if (itemBody.email) {
+        const existingEmail = await Customer.findOne({
+          email: itemBody.email,
+          _id: { $ne: itemId }, // Exclude the current customer from the check
+        });
+
+        if (existingEmail) {
+          return res.status(400).json({
+            ok: false,
+            message: "Email already exists",
+          });
+        }
+      }
+      const updatedItem = await Customer.findByIdAndUpdate(
+        itemId,
+        { $set: itemBody },
+        { new: true }
+      );
+
+      if (updatedItem) {
+        return res.status(200).json({ ok: true, result: updatedItem });
+      } else {
+        return res.status(410).json({ ok: false, message: "Object not found" });
+      }
+    } catch (err) {
+      next(err);
     }
   }
 );
 
+//FRESH TOKEN :
+
+router.post("/refreshToken", async (req, res, next) => {
+  const { refreshToken, id } = req?.body;
+
+  if (!refreshToken) {
+    return res.sendStatus(401);
+  }
+
+  const checkCustomer = await Customer.findById(id);
+  const customerRefreshToken = checkCustomer?.refreshToken;
+  if (!customerRefreshToken) {
+    return res.sendStatus(403);
+  }
+
+  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
+    if (err) {
+      return res.sendStatus(403);
+    }
+    const { _id, empEmail, firstName, lastName } = data;
+
+    const accessToken = encodeToken(_id, empEmail, firstName, lastName);
+    res.json({ accessToken });
+  });
+});
 /// LOGIN
 router.post(
   "/login",
-
   validateSchema(loginSchema),
-
+  passport.authenticate(passportConfigLocal(Customer), { session: false }),
   async (req, res, next) => {
     try {
-      const { email, password } = req.body;
+      const { email } = req.body;
 
-      const customer = await Customer.findOne({ email, password });
+      const employee = await Customer.findOne({ email });
 
-      console.log(customer);
-      if (!customer) return res.status(404).send({ message: "Not found" });
+      if (!employee) {
+        return res.status(404).json({ message: "User not found" });
+      }
 
-      const { _id, email: empEmail, firstName, lastName } = customer;
+      const { _id, firstName, lastName } = employee;
+      const id = _id.toString();
 
-      const token = encodeToken(_id, empEmail, firstName, lastName);
+      const token = encodeToken(id, firstName, lastName, "Customer");
+      const refreshToken = encodeRefreshToken(
+        id,
+        firstName,
+        lastName,
+        "Customer"
+      );
 
-      console.log(token);
+      await Customer.findByIdAndUpdate(id, {
+        $set: { refreshToken: refreshToken },
+      });
+
       res.status(200).json({
         token,
-        payload: customer,
+        refreshToken,
       });
     } catch (err) {
-      res.status(401).json({
-        statusCode: 401,
-        message: "Login Unsuccessful",
-      });
+      console.error(err);
+      res.status(500).json({ message: "Internal server error" });
     }
   }
 );
+
+// function authenToken(req, res, next) {
+//   const authorizationHeader = req.headers["authorization"];
+
+//   const token = authorizationHeader ? authorizationHeader.split(" ")[1] : null;
+//   if (!token) {
+//     return res
+//       .status(401)
+//       .json({ oke: false, message: "Token is not defined" });
+//   }
+
+//   jwt.verify(token, process.env.SECRET, (err, data) => {
+//     if (err) {
+//       return res
+//         .status(403)
+//         .json({ oke: false, message: "JWT's valid", err: err.message });
+//     }
+
+//     next();
+//   });
+// }
+router.get(
+  "/login/profile",
+  // passport.authenticate("jwt", { session: false }),
+  authenToken,
+  passport.authenticate("jwt", { session: false }),
+  async (req, res, next) => {
+    try {
+      const customer = await Customer.findById(req.user._id);
+
+      if (!customer) return res.status(404).send({ message: "Not found" });
+      const responseData = {
+        _id: customer._id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phoneNumber: customer.phoneNumber,
+        address: customer.address,
+        birthday: customer.birthday,
+      };
+
+      res.status(200).json(responseData);
+    } catch (err) {
+      res.sendStatus(500);
+    }
+  }
+);
+
+// router.post(
+//   "/login",
+
+//   validateSchema(loginSchema),
+
+//   async (req, res, next) => {
+//     try {
+//       const { email, password } = req.body;
+
+//       const customer = await Customer.findOne({ email, password });
+
+//       if (!customer) return res.status(404).send({ message: "Not found" });
+
+//       res.status(200).json({
+//         payload: customer,
+//       });
+//     } catch (err) {
+//       res.status(401).json({
+//         statusCode: 401,
+//         message: "Login Unsuccessful",
+//       });
+//     }
+//   }
+// );
 
 module.exports = router;

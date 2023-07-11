@@ -1515,6 +1515,7 @@ router.get("/34", function (req, res, next) {
 router.get("/sold", async (req, res) => {
   try {
     Order.aggregate()
+      .match({ status: "COMPLETED" })
       .unwind("$orderDetails")
       .lookup({
         from: "products",
@@ -1529,12 +1530,12 @@ router.get("/sold", async (req, res) => {
         price: { $first: "$productSold.price" },
         totalQuantity: { $sum: "$orderDetails.quantity" },
       })
-      .project({
-        _id: 1,
-        productName: 1,
-        price: 1,
-        totalQuantity: 1,
-      })
+      // .project({
+      //   _id: 1,
+      //   productName: 1,
+      //   price: 1,
+      //   totalQuantity: 1,
+      // })
       .then((result) => {
         res.send(result);
       })

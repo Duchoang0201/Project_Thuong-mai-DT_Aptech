@@ -18,7 +18,7 @@ const updatedBySchema = new Schema({
   lastName: { type: String },
 });
 
-const customerSchema = Schema(
+const customerSchema = new Schema(
   {
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
@@ -60,6 +60,7 @@ const customerSchema = Schema(
     updatedBy: updatedBySchema,
     note: { type: String },
     lastActivity: { type: Date },
+    refreshToken: { type: String },
   },
   {
     versionKey: false,
@@ -79,6 +80,19 @@ const customerSchema = Schema(
 //     next(err);
 //   }
 // });
+customerSchema.pre("save", async function (next) {
+  try {
+    // generate salt key
+    const salt = await bcrypt.genSalt(10); // 10 ký tự
+    // generate password = salt key + hash key
+    const hashPass = await bcrypt.hash(this.password, salt);
+    // override password
+    this.password = hashPass;
+    next();
+  } catch (err) {
+    next(err);
+  }
+});
 
 customerSchema.methods.isValidPass = async function (pass) {
   try {
@@ -88,5 +102,9 @@ customerSchema.methods.isValidPass = async function (pass) {
   }
 };
 
+// // Check password from client
+// employeeSchema.methods.comparePassword = function comparePassword(checkPassword) {
+//   return bcrypt.compareSync(checkPassword, this.password);
+// };
 const Customer = model("Customer", customerSchema);
 module.exports = Customer;

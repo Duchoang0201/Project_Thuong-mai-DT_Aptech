@@ -66,6 +66,8 @@ const AccountOrders = (props: Props) => {
       key: "quantity",
     },
     {
+      width: "30%",
+
       title: "Tên sản phẩm",
       dataIndex: "product.name",
       key: "product.name",
@@ -74,6 +76,8 @@ const AccountOrders = (props: Props) => {
       },
     },
     {
+      width: "10%",
+
       title: "Giá",
       dataIndex: "product.price",
       key: "product.price",
@@ -124,6 +128,8 @@ const AccountOrders = (props: Props) => {
       key: "status",
       render: (text: any, record: any) => {
         return text === "WAITING" ? (
+          <div className="">{text}</div>
+        ) : text === "ECONFIRMED" ? (
           <div className="text-primary">{text}</div>
         ) : text === "COMPLETED" ? (
           <div className="text-success">{text}</div>
@@ -182,37 +188,42 @@ const AccountOrders = (props: Props) => {
               shape="circle"
               icon={<SearchOutlined />}
             />
-            <Popconfirm
-              okText="Delete"
-              okType="danger"
-              onConfirm={async () => {
-                const handleCanceled: any = await axios.patch(
-                  `${URL_ENV}/orders/${record._id}`,
-                  {
-                    status: "CANCELED",
-                  }
-                );
+            {(record.status === "WAITING" ||
+              record.status === "ECONFIRMED") && (
+              <>
+                <Popconfirm
+                  okText="Delete"
+                  okType="danger"
+                  onConfirm={async () => {
+                    const handleCanceled: any = await axios.patch(
+                      `${URL_ENV}/orders/${record._id}`,
+                      {
+                        status: "CANCELED",
+                      }
+                    );
 
-                if (handleCanceled?.data?._id) {
-                  await axios
-                    .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
-                    .then((response) => {
-                      setTimeout(() => {
-                        setRefresh((f) => f + 1);
-                        message.success("Hủy đơn hàng thành công !!", 1.5);
-                      }, 2000);
-                    })
-                    .catch((error) => {
-                      console.error(error);
-                    });
-                } else {
-                  message.error(`SYSTEM ERROR !!!`);
-                }
-              }}
-              title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
-            >
-              <Button danger icon={<RestOutlined />}></Button>
-            </Popconfirm>
+                    if (handleCanceled?.data?._id) {
+                      await axios
+                        .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                        .then((response) => {
+                          setTimeout(() => {
+                            setRefresh((f) => f + 1);
+                            message.success("Hủy đơn hàng thành công !!", 1.5);
+                          }, 2000);
+                        })
+                        .catch((error) => {
+                          console.error(error);
+                        });
+                    } else {
+                      message.error(`SYSTEM ERROR !!!`);
+                    }
+                  }}
+                  title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
+                >
+                  <Button danger icon={<RestOutlined />}></Button>
+                </Popconfirm>
+              </>
+            )}
           </Space>
         );
       },
@@ -222,7 +233,7 @@ const AccountOrders = (props: Props) => {
     <div>
       <div className="container rounded-end-circle ">
         <Table
-          scroll={{ x: "max-content", y: 200 }}
+          scroll={{ x: true, y: 400 }}
           loading={loadingTable}
           rowKey={"_id"}
           dataSource={userOrders}
@@ -246,6 +257,9 @@ const AccountOrders = (props: Props) => {
               <div>
                 {/* Description of order */}
                 <Descriptions bordered column={1}>
+                  <Descriptions.Item label="Mã đơn hàng">
+                    {selectedOrder._id}
+                  </Descriptions.Item>
                   <Descriptions.Item label="Trạng thái">
                     {selectedOrder.status}
                   </Descriptions.Item>

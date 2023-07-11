@@ -24,17 +24,40 @@ import SearchOrdersByStatus from "./pages/Order/SearchOrdersByStatus";
 import EmployeesCRUD from "./pages/Management/EmployeesCRUD";
 import SlidesCRUD from "./pages/Management/SlideCRUD";
 import FeaturesCRUD from "./pages/Management/FeaturesCRUD";
-import axios from "axios";
 import { useBreadcrumb } from "./hooks/useBreadcrumb";
+import { axiosClient } from "./libraries/axiosClient";
 numeral.locale("vi");
 const { Header, Sider, Content } = Layout;
+const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
 const App: React.FC = () => {
-  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
-
   const { breadCrumb } = useBreadcrumb((state: any) => state);
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  const { auth } = useAuthStore((state: any) => state);
+
+  const [user, setUser] = useState<any>();
+  let token = window.localStorage.getItem("token");
+
+  useEffect(() => {
+    document.title = "Management Website";
+
+    if (token) {
+      axiosClient
+        .get(`/employees/login/profile`, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+        .then((res) => {
+          setUser(res?.data);
+        })
+        .catch((err) => {
+          console.log("««««« err »»»»»", err);
+        });
+    }
+  }, [token, auth]);
 
   useEffect(() => {
     // Update windowWidth when the window is resized
@@ -51,34 +74,20 @@ const App: React.FC = () => {
     };
   }, []); // Empty dependency array ensures that the effect runs only once
 
-  const { auth } = useAuthStore((state: any) => state);
-  const [user, setUser] = useState<any>();
-
-  useEffect(() => {
-    document.title = "Management Website";
-  }, []);
-  // /// USER ONLINE_OFFLINE
+  /// USER ONLINE_OFFLINE
   const socket = useRef<any>();
 
   useEffect(() => {
-    if (auth) {
+    if (user) {
       socket.current = io(URL_ENV);
     }
-  }, [URL_ENV, auth]);
+  }, [user]);
 
   useEffect(() => {
-    if (auth) {
-      socket.current.emit("addUser", auth?.payload?._id);
+    if (user) {
+      socket.current.emit("addUser", user?.payload?._id);
     }
-  }, [auth]);
-
-  useEffect(() => {
-    if (auth) {
-      axios.get(`${URL_ENV}/employees/${auth.payload._id}`).then((res) => {
-        setUser(res.data.result);
-      });
-    }
-  }, [URL_ENV, auth]);
+  }, [user]);
 
   // Function reresh to clear local storage
 
@@ -91,7 +100,7 @@ const App: React.FC = () => {
     <>
       <div>
         <BrowserRouter>
-          {!auth && (
+          {!user?._id && (
             <Content style={{ padding: 24 }}>
               <Routes>
                 <Route path="/" element={<Login />} />
@@ -100,7 +109,7 @@ const App: React.FC = () => {
               </Routes>
             </Content>
           )}
-          {auth && (
+          {user?._id && (
             <Layout>
               <Sider
                 collapsedWidth={windowWidth <= 768 ? 0 : undefined}
@@ -124,7 +133,7 @@ const App: React.FC = () => {
                     background: "rgba(255, 255, 255, 0.2)",
                   }}
                 />
-                <MainMenu />
+                <MainMenu user={user} />
               </Sider>
 
               <Layout
@@ -188,7 +197,7 @@ const App: React.FC = () => {
 
                     {/* MANAGEMENT */}
 
-                    {auth.payload.isAdmin && (
+                    {user.isAdmin && (
                       <Route
                         path="/management/employees"
                         element={<EmployeesCRUD />}
@@ -231,15 +240,6 @@ const App: React.FC = () => {
                       element={<Messages collapsed={collapsed} />}
                     />
 
-                    {/* SALES */}
-                    {/* <Route path='/sales/products/discount' element={<DiscountPage />} />
-                  <Route path='/sales/products/stock' element={<StockPage />} /> */}
-
-                    {/* UPLOAD */}
-
-                    {/* <Route path='/upload/form' element={<FormUpload />} />
-                  <Route path='/upload/antd' element={<AntUpload />} /> */}
-                    {/* NO MATCH ROUTE */}
                     <Route path="*" element={<NotFoundPage />} />
                   </Routes>
                 </Content>
