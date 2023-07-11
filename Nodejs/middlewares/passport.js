@@ -56,7 +56,6 @@ const LocalStrategy = require("passport-local").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const { findDocument, findDocuments } = require("../helpers/MongoDbHelper");
 const jwtSettings = require("../constants/jwtSetting");
-const { Employee, Customer } = require("../models");
 
 const passportConfig = (model) => {
   return new JwtStrategy(

@@ -9,7 +9,7 @@ const {
 const { Employee } = require("../models");
 const yup = require("yup");
 const jwt = require("jsonwebtoken");
-const { authenToken } = require("../helpers/authenToken");
+// const { authenToken } = require("../helpers/authenToken");
 
 const {
   validateSchema,
@@ -20,8 +20,6 @@ const {
 } = require("../validation/employee");
 const { encodeToken, encodeRefreshToken } = require("../helpers/jwtHelper");
 const { findDocument } = require("../helpers/MongoDbHelper");
-
-const ObjectId = require("mongodb").ObjectId;
 
 //CHECK ROLES
 
@@ -151,15 +149,24 @@ router.get(
 );
 
 // GET A DATA
-router.get("/:id", validateSchema(employeeIdSchema), async (req, res, next) => {
-  const itemId = req.params.id;
-  let found = await Employee.findById(itemId);
+router.get(
+  "/personal",
+  passport.authenticate(passportConfig(Employee), { session: false }),
+  async (req, res, next) => {
+    const bearerToken = req.get("Authorization").replace("Bearer ", "");
 
-  if (found) {
-    return res.status(200).json({ oke: true, result: found });
+    // DECODE TOKEN
+    const payload = jwt.decode(bearerToken, { json: true });
+    const { sub } = payload;
+
+    let found = await Employee.findById(sub);
+
+    if (found) {
+      return res.status(200).json({ oke: true, result: found });
+    }
+    return res.status(410).json({ oke: false, message: "Object not found" });
   }
-  return res.status(410).json({ oke: false, message: "Object not found" });
-});
+);
 // POST DATA
 router.post("/", validateSchema(employeeBodySchema), async (req, res, next) => {
   try {
@@ -302,36 +309,39 @@ router.patch(
 
 /// set new Token
 router.post("/refreshToken", async (req, res, next) => {
-  const { refreshToken, id } = req?.body;
+  const { refreshToken } = req?.body;
 
-  if (!refreshToken || !id) {
+  if (!refreshToken) {
     return res.sendStatus(401);
   }
 
   try {
-    const employee = await Employee.findOne({
-      _id: id,
-      refreshToken: refreshToken,
-    });
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_ACCESS_TOKEN,
+      async (err, data) => {
+        if (err) {
+          return res
+            .status(401)
+            .json({ message: "refreshToken is not a valid Token" });
+        }
+        const { id, firstName, lastName } = data;
 
-    if (!employee) {
-      return res
-        .status(401)
-        .json({ message: "refreshToken and id's not match!" });
-    }
+        const employee = await Employee.findOne({
+          _id: id,
+          refreshToken: refreshToken,
+        });
 
-    jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
-      if (err) {
-        return res
-          .status(401)
-          .json({ message: "refreshToken is not a valid Token" });
+        if (!employee) {
+          return res
+            .status(401)
+            .json({ message: "refreshToken and id's not match!" });
+        }
+
+        const token = encodeToken(id, firstName, lastName);
+        res.json({ token });
       }
-
-      const { _id, firstName, lastName } = data;
-
-      const accessToken = encodeToken(id, firstName, lastName);
-      res.json({ accessToken });
-    });
+    );
   } catch (err) {
     console.error(err);
     res.sendStatus(500);
@@ -365,7 +375,6 @@ router.post(
       res.status(200).json({
         token,
         refreshToken,
-        userId: id,
       });
     } catch (err) {
       console.error(err);
@@ -397,11 +406,18 @@ router.post(
 router.get(
   "/login/profile",
   // passport.authenticate("jwt", { session: false }),
-  authenToken,
+  // authenToken,
   passport.authenticate(passportConfig(Employee), { session: false }),
   async (req, res, next) => {
     try {
-      const employee = await Employee.findById(req.user._id);
+      const bearerToken = req.get("Authorization").replace("Bearer ", "");
+      // DECODE TOKEN
+      const payload = jwt.decode(bearerToken, { json: true });
+
+      // AFTER DECODE TOKEN: GET UID FROM PAYLOAD
+
+      const { sub } = payload;
+      const employee = await Employee.findById(sub);
 
       if (!employee) return res.status(404).send({ message: "Not found" });
       const responseData = {
