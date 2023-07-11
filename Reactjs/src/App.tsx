@@ -35,8 +35,6 @@ const App: React.FC = () => {
 
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  const { auth } = useAuthStore((state: any) => state);
-
   const [user, setUser] = useState<any>();
   let token = window.localStorage.getItem("token");
 
@@ -57,7 +55,7 @@ const App: React.FC = () => {
           console.log("««««« err »»»»»", err);
         });
     }
-  }, [token, auth]);
+  }, [token]);
 
   useEffect(() => {
     // Update windowWidth when the window is resized

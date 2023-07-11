@@ -44,7 +44,6 @@ const encodeToken = (userId, firstName, lastName, position) => {
 const encodeRefreshToken = (userId, firstName, lastName, position) => {
   const token = JWT.sign(
     {
-      id: userId,
       position,
       fullName: `${firstName} - ${lastName}`,
     },

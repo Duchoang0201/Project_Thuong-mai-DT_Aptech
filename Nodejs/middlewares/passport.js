@@ -98,7 +98,6 @@ const passportConfig = new JwtStrategy(
       const { position } = payload;
       let user;
 
-      console.log("««««« position »»»»»", position);
       if (position === "Employee") {
         user = await Employee.findById(payload.sub);
       } else if (position === "Customer") {

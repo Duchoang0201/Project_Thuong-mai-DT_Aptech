@@ -27,7 +27,8 @@ import {
 
 export default function Orders() {
   const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
-  let API_URL = `${URL_ENV}/orders`;
+  let API_URL = `/orders`;
+  let token = window.localStorage.getItem("token");
 
   const [refresh, setRefresh] = useState(0);
   const [addProductsModalVisible, setAddProductsModalVisible] = useState(false);
@@ -35,6 +36,9 @@ export default function Orders() {
   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
   const [shippingAddressDisabled, setShippingAddressDisabled] =
     useState<boolean>(true);
+
+  const [loading, setLoading] = useState(true);
+
   const handleDelete = async (record: any, index: any) => {
     const currentProduct = record;
     const response = await axiosClient.get("orders/" + selectedOrder._id);
@@ -123,10 +127,10 @@ export default function Orders() {
     .filter(Boolean)
     .join("&");
 
-  let URL_FILTER_PRODUCTS = `${URL_ENV}/products?${queryParams}&limit=10`;
+  let URL_FILTER_PRODUCTS = `/products?${queryParams}&limit=10`;
   // CALL API FILTER PRODUCT DEPEND ON QUERY
   useEffect(() => {
-    axios
+    axiosClient
       .get(URL_FILTER_PRODUCTS)
       .then((res) => {
         setProducts(res.data.results);
@@ -159,11 +163,18 @@ export default function Orders() {
   // Create an array of merged items
 
   useEffect(() => {
-    axios.get(URL_FILTER).then((response) => {
-      setOrders(response.data.results);
-      setPages(response.data.amountResults);
-    });
-  }, [URL_FILTER, refresh]);
+    axiosClient
+      .get(URL_FILTER, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        setOrders(response.data.results);
+        setPages(response.data.amountResults);
+        setLoading(false);
+      });
+  }, [URL_FILTER, refresh, token]);
 
   useEffect(() => {
     // Check if the selected order exists in the updated dataResource
@@ -513,8 +524,8 @@ export default function Orders() {
               okText="Delete"
               okType="danger"
               onConfirm={async () => {
-                const handleCanceled: any = await axios.patch(
-                  `${URL_ENV}/orders/${record._id}`,
+                const handleCanceled: any = await axiosClient.patch(
+                  `/orders/${record._id}`,
                   {
                     status: "CANCELED",
                   }
@@ -522,7 +533,7 @@ export default function Orders() {
 
                 if (handleCanceled?.data?._id) {
                   await axios
-                    .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                    .post(`/products/orderm/${record._id}/stock`)
                     .then((response) => {
                       setTimeout(() => {
                         setRefresh((f) => f + 1);
@@ -546,12 +557,9 @@ export default function Orders() {
                 okType="danger"
                 title={"Are you sure to Confirm it?"}
                 onConfirm={async () => {
-                  const res = await axios.patch(
-                    `${URL_ENV}/orders/${record._id}`,
-                    {
-                      status: "ECONFIRMED",
-                    }
-                  );
+                  const res = await axiosClient.patch(`/orders/${record._id}`, {
+                    status: "ECONFIRMED",
+                  });
                   if (res?.data?._id) {
                     message.success(`CONFIRM ORDER'S SUCESSFULLY`);
                     setRefresh((f) => f + 1);
@@ -640,6 +648,7 @@ export default function Orders() {
         <Col span={24}>
           {" "}
           <Table
+            loading={loading}
             bordered
             pagination={false}
             scroll={{ x: "max-content", y: "max-content" }}
@@ -676,8 +685,8 @@ export default function Orders() {
                             optionFilterProp="children"
                             onChange={async (e) => {
                               message.loading("Changing status !!", 1.5);
-                              const req = await axios.patch(
-                                `${URL_ENV}/orders/${selectedOrder._id}`,
+                              const req = await axiosClient.patch(
+                                `/orders/${selectedOrder._id}`,
                                 {
                                   status: e,
                                 }
@@ -750,8 +759,8 @@ export default function Orders() {
                                 "Changing Shipping Address !!",
                                 1.5
                               );
-                              const req = await axios.patch(
-                                `${URL_ENV}/orders/${selectedOrder._id}`,
+                              const req = await axiosClient.patch(
+                                `/orders/${selectedOrder._id}`,
                                 {
                                   shippingAddress: e,
                                 }
