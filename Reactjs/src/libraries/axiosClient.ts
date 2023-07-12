@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { API_URL } from '../constants/URLS';
-import { message } from 'antd';
 import { useAuthStore } from '../hooks/useAuthStore';
+import { message } from 'antd';
 
 const axiosClient = axios.create({
   baseURL: API_URL,
@@ -29,7 +29,6 @@ axiosClient.interceptors.request.use(
 
 axiosClient.interceptors.response.use(
   async (response) => {
-
     const { token, refreshToken } = response.data;
     // LOGIN
     if (token) {
@@ -52,18 +51,16 @@ axiosClient.interceptors.response.use(
       console.log('Error 🚀', error);
       originalConfig.sent = true;
       try {
-
         // Trường hợp không có token thì chuyển sang trang LOGIN
         const token = window.localStorage.getItem('token');
         if (!token) {
-          window.location.href = '/login';
+          window.location.href = '/';
           return Promise.reject(error);
         }
 
-        message.loading('System reload, please wait!!', 1.5)
+        message.info("System reload", 1.5)
         const refreshToken = window.localStorage.getItem('refreshToken');
         if (refreshToken) {
-
           const response = await axiosClient.post('/employees/refreshToken', {
             refreshToken: refreshToken,
           });
@@ -73,15 +70,10 @@ axiosClient.interceptors.response.use(
 
           originalConfig.headers = {
             ...originalConfig.headers,
-            authorization: `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           };
-          const {setAuth} = useAuthStore((state:any) => state)
 
-          const data = {
-            token,
-            refreshToken
-          }
-          setAuth(data)
+
           return axiosClient(originalConfig);
         } else {
           return Promise.reject(error);

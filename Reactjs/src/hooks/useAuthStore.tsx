@@ -107,7 +107,9 @@ export const useAuthStore = create(
             });
           },
           setAuth: async (data: any) => {
-            set({ auth: data }, false, {
+            let auth: any = get().auth;
+            auth = data;
+            set({ auth: auth }, false, {
               type: "auth/login-success",
             });
           },

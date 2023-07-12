@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import style from "./login.module.css";
 import { useAuthStore } from "../../hooks/useAuthStore";
 
@@ -8,6 +8,7 @@ const Login = () => {
 
   const onLogin = async (values: any) => {
     const { email, password } = values;
+    message.loading("Access to system, please wait!!", 2);
     await login({ email, password });
   };
 

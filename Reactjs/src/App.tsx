@@ -1,8 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Login from "./pages/Auth/Login";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useAuthStore } from "./hooks/useAuthStore";
-import { Layout, Button, theme, Divider } from "antd";
+import { Layout, Button, theme, Divider, message } from "antd";
 import { io } from "socket.io-client";
 
 import { MenuFoldOutlined, MenuUnfoldOutlined } from "@ant-design/icons";
@@ -26,6 +25,7 @@ import SlidesCRUD from "./pages/Management/SlideCRUD";
 import FeaturesCRUD from "./pages/Management/FeaturesCRUD";
 import { useBreadcrumb } from "./hooks/useBreadcrumb";
 import { axiosClient } from "./libraries/axiosClient";
+import { useAuthStore } from "./hooks/useAuthStore";
 numeral.locale("vi");
 const { Header, Sider, Content } = Layout;
 const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
@@ -36,24 +36,25 @@ const App: React.FC = () => {
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
   const [user, setUser] = useState<any>();
+
+  const { auth } = useAuthStore((state: any) => state);
   let token = window.localStorage.getItem("token");
 
+  console.log("««««« token »»»»»", token);
   useEffect(() => {
     document.title = "Management Website";
 
     if (token) {
       axiosClient
-        .get(`/employees/login/profile`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        .get(`/employees/login/profile`)
         .then((res) => {
           setUser(res?.data);
         })
         .catch((err) => {
           console.log("««««« err »»»»»", err);
         });
+    } else {
+      message.info("Please login!!", 1.5);
     }
   }, [token]);
 

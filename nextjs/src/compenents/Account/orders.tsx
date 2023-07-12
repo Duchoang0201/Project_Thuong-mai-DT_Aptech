@@ -37,12 +37,6 @@ const AccountOrders = (props: Props) => {
   const [loadingTable, setLoadingTable] = useState(true);
 
   useEffect(() => {
-    setTimeout(() => {
-      setLoadingTable(false);
-    }, 1000); // 5000 milliseconds = 5 seconds
-  }, []);
-
-  useEffect(() => {
     // Check if the selected order exists in the updated dataResource
     const updatedSelectedOrder = userOrders?.find(
       (order: any) => order.id === selectedOrder?.id
@@ -55,6 +49,7 @@ const AccountOrders = (props: Props) => {
       .get(`${URL_ENV}/orders/personal/${auth?.payload?._id}`)
       .then((res) => {
         setUserOrders(res.data.results);
+        setLoadingTable(false);
       });
   }, [URL_ENV, auth, refresh]);
 

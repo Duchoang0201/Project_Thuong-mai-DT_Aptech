@@ -90,7 +90,7 @@ const { Employee, Customer } = require("../models/index");
 
 const passportConfig = new JwtStrategy(
   {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken("Authorization"),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken("authorization"),
     secretOrKey: jwtSettings.SECRET,
   },
   async (payload, done) => {
