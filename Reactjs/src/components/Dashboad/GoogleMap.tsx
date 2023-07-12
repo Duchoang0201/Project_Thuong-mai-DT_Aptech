@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import GoogleMapReact from "google-map-react";
-import axios from "axios";
 import { Divider } from "antd";
 import { axiosClient } from "../../libraries/axiosClient";
 

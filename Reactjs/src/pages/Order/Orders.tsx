@@ -26,7 +26,6 @@ import {
 } from "@ant-design/icons";
 
 export default function Orders() {
-  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
   let API_URL = `/orders`;
   let token = window.localStorage.getItem("token");
 
@@ -692,7 +691,7 @@ export default function Orders() {
                                 }
                               );
                               if (req.data) {
-                                const count = setTimeout(() => {
+                                setTimeout(() => {
                                   message.success(
                                     `Change status to ${req.data.status} successfully!!`,
                                     1.5
@@ -766,7 +765,7 @@ export default function Orders() {
                                 }
                               );
                               if (req.data) {
-                                const count = setTimeout(() => {
+                                setTimeout(() => {
                                   message.success(
                                     `Change Shipping address to ${req.data.status} successfully!!`,
                                     1.5

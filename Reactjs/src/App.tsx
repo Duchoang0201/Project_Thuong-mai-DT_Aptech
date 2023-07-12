@@ -37,10 +37,9 @@ const App: React.FC = () => {
 
   const [user, setUser] = useState<any>();
 
-  const { auth } = useAuthStore((state: any) => state);
+  const { setAuth } = useAuthStore((state: any) => state);
   let token = window.localStorage.getItem("token");
 
-  console.log("««««« token »»»»»", token);
   useEffect(() => {
     document.title = "Management Website";
 
@@ -49,6 +48,7 @@ const App: React.FC = () => {
         .get(`/employees/login/profile`)
         .then((res) => {
           setUser(res?.data);
+          setAuth(res?.data);
         })
         .catch((err) => {
           console.log("««««« err »»»»»", err);
@@ -56,7 +56,7 @@ const App: React.FC = () => {
     } else {
       message.info("Please login!!", 1.5);
     }
-  }, [token]);
+  }, [setAuth, token]);
 
   useEffect(() => {
     // Update windowWidth when the window is resized

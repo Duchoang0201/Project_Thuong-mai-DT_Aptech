@@ -166,6 +166,7 @@ function EmployeeCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
+    console.log("««««« record »»»»»", record);
     record.updatedBy = {
       employeeId: auth.payload._id,
       firstName: auth.payload.firstName,

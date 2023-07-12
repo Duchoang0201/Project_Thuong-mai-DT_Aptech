@@ -1,6 +1,5 @@
 import axios from 'axios';
 import { API_URL } from '../constants/URLS';
-import { useAuthStore } from '../hooks/useAuthStore';
 import { message } from 'antd';
 
 const axiosClient = axios.create({

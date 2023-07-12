@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
-import axios from "axios";
 import { message } from "antd";
 
 import { axiosClient } from "../libraries/axiosClient";
@@ -107,10 +106,10 @@ export const useAuthStore = create(
             });
           },
           setAuth: async (data: any) => {
-            let auth: any = get().auth;
-            auth = data;
-            set({ auth: auth }, false, {
-              type: "auth/login-success",
+            const auth: any = get().auth;
+
+            set({ auth: { ...auth, payload: data } }, false, {
+              type: "auth/setData",
             });
           },
           setLogout: async () => {
