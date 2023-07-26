@@ -25,13 +25,14 @@ import {
 import FormItem from "antd/es/form/FormItem";
 import axios from "axios";
 import { axiosClient } from "../../libraries/axiosClient";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
 // Date Picker
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
+import { useQuery } from "@tanstack/react-query";
 function EmployeeCRUD() {
   const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
@@ -66,9 +67,6 @@ function EmployeeCRUD() {
 
   //For fillter:
 
-  //Data fillter
-  const [employeesTEST, setEmployeesTEST] = useState<any>([]);
-
   // Change fillter (f=> f+1)
 
   const [updateId, setUpdateId] = useState<any>();
@@ -78,10 +76,6 @@ function EmployeeCRUD() {
   const [updateForm] = Form.useForm();
 
   //Text of Tyography:
-
-  //TableLoading
-
-  const [loadingTable, setLoadingTable] = useState(true);
 
   ///GET TOKEM FORM LOCALSTORAGE
   const token = window.localStorage.getItem("token");
@@ -166,7 +160,7 @@ function EmployeeCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
-    console.log("««««« record »»»»»", record);
+    message.loading("Updating, please wait!!", 3);
     record.updatedBy = {
       employeeId: auth.payload._id,
       firstName: auth.payload.firstName,
@@ -178,7 +172,7 @@ function EmployeeCRUD() {
     if (record.isAdmin === undefined) {
       record.isAdmin = false;
     }
-    axios
+    axiosClient
       .patch(API_URL + "/" + updateId._id, record)
       .then((res) => {
         console.log(res);
@@ -196,7 +190,6 @@ function EmployeeCRUD() {
 
   const [isLocked, setIsLocked] = useState("");
   const onSearchIsLocked = useCallback((value: any) => {
-    console.log("««««« value »»»»»", value);
     if (value) {
       setIsLocked(value);
     } else {
@@ -279,7 +272,6 @@ function EmployeeCRUD() {
 
   //Search on Skip and Limit
 
-  const [pages, setPages] = useState();
   const [skip, setSkip] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const slideCurrent = (value: any) => {
@@ -301,21 +293,12 @@ function EmployeeCRUD() {
     .filter(Boolean)
     .join("")}&limit=10`;
 
-  useEffect(() => {
-    axiosClient
-      .get(URL_FILTER, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-      .then((res) => {
-        setEmployeesTEST(res.data.results);
-        setPages(res.data.amountResults);
-        setLoadingTable(false);
-      })
-      .catch((err) => console.log(err));
-  }, [URL_FILTER, refresh, token]);
-
+  const { data: employeesData, isLoading } = useQuery({
+    queryKey: ["getEmployees", URL_FILTER],
+    queryFn: () => {
+      return axiosClient.get(URL_FILTER);
+    },
+  });
   //Setting column
   const columns = [
     //NO
@@ -693,6 +676,7 @@ function EmployeeCRUD() {
     <div>
       {/* Modal Create A employees */}
       <Modal
+        okType="dashed"
         title={`Create employees `}
         open={openCreate}
         onCancel={() => {
@@ -878,10 +862,10 @@ function EmployeeCRUD() {
       <div>
         <Table
           // loading={!employeesTEST ? true : false}
-          loading={loadingTable}
+          loading={isLoading}
           rowKey="_id"
           columns={columns}
-          dataSource={employeesTEST}
+          dataSource={employeesData?.data?.results}
           pagination={false}
           scroll={{ x: "max-content", y: 610 }}
           rowClassName={(record) => {
@@ -894,7 +878,7 @@ function EmployeeCRUD() {
           className="container text-end"
           onChange={(e) => slideCurrent(e)}
           defaultCurrent={1}
-          total={pages}
+          total={employeesData?.data?.amountResults}
         />
       </div>
 
@@ -902,6 +886,7 @@ function EmployeeCRUD() {
 
       {/* Model Update */}
       <Modal
+        okType="dashed"
         open={open}
         title="Update Employee"
         onCancel={() => {

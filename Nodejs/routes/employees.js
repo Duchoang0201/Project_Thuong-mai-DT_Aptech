@@ -247,6 +247,8 @@ router.delete(
 router.patch(
   "/:id",
   validateSchema(employeeIdSchema),
+  passport.authenticate("jwt", { session: false }),
+  allowRoles("admin", "manager"),
   async (req, res, next) => {
     const itemId = req.params.id;
     const itemBody = req.body;
@@ -344,7 +346,7 @@ router.post("/refreshToken", async (req, res, next) => {
     );
   } catch (err) {
     console.error(err);
-    res.sendStatus(500);
+    res.status(500).json({ message: "System's failed" });
   }
 });
 

@@ -30,7 +30,7 @@ const encodeToken = (userId, firstName, lastName, position) => {
     },
     jwtSettings.SECRET,
     {
-      expiresIn: "30s",
+      expiresIn: "2h",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       subject: userId,
@@ -49,7 +49,7 @@ const encodeRefreshToken = (userId, firstName, lastName, position) => {
     },
     process.env.REFRESH_ACCESS_TOKEN,
     {
-      expiresIn: "5d",
+      expiresIn: "10d",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       subject: userId,

@@ -90,7 +90,7 @@ const { Employee, Customer } = require("../models/index");
 
 const passportConfig = new JwtStrategy(
   {
-    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken("authorization"),
+    jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken("Authorization"),
     secretOrKey: jwtSettings.SECRET,
   },
   async (payload, done) => {
@@ -128,7 +128,9 @@ const passportConfigLocal = (model) => {
         const isCorrectPass = await user.isValidPass(password);
 
         if (!isCorrectPass)
-          return done(null, false, { message: "Invalid password" });
+          return done(null, false, {
+            message: "Invalid password",
+          });
 
         return done(null, user);
       } catch (error) {

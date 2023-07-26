@@ -1099,24 +1099,24 @@ router.get("/26b", async (req, res, next) => {
         _id: 0,
         suppliers: 1,
       })
-      .unwind({
-        path: "$suppliers",
-        preserveNullAndEmptyArrays: true,
-      })
-      .project({
-        _id: "$suppliers._id",
-        name: "$suppliers.name",
-        email: "$suppliers.email",
-        phoneNumber: "$suppliers.phoneNumber",
-        address: "$suppliers.address",
-      })
-      .group({
-        _id: "$_id",
-        name: { $first: "$name" },
-        phoneNumber: { $first: "$phoneNumber" },
-        email: { $first: "$email" },
-        address: { $first: "$address" },
-      })
+      // .unwind({
+      //   path: "$suppliers",
+      //   preserveNullAndEmptyArrays: true,
+      // })
+      // .project({
+      //   _id: "$suppliers._id",
+      //   name: "$suppliers.name",
+      //   email: "$suppliers.email",
+      //   phoneNumber: "$suppliers.phoneNumber",
+      //   address: "$suppliers.address",
+      // })
+      // .group({
+      //   _id: "$_id",
+      //   name: { $first: "$name" },
+      //   phoneNumber: { $first: "$phoneNumber" },
+      //   email: { $first: "$email" },
+      //   address: { $first: "$address" },
+      // })
 
       .then((result) => {
         res.send({

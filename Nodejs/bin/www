@@ -8,7 +8,6 @@ var app = require("../app");
 var debug = require("debug")("backend-express:server");
 var http = require("http");
 const socketIO = require("socket.io");
-const { Employee, Message } = require("../models/Message");
 
 /**
  * Get port from environment and store in Express.
@@ -23,75 +22,64 @@ app.set("port", port);
 
 var server = http.createServer(app);
 
-// const io = require("socket.io")(8888, {
+// const io = socketIO(server);
+
+// var server = http.createServer(app);
+// const io = socketIO(server, {
 //   cors: {
-//     origin: "http://localhost:3000",
+//     origin: process.env.WEB_ADMIN_URL || "http://localhost:3000",
 //     methods: ["GET", "POST"],
 //   },
 // });
 
-// const io = socketIO(server);
-
-let users = []; //Get list of users are active (  login successfully)
-
-// users.some check exist user, if get new user not exist in users[array] => push to users[array]
-const addUser = (userId, socketId) => {
-  !users.some((user) => user.userId === userId) &&
-    users.push({ userId, socketId });
-};
-
-const removeUser = (socketId) => {
-  users = users.filter((user) => user.socketId !== socketId);
-};
-
-const getUser = (userId) => {
-  return users.find((user) => user.userId === userId);
-};
-
 var server = http.createServer(app);
 const io = socketIO(server, {
   cors: {
-    origin: process.env.WEB_ADMIN_URL || "http://localhost:3000",
-    methods: ["GET", "POST"],
+    origin: true,
+    credentials: true,
   },
 });
+const { Message } = require("../models");
 
 io.on("connection", (socket) => {
-  // when connect
-  console.log("a user connected.");
+  socket.on("client-message", async (data) => {
+    socket.join(data.conversationId);
 
-  // take userId and socketId from user
-  socket.on("addUser", (userId) => {
-    addUser(userId, socket.id);
-    io.emit("getUsers", users);
-  });
+    if (data.type === "chat") {
+      const dataMessage = {
+        employee: data.employee,
+        text: data.text,
+        sender: data.sender,
+        conversationId: data.conversationId,
+        createdAt: data.createdAt,
+        updatedAt: data.updatedAt,
+      };
 
-  // send and get message
-  //send and get message
-  socket.on("sendMessage", ({ senderId, receiverId, text }) => {
-    const user = getUser(receiverId);
-    const messageData = {
-      senderId,
-      text,
-    };
-    if (user && user.socketId) {
-      io.emit("getMessage", messageData);
-    } else {
-      // Handle the case where the user is not found
-      io.emit("getMessage", messageData);
+      let newMessage = new Message(dataMessage);
+      try {
+        const newData = await newMessage.save();
+        if (newData._id) {
+          newData.employee = data.employee;
+
+          console.log("««««« newData »»»»»", newData);
+          io.to(data.room).emit("direct-message", {
+            newData,
+          });
+        }
+      } catch (err) {
+        console.log("««««« err »»»»»", err);
+      }
+    } else if (data.type === "join") {
+      io.to(data.room).emit("server-message", {
+        message: `join room ${data.room} ok`,
+      });
     }
-    // io.emit("sendMessageToClients", messageData);
   });
 
-  // when disconnect
   socket.on("disconnect", () => {
-    console.log("a user disconnected!");
-    removeUser(socket.id);
-    io.emit("getUsers", users);
+    console.log("User disconnected");
   });
 });
-
-// send and get messages
 
 /**
  * Listen on provided port, on all network interfaces.

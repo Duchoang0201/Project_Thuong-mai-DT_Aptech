@@ -21,7 +21,11 @@ router.get("/:conversationId", async (req, res) => {
     const messages = await Message.find({
       conversationId: req.params.conversationId,
     }).populate("employee");
-    res.status(200).json(messages);
+
+    const lastMessage = await Message.findOne({
+      conversationId: req.params.conversationId,
+    }).sort({ createdAt: -1 });
+    res.status(200).json({ messages: messages, lastMessage: lastMessage });
   } catch (err) {
     res.status(500).json(err);
   }
