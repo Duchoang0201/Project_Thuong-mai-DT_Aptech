@@ -33,9 +33,9 @@ Hệ thống gồm 2 website, 1 server
 
     https://data-server-shop.onrender.com
 
-    use:
-    install: npm i,
-    run: npm run dev
+    - use:
+      - install: npm i,
+      - run: npm run dev
 
 // MOMO CHECK ACCOUNT:
 
