@@ -7,17 +7,25 @@ Hệ thống gồm 2 website, 1 server
 
     https://deploy-shop-website.vercel.app
 
-    use:
-    install: npm i,
-    run: npm run dev
+    - use:
+      install: npm i,
+      run: npm run dev
+
+    - Account test:
+      email: Blaise45@hotmail.com
+      password: 123456
 
 2.  WEB_REATJS_ADMIN
 
     https://deploy-admin-website.vercel.app
 
-    use:
-    install: npm i,
-    run: npm run start
+    - use:
+      install: npm i,
+      run: npm run start
+
+    - Account test:
+      email: trump@gmail.com
+      password: 123456
 
 3.  NODE-SERVER
 
