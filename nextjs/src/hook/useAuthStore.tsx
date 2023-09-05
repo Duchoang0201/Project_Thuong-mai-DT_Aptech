@@ -4,7 +4,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import axios from "axios";
 import { message } from "antd";
 import router from "next/router";
-import { useCartStore } from "./useCountStore";
+import { axiosClient } from "@/libraries/axiosClient";
 interface isLogin {
   email: string;
   password: string;
@@ -22,13 +22,12 @@ export const useAuthStore = create(
           auth: null,
           login: async ({ email, password }: isLogin) => {
             try {
-              const response = await axios.post(`${URL_ENV}/customers/login`, {
+              const response = await axiosClient.post(`/customers/login`, {
                 email: email,
                 password: password,
               });
               if (response.data.token) {
                 loginData = response.data; // Store the response data
-
                 router.push("/");
                 set({ auth: response.data }, false, {
                   type: "auth/login-success",
@@ -122,6 +121,7 @@ export const useAuthStore = create(
                 lastActivity: new Date(),
               });
             }
+            router.push("/");
             localStorage.clear();
 
             return set({ auth: null }, false, { type: "auth/logout-success" });

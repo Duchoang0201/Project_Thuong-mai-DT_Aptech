@@ -30,7 +30,7 @@ const encodeToken = (userId, firstName, lastName, position) => {
     },
     jwtSettings.SECRET,
     {
-      expiresIn: "2h",
+      expiresIn: "30s",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       subject: userId,
@@ -44,13 +44,12 @@ const encodeToken = (userId, firstName, lastName, position) => {
 const encodeRefreshToken = (userId, firstName, lastName, position) => {
   const token = JWT.sign(
     {
-      id: userId,
       position,
       fullName: `${firstName} - ${lastName}`,
     },
     process.env.REFRESH_ACCESS_TOKEN,
     {
-      expiresIn: "5d",
+      expiresIn: "10d",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       subject: userId,

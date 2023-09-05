@@ -15,7 +15,7 @@ const CheckoutMethod = (props: Props) => {
   }, [URL_ENV]);
 
   return (
-    <div className="container">
+    <div className="container mx-auto">
       {" "}
       <Row className="py-3 ">
         {methodPay?.map((item: any, index: any) => (
@@ -27,7 +27,7 @@ const CheckoutMethod = (props: Props) => {
           >
             {" "}
             <Card className="border mx-4 ">
-              <div className="d-flex justify-content-between">
+              <div className="flex justify-between">
                 <div className="content">
                   {" "}
                   <Space>
@@ -37,11 +37,11 @@ const CheckoutMethod = (props: Props) => {
                 <Button
                   icon={
                     <Image
+                      className="ml-1"
                       alt={item.title}
                       src={`${URL_ENV}${item.imageUrl}`}
                       width={50}
                       height={50}
-                      style={{ fontSize: "24px", color: "white" }}
                     />
                   }
                   style={{

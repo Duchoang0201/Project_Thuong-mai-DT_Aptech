@@ -1,9 +1,14 @@
 const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
-const ConversationSchema = Schema(
+
+const membersSchema = new Schema({
+  [0]: { type: Schema.Types.ObjectId, ref: "Employee", required: false },
+  [1]: { type: Schema.Types.ObjectId, ref: "Employee", required: false },
+});
+const ConversationSchema = new Schema(
   {
     members: {
-      type: Array,
+      type: [membersSchema],
     },
   },
   { timestamps: true }

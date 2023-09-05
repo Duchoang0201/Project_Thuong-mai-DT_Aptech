@@ -8,8 +8,10 @@ const customerRateSchema = new Schema({
     firstName: { type: String },
     lastName: { type: String },
     comment: { type: String },
+    imageUrl: { type: String },
   },
   rateNumber: { type: Number },
+  createdAt: { type: Date },
 });
 
 const createdBySchema = new Schema({

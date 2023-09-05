@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { OrderedListOutlined, UserOutlined } from "@ant-design/icons";
 import { Card, Layout, Menu } from "antd";
-import { useAuthStore } from "@/hook/useAuthStore";
 import AccountOrders from "./orders";
 import AccountInformation from "./AccountInformation";
 
@@ -11,12 +10,6 @@ const NavbarAccount: React.FC = () => {
   const [keyActive, setKeyActive] = useState<string>("information");
   const [windowWidth, setWindowWidth] = useState<number>(0);
   const [trigger, setTrigger] = useState<boolean>(false);
-
-  // useEffect(() => {
-  //   const authData: any = useAuthStore.getState();
-  //   const { auth } = authData;
-  //   setAuth(auth);
-  // }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -45,11 +38,12 @@ const NavbarAccount: React.FC = () => {
   ];
 
   return (
-    <Card className="container">
-      <Layout className="container">
+    <Card className="container mx-auto">
+      <Layout className="container mx-auto">
         <Sider
-          className="py-2 bg-body-secondary my-4 rounded-end-circle"
-          style={{ height: "500px" }}
+          theme="light"
+          // className="bg-body-secondary my-4 rounded-end-circle bg-white"
+          style={{ height: "auto" }}
           breakpoint="lg"
           collapsedWidth="0"
           onBreakpoint={(broken) => {
@@ -61,10 +55,12 @@ const NavbarAccount: React.FC = () => {
           }}
         >
           <div className="text-center py-3">
-            <strong className="text-center">INFORMATION</strong>
+            <strong className="text-center text-white">INFORMATION</strong>
           </div>
           <Menu
+            className=""
             mode="inline"
+            // theme="dark"
             defaultSelectedKeys={["information"]}
             items={itemsNavbar}
             onClick={(e: any) => {
@@ -72,7 +68,7 @@ const NavbarAccount: React.FC = () => {
             }}
           />
         </Sider>
-        <Layout>
+        <Layout className="py-5">
           {windowWidth < 900 && trigger && (
             <Content style={{ margin: "24px 16px 0" }}>
               {keyActive === "information" && <AccountInformation />}

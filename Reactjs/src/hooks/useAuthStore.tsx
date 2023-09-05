@@ -1,7 +1,6 @@
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
-import axios from "axios";
 import { message } from "antd";
 
 import { axiosClient } from "../libraries/axiosClient";
@@ -27,6 +26,7 @@ export const useAuthStore = create(
                 password: password,
               });
               if (found.data.token) {
+                message.success("Login sucesfully!!");
                 loginData = found.data; // Store the found data
 
                 set({ auth: found.data }, false, {
@@ -35,6 +35,7 @@ export const useAuthStore = create(
 
                 // await get().dataFromToken({ token: found.data.token });
               } else {
+                console.log(`⚠️⚠️⚠️!! error `);
                 message.error("Login unsuccessfully!!");
               }
             } catch (err: any) {
@@ -107,8 +108,10 @@ export const useAuthStore = create(
             });
           },
           setAuth: async (data: any) => {
-            set({ auth: data }, false, {
-              type: "auth/login-success",
+            const auth: any = get().auth;
+
+            set({ auth: { ...auth, payload: data } }, false, {
+              type: "auth/setData",
             });
           },
           setLogout: async () => {

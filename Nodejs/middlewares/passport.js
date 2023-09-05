@@ -98,7 +98,6 @@ const passportConfig = new JwtStrategy(
       const { position } = payload;
       let user;
 
-      console.log("««««« position »»»»»", position);
       if (position === "Employee") {
         user = await Employee.findById(payload.sub);
       } else if (position === "Customer") {
@@ -106,7 +105,6 @@ const passportConfig = new JwtStrategy(
       } else {
         return done(null, false);
       }
-
       if (!user) return done(null, false);
 
       return done(null, user);
@@ -129,7 +127,9 @@ const passportConfigLocal = (model) => {
         const isCorrectPass = await user.isValidPass(password);
 
         if (!isCorrectPass)
-          return done(null, false, { message: "Invalid password" });
+          return done(null, false, {
+            message: "Invalid password",
+          });
 
         return done(null, user);
       } catch (error) {

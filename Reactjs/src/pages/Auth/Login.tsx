@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Form, Input } from "antd";
+import { Button, Form, Input, message } from "antd";
 import style from "./login.module.css";
 import { useAuthStore } from "../../hooks/useAuthStore";
 
@@ -61,7 +61,7 @@ const Login = () => {
           </Form.Item>
 
           <Form.Item wrapperCol={{ offset: 8, span: 16 }}>
-            <Button type="primary" htmlType="submit">
+            <Button type="dashed" htmlType="submit">
               Submit
             </Button>
           </Form.Item>

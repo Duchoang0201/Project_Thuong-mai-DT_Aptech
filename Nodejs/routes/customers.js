@@ -280,27 +280,43 @@ router.patch(
 //FRESH TOKEN :
 
 router.post("/refreshToken", async (req, res, next) => {
-  const { refreshToken, id } = req?.body;
+  const { refreshToken } = req?.body;
 
   if (!refreshToken) {
     return res.sendStatus(401);
   }
 
-  const checkCustomer = await Customer.findById(id);
-  const customerRefreshToken = checkCustomer?.refreshToken;
-  if (!customerRefreshToken) {
-    return res.sendStatus(403);
+  try {
+    jwt.verify(
+      refreshToken,
+      process.env.REFRESH_ACCESS_TOKEN,
+      async (err, data) => {
+        if (err) {
+          return res
+            .status(401)
+            .json({ message: "refreshToken is not a valid Token" });
+        }
+        const { sub, firstName, lastName } = data;
+
+        const employee = await Customer.findOne({
+          _id: sub,
+          refreshToken: refreshToken,
+        });
+
+        if (!employee) {
+          return res
+            .status(401)
+            .json({ message: "refreshToken and id's not match!" });
+        }
+
+        const token = encodeToken(sub, firstName, lastName, "Customer");
+        res.json({ token });
+      }
+    );
+  } catch (err) {
+    console.error(err);
+    res.sendStatus(500);
   }
-
-  jwt.verify(refreshToken, process.env.REFRESH_ACCESS_TOKEN, (err, data) => {
-    if (err) {
-      return res.sendStatus(403);
-    }
-    const { _id, empEmail, firstName, lastName } = data;
-
-    const accessToken = encodeToken(_id, empEmail, firstName, lastName);
-    res.json({ accessToken });
-  });
 });
 /// LOGIN
 router.post(
@@ -366,7 +382,7 @@ router.post(
 router.get(
   "/login/profile",
   // passport.authenticate("jwt", { session: false }),
-  authenToken,
+  // authenToken,
   passport.authenticate("jwt", { session: false }),
   async (req, res, next) => {
     try {
@@ -379,8 +395,12 @@ router.get(
         lastName: customer.lastName,
         email: customer.email,
         phoneNumber: customer.phoneNumber,
+        imageUrl: customer.imageUrl,
         address: customer.address,
         birthday: customer.birthday,
+        shippingAddress: customer.shippingAddress,
+        bio: customer.bio,
+        sex: customer.sex,
       };
 
       res.status(200).json(responseData);

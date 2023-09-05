@@ -16,7 +16,6 @@ import {
   Input,
 } from "antd";
 import numeral from "numeral";
-import axios from "axios";
 import { axiosClient } from "../../libraries/axiosClient";
 import {
   EditOutlined,
@@ -24,10 +23,10 @@ import {
   SearchOutlined,
   SendOutlined,
 } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 
 export default function Orders() {
-  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
-  let API_URL = `${URL_ENV}/orders`;
+  let API_URL = `/orders`;
 
   const [refresh, setRefresh] = useState(0);
   const [addProductsModalVisible, setAddProductsModalVisible] = useState(false);
@@ -35,6 +34,7 @@ export default function Orders() {
   const [componentDisabled, setComponentDisabled] = useState<boolean>(true);
   const [shippingAddressDisabled, setShippingAddressDisabled] =
     useState<boolean>(true);
+
   const handleDelete = async (record: any, index: any) => {
     const currentProduct = record;
     const response = await axiosClient.get("orders/" + selectedOrder._id);
@@ -102,7 +102,6 @@ export default function Orders() {
     };
   }, []);
 
-  const [pages, setPages] = useState();
   const [skip, setSkip] = useState(0);
   // const [currentPage, setCurrentPage] = useState(1);
   const slideCurrent = (value: any) => {
@@ -117,16 +116,15 @@ export default function Orders() {
   const [pageProducts, setPageProduts] = useState();
   const slideCurrentProduct = (value: any) => {
     setSkipProducts(value * 10 - 10);
-    // setCurrentPageProducts(value);
   };
   const queryParams = [skipProducts && `skip=${skipProducts}`]
     .filter(Boolean)
     .join("&");
 
-  let URL_FILTER_PRODUCTS = `${URL_ENV}/products?${queryParams}&limit=10`;
+  let URL_FILTER_PRODUCTS = `/products?${queryParams}&limit=10`;
   // CALL API FILTER PRODUCT DEPEND ON QUERY
   useEffect(() => {
-    axios
+    axiosClient
       .get(URL_FILTER_PRODUCTS)
       .then((res) => {
         setProducts(res.data.results);
@@ -145,33 +143,32 @@ export default function Orders() {
     .filter(Boolean)
     .join("")}&limit=10`;
 
-  //GET ORDER
-  const [orders, setOrders] = useState<any>([]);
-
   const listCustomerRef = useRef<any>(null);
-
-  if (orders.length > 0 && !listCustomerRef.current) {
-    listCustomerRef.current = orders;
-  }
 
   const listCustomer = listCustomerRef.current;
 
-  // Create an array of merged items
+  const {
+    data: ordersData,
+    isLoading,
+    refetch,
+  } = useQuery({
+    queryKey: ["getOrders", URL_FILTER],
+    queryFn: () => {
+      return axiosClient.get(URL_FILTER);
+    },
+  });
 
-  useEffect(() => {
-    axios.get(URL_FILTER).then((response) => {
-      setOrders(response.data.results);
-      setPages(response.data.amountResults);
-    });
-  }, [URL_FILTER, refresh]);
+  if (ordersData?.data?.results?.length > 0 && !listCustomerRef.current) {
+    listCustomerRef.current = ordersData?.data?.results;
+  }
 
   useEffect(() => {
     // Check if the selected order exists in the updated dataResource
-    const updatedSelectedOrder = orders.find(
+    const updatedSelectedOrder = ordersData?.data?.results?.find(
       (order: any) => order._id === selectedOrder?._id
     );
     setSelectedOrder(updatedSelectedOrder || null);
-  }, [orders, selectedOrder]);
+  }, [ordersData?.data?.results, selectedOrder]);
 
   /// ORDERDETAILS
   const productColumns = [
@@ -206,7 +203,8 @@ export default function Orders() {
               await axiosClient.patch("orders/" + selectedOrder._id, {
                 orderDetails,
               });
-              setRefresh((f) => f + 1);
+              // setRefresh((f) => f + 1);
+              refetch();
               message.success("Plus a product sucessfully!!", 1.5);
             }}
           >
@@ -235,7 +233,8 @@ export default function Orders() {
                 await axiosClient.patch("orders/" + selectedOrder._id, {
                   orderDetails,
                 });
-                setRefresh((f) => f + 1);
+                // setRefresh((f) => f + 1);
+                refetch();
                 message.success(
                   "Remove a product out of order sucessfully!!",
                   1.5
@@ -245,7 +244,9 @@ export default function Orders() {
                 await axiosClient.patch("orders/" + selectedOrder._id, {
                   orderDetails,
                 });
-                setRefresh((f) => f + 1);
+                // setRefresh((f) => f + 1);
+                refetch();
+
                 message.success("Minus a product sucessfully!!", 1.5);
               }
             }}
@@ -513,19 +514,21 @@ export default function Orders() {
               okText="Delete"
               okType="danger"
               onConfirm={async () => {
-                const handleCanceled: any = await axios.patch(
-                  `${URL_ENV}/orders/${record._id}`,
+                const handleCanceled: any = await axiosClient.patch(
+                  `/orders/${record._id}`,
                   {
                     status: "CANCELED",
                   }
                 );
 
                 if (handleCanceled?.data?._id) {
-                  await axios
-                    .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                  await axiosClient
+                    .post(`/products/orderm/${record._id}/stock`)
                     .then((response) => {
                       setTimeout(() => {
-                        setRefresh((f) => f + 1);
+                        // setRefresh((f) => f + 1);
+                        refetch();
+
                         message.success("Hủy đơn hàng thành công !!", 1.5);
                       }, 2000);
                     })
@@ -546,15 +549,13 @@ export default function Orders() {
                 okType="danger"
                 title={"Are you sure to Confirm it?"}
                 onConfirm={async () => {
-                  const res = await axios.patch(
-                    `${URL_ENV}/orders/${record._id}`,
-                    {
-                      status: "ECONFIRMED",
-                    }
-                  );
+                  const res = await axiosClient.patch(`/orders/${record._id}`, {
+                    status: "ECONFIRMED",
+                  });
                   if (res?.data?._id) {
                     message.success(`CONFIRM ORDER'S SUCESSFULLY`);
-                    setRefresh((f) => f + 1);
+                    // setRefresh((f) => f + 1);
+                    refetch();
                   } else {
                     message.error(`SYSTEM ERROR !!!`);
                   }
@@ -585,6 +586,7 @@ export default function Orders() {
         onOk={() => {
           setAddProductsModalVisible(false);
         }}
+        okType="dashed"
       >
         {products &&
           products.map((p: any) => {
@@ -614,7 +616,9 @@ export default function Orders() {
                     await axiosClient.patch("orders/" + selectedOrder._id, {
                       orderDetails,
                     });
-                    setRefresh((f) => f + 1);
+                    // setRefresh((f) => f + 1);
+                    refetch();
+
                     message.success(
                       `Add product: "${p.name}"  into order sucessfully!!`,
                       1.5
@@ -640,11 +644,12 @@ export default function Orders() {
         <Col span={24}>
           {" "}
           <Table
+            loading={isLoading}
             bordered
             pagination={false}
             scroll={{ x: "max-content", y: "max-content" }}
             rowKey="_id"
-            dataSource={orders}
+            dataSource={ordersData?.data?.results}
             columns={columns}
           />
         </Col>
@@ -656,6 +661,7 @@ export default function Orders() {
           onOk={() => {
             setSelectedOrder(null);
           }}
+          okType="dashed"
           open={selectedOrder}
         >
           <Col>
@@ -676,19 +682,21 @@ export default function Orders() {
                             optionFilterProp="children"
                             onChange={async (e) => {
                               message.loading("Changing status !!", 1.5);
-                              const req = await axios.patch(
-                                `${URL_ENV}/orders/${selectedOrder._id}`,
+                              const req = await axiosClient.patch(
+                                `/orders/${selectedOrder._id}`,
                                 {
                                   status: e,
                                 }
                               );
                               if (req.data) {
-                                const count = setTimeout(() => {
+                                setTimeout(() => {
                                   message.success(
                                     `Change status to ${req.data.status} successfully!!`,
                                     1.5
                                   );
-                                  setRefresh((f) => f + 1);
+                                  // setRefresh((f) => f + 1);
+                                  refetch();
+
                                   setComponentDisabled(!componentDisabled);
                                 }, 2000);
                               }
@@ -750,19 +758,21 @@ export default function Orders() {
                                 "Changing Shipping Address !!",
                                 1.5
                               );
-                              const req = await axios.patch(
-                                `${URL_ENV}/orders/${selectedOrder._id}`,
+                              const req = await axiosClient.patch(
+                                `/orders/${selectedOrder._id}`,
                                 {
                                   shippingAddress: e,
                                 }
                               );
                               if (req.data) {
-                                const count = setTimeout(() => {
+                                setTimeout(() => {
                                   message.success(
                                     `Change Shipping address to ${req.data.status} successfully!!`,
                                     1.5
                                   );
-                                  setRefresh((f) => f + 1);
+                                  // setRefresh((f) => f + 1);
+                                  refetch();
+
                                   setShippingAddressDisabled(
                                     !shippingAddressDisabled
                                   );
@@ -815,7 +825,7 @@ export default function Orders() {
         className="container text-end"
         onChange={(e) => slideCurrent(e)}
         defaultCurrent={1}
-        total={pages}
+        total={ordersData?.data?.amountResults}
       />
     </div>
   );

@@ -85,7 +85,7 @@ const Information = (props: Props) => {
                 <Upload
                   showUploadList={false}
                   name="file"
-                  action={`${URL_ENV}/upload/employees/${user._id}/image`}
+                  action={`${URL_ENV}/upload/employees/${user?._id}/image`}
                   headers={{ authorization: "authorization-text" }}
                   onChange={(info) => {
                     if (info.file.status !== "uploading") {
@@ -141,11 +141,11 @@ const Information = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={user.firstName}
+                        placeholder={user?.firstName}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
                           axiosClient
-                            .patch(`/employees/${user._id}`, {
+                            .patch(`/employees/${user?._id}`, {
                               firstName: e,
                             })
                             .then((res) => {
@@ -182,11 +182,11 @@ const Information = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={user.lastName}
+                        placeholder={user?.lastName}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
                           axiosClient
-                            .patch(`/employees/${user._id}`, {
+                            .patch(`/employees/${user?._id}`, {
                               lastName: e,
                             })
                             .then((res) => {
@@ -223,11 +223,11 @@ const Information = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={user.address}
+                        placeholder={user?.address}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
                           axiosClient
-                            .patch(`/employees/${user._id}`, {
+                            .patch(`/employees/${user?._id}`, {
                               address: e,
                             })
                             .then((res) => {
@@ -264,11 +264,11 @@ const Information = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={user.phoneNumber}
+                        placeholder={user?.phoneNumber}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
                           axiosClient
-                            .patch(`/employees/${user._id}`, {
+                            .patch(`/employees/${user?._id}`, {
                               phoneNumber: e,
                             })
                             .then((res) => {
@@ -310,11 +310,11 @@ const Information = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={user.email}
+                        placeholder={user?.email}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
                           axiosClient
-                            .patch(`/employees/${user._id}`, {
+                            .patch(`/employees/${user?._id}`, {
                               email: e,
                             })
                             .then((res) => {
@@ -427,7 +427,7 @@ const Information = (props: Props) => {
                             disabled={disabledNewPassword}
                             onClick={async (e: any) => {
                               axiosClient
-                                .patch(`/employees/${user._id}`, {
+                                .patch(`/employees/${user?._id}`, {
                                   password: newPassword,
                                 })
                                 .then((res) => {

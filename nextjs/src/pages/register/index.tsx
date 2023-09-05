@@ -3,7 +3,7 @@ import React, { useEffect } from "react";
 import { useState } from "react";
 import style from "./index.module.css";
 import { Col, Row, Card, message } from "antd";
-import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
+// import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
 
 import { Button, DatePicker, Form, Input, Upload } from "antd";
 

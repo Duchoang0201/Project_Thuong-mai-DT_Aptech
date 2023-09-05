@@ -12,11 +12,11 @@ const CheckoutPay = (props: Props) => {
       {itemsCheckout.length > 0 &&
         itemsCheckout.map((i: any, index: any) => {
           return (
-            <div key={i.product._id}>
-              <div className="d-flex justify-content-between">
+            <div key={i.product._id} className="py-3">
+              <div className="flex justify-between">
                 <div className="w-75">
                   <span>{i.product.name}</span> x{" "}
-                  <span className="text-danger">{i.quantity}</span>
+                  <span className="text-red-600">{i.quantity}</span>
                 </div>
                 <span>
                   {(i.product.price * i.quantity).toLocaleString("vi-VN", {
@@ -30,7 +30,7 @@ const CheckoutPay = (props: Props) => {
           );
         })}
 
-      <div className="d-flex justify-content-between">
+      <div className="flex justify-between">
         <strong>Tổng</strong>
         <strong>
           {itemsCheckout.length > 0

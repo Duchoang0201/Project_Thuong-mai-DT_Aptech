@@ -2,6 +2,18 @@ const mongoose = require("mongoose");
 const { Schema, model } = mongoose;
 const bcrypt = require("bcryptjs");
 
+const shippingSchema = new Schema({
+  phone: { type: String },
+  receiverName: { type: String },
+  note: { type: String },
+  ward: { type: String },
+  district: { type: String },
+  city: { type: String },
+  isActive: { type: Boolean },
+  wardNumber: { type: String },
+  districtNumber: { type: String },
+  cityNumber: { type: String },
+});
 const createdBySchema = new Schema({
   employeeId: { type: Schema.Types.ObjectId, ref: "Employee", require: true },
   firstName: { type: String },
@@ -61,6 +73,22 @@ const customerSchema = new Schema(
     note: { type: String },
     lastActivity: { type: Date },
     refreshToken: { type: String },
+    shippingAddress: [shippingSchema],
+    bio: { type: String },
+    sex: {
+      type: String,
+      required: true,
+      default: "MAN",
+      validate: {
+        validator: (value) => {
+          if (["MAN", "WOMEN"].includes(value)) {
+            return true;
+          }
+          return false;
+        },
+        message: `Status: {VALUE} is invalid!`,
+      },
+    },
   },
   {
     versionKey: false,
