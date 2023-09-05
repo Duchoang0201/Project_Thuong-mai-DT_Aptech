@@ -666,12 +666,6 @@ router.get("/22", function (req, res, next) {
       $expr: { $and: [compareFromDate, compareToDate] },
     };
 
-    // const s = { $subtract: [100, '$orderDetails.discount'] };
-
-    // const m = { $multiply: ['$orderDetails.price', s] };
-
-    // const d = { $divide: [m, 100] };
-
     Order.aggregate()
       .lookup({
         from: "customers",
@@ -682,6 +676,23 @@ router.get("/22", function (req, res, next) {
       .match(query)
       .unwind("customer")
       .unwind("orderDetails")
+      .lookup({
+        from: "products",
+        localField: "orderDetails.productId",
+        foreignField: "_id",
+        as: "orderDetails.product",
+      })
+      .unwind("orderDetails.product")
+      .addFields({
+        "orderDetails.name": "$orderDetails.product.name",
+        "orderDetails.discount": "$orderDetails.product.discount",
+        "orderDetails.price": "$orderDetails.product.price",
+      })
+      .project({
+        // Optionally, you can remove the "orderDetails.product" field from the result
+        // if you don't need it anymore after adding its properties to "orderDetails".
+        "orderDetails.product": 0,
+      })
       .addFields({
         originalPrice: {
           $divide: [

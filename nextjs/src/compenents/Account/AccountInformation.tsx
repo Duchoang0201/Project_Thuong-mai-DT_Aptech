@@ -15,8 +15,6 @@ import {
   Upload,
   message,
 } from "antd";
-import axios from "axios";
-import { useAuthStore } from "@/hook/useAuthStore";
 import {
   EditFilled,
   EditOutlined,
@@ -25,64 +23,54 @@ import {
   PhoneOutlined,
   SendOutlined,
   UploadOutlined,
-  UserOutlined,
 } from "@ant-design/icons";
-import router from "next/router";
+import { axiosClient } from "@/libraries/axiosClient";
+import { API_URL } from "@/contants/URLS";
 
 type Props = {};
 const { Text } = Typography;
 const AccountInformation = (props: Props) => {
-  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-
   const [refresh, setRefresh] = useState(0);
-  const { auth } = useAuthStore((state: any) => state);
 
   const [user, setUser] = useState<any>();
 
   const [disabled, setDisabled] = useState(true);
   const [disabledNewPassword, setDisabledNewPassword] = useState(true);
 
-  const [loading, setLoading] = useState<any>(true);
-
   //SetPassword:
   const [oldPassWord, setOldPassWord] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  setTimeout(() => {
-    setLoading(false);
-  }, 1000);
-
-  const E_URL = `${URL_ENV}/customers/${auth?.payload._id}`;
-
   useEffect(() => {
-    axios
-      .get(E_URL)
+    axiosClient
+      .get("/customers/login/profile")
       .then((res) => {
-        setUser(res.data.result);
+        setUser(res.data);
       })
       .catch((err) => console.log(err));
-  }, [E_URL, refresh]);
+  }, [refresh]);
 
   return (
     <>
-      <Row
-        className="px-2 py-2  bg-body-secondary rounded-5 d-flex justify-content-evenly"
+      <div
+        // className="px-2 py-2 bg-body-secondary rounded-5 flex justify-evenly"
+        // className="grid grid-cols-1 md:grid-cols-2"
+        className="flex flex-col md:flex-row"
         style={{ backgroundColor: "white" }}
       >
-        <Col xs={24} xl={7}>
-          <Card loading={loading} bordered={true} style={{ width: "100%" }}>
+        <div className="w-auto md:w-1/3 ">
+          <Card bordered={true} style={{ width: "100%" }}>
             <div className="text-center">
               <Avatar
                 shape="square"
-                // size={{ xs: 24, sm: 32, md: 40, lg: 64, xl: 80, xxl: 100 }}
                 size={100}
-                src={`${URL_ENV}${user?.imageUrl}`}
+                src={`${API_URL}${user?.imageUrl}`}
               />
               <div className="py-2">
                 <Upload
                   showUploadList={false}
                   name="file"
-                  action={`${URL_ENV}/upload/customers/${auth?.payload._id}/image`}
+                  action={`${API_URL}/upload/customers/${user?._id}/image`}
                   headers={{ authorization: "authorization-text" }}
                   onChange={(info) => {
                     if (info.file.status !== "uploading") {
@@ -127,9 +115,9 @@ const AccountInformation = (props: Props) => {
 
             <Divider>More Information</Divider>
           </Card>
-        </Col>
-        <Col xs={24} xl={14} title="Cài đặt tài khoản">
-          <Card loading={loading} bordered={true}>
+        </div>
+        <div className="w-auto md:w-2/3 " title="Cài đặt tài khoản">
+          <Card bordered={true}>
             <div>
               <Collapse accordion>
                 <Collapse.Panel header="First Name" key="1">
@@ -138,11 +126,11 @@ const AccountInformation = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={auth?.payload?.firstName}
+                        placeholder={user?.firstName}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
-                          axios
-                            .patch(`${URL_ENV}/customers/${auth.payload._id}`, {
+                          axiosClient
+                            .patch(`/customers/${user?._id}`, {
                               firstName: e,
                             })
                             .then((res) => {
@@ -179,11 +167,11 @@ const AccountInformation = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={auth?.payload?.lastName}
+                        placeholder={user?.lastName}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
-                          axios
-                            .patch(`${URL_ENV}/customers/${auth.payload._id}`, {
+                          axiosClient
+                            .patch(`/customers/${user?._id}`, {
                               lastName: e,
                             })
                             .then((res) => {
@@ -220,11 +208,11 @@ const AccountInformation = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={auth?.payload?.address}
+                        placeholder={user?.address}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
-                          axios
-                            .patch(`${URL_ENV}/customers/${auth.payload._id}`, {
+                          axiosClient
+                            .patch(`/customers/${user?._id}`, {
                               address: e,
                             })
                             .then((res) => {
@@ -261,11 +249,11 @@ const AccountInformation = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={auth?.payload?.phoneNumber}
+                        placeholder={user?.phoneNumber}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
-                          axios
-                            .patch(`${URL_ENV}/customers/${auth.payload._id}`, {
+                          axiosClient
+                            .patch(`/customers/${user?._id}`, {
                               phoneNumber: e,
                             })
                             .then((res) => {
@@ -307,11 +295,11 @@ const AccountInformation = (props: Props) => {
                       <Input.Search
                         disabled={disabled}
                         enterButton={<SendOutlined />}
-                        placeholder={auth?.payload?.email}
+                        placeholder={user?.email}
                         style={{ width: "100%" }}
                         onSearch={async (e) => {
-                          axios
-                            .patch(`${URL_ENV}/customers/${auth.payload._id}`, {
+                          axiosClient
+                            .patch(`/customers/${user?._id}`, {
                               email: e,
                             })
                             .then((res) => {
@@ -359,8 +347,8 @@ const AccountInformation = (props: Props) => {
                   />{" "}
                   <div>
                     Nhập mật khẩu cũ:
-                    <Row gutter={10} className="py-2">
-                      <Col span={20}>
+                    <div className="">
+                      <div className="">
                         <Space>
                           <Input.Password
                             disabled={disabled}
@@ -372,9 +360,9 @@ const AccountInformation = (props: Props) => {
                           <Button
                             disabled={disabled}
                             onClick={async (e) => {
-                              axios
-                                .post(`${URL_ENV}/customers/login`, {
-                                  email: auth.payload.email,
+                              axiosClient
+                                .post(`/customers/login`, {
+                                  email: user?.email,
                                   password: oldPassWord,
                                 })
                                 .then((res) => {
@@ -401,13 +389,13 @@ const AccountInformation = (props: Props) => {
                             icon={<SendOutlined />}
                           />
                         </Space>
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                   </div>
                   <div className="">
-                    <Row gutter={10} className="py-2">
+                    <div className="py-2">
                       Mật khẩu mới:
-                      <Col span={20}>
+                      <div>
                         <Space>
                           <Input.Password
                             disabled={disabledNewPassword}
@@ -421,13 +409,10 @@ const AccountInformation = (props: Props) => {
                           <Button
                             disabled={disabledNewPassword}
                             onClick={async (e: any) => {
-                              axios
-                                .patch(
-                                  `${URL_ENV}/customers/${auth.payload._id}`,
-                                  {
-                                    password: newPassword,
-                                  }
-                                )
+                              axiosClient
+                                .patch(`/customers/${user?._id}`, {
+                                  password: newPassword,
+                                })
                                 .then((res) => {
                                   message.loading("Changing Password !!", 1.5);
 
@@ -454,15 +439,15 @@ const AccountInformation = (props: Props) => {
                             icon={<SendOutlined />}
                           />
                         </Space>
-                      </Col>
-                    </Row>
+                      </div>
+                    </div>
                   </div>
                 </Collapse.Panel>
               </Collapse>
             </div>
           </Card>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </>
   );
 };

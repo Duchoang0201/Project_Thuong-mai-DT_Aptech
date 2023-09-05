@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useCartStore } from "../../../../hook/useCountStore";
-import { Divider, Card, Checkbox, Badge } from "antd";
+import { Divider, Card, Checkbox, Badge, Statistic } from "antd";
 import Image from "next/image";
 
 export default function CartShoppe() {
@@ -17,16 +17,15 @@ export default function CartShoppe() {
     selectAllCheck,
     removeAllCheck,
   } = useCartStore((state: any) => state);
-
   return (
     <>
-      <div className="container table-responsive ">
+      <div className="">
         <Divider orientation="left">Danh sách các đơn hàng</Divider>
       </div>
-      <div className=" ">
+      <div className="  ">
         <Card>
-          <div className="row text-center">
-            <div className="col-lg-1">
+          <div className="grid grid-cols-6 gap-4 text-center ">
+            <div className=" ">
               <Checkbox
                 onChange={(info: any) => {
                   if (info.target.checked) {
@@ -37,18 +36,19 @@ export default function CartShoppe() {
                 }}
               ></Checkbox>
             </div>
-            <div className="col-lg-4">
+            <div className="">
               <div>Sản phẩm</div>
             </div>
-            <div className="col-lg-2">Đơn giá</div>
-            <div className="col-lg-2">Số lượng</div>
-            <div className="col-lg-2">Số tiền</div>
-            <div className="col-lg-1">Thao tác</div>
+            <div className="">Đơn giá</div>
+            <div className="">Số lượng</div>
+            <div className="">Số tiền</div>
+            <div className="">Thao tác</div>
           </div>
         </Card>
-        <div className="py-3">
+        <div className="">
           {items.map((item: any, index: any) => (
             <Badge.Ribbon
+              className="py-3"
               key={`${item._id}-${index}`}
               text={
                 itemsCheckout.some(
@@ -59,104 +59,115 @@ export default function CartShoppe() {
                   : ""
               }
             >
-              <Card className=" text-center py-3 my-2">
-                <div
-                  className={`row py-3 border rounded-2 ${
-                    itemsCheckout?.some(
+              <div
+                className="  gap-2 py-2
+              "
+              ></div>
+              <div
+                className={`grid grid-cols-1  ${
+                  itemsCheckout?.some(
+                    (checkoutItem: any) =>
+                      checkoutItem.product.productId === item.product.productId
+                  )
+                    ? "bg-body-tertiary"
+                    : ""
+                } md:grid-cols-6 border rounded-lg py-6
+                `}
+              >
+                <div className="flex items-center justify-center ">
+                  <Checkbox
+                    checked={itemsCheckout.some(
                       (checkoutItem: any) =>
                         checkoutItem.product.productId ===
                         item.product.productId
-                    )
-                      ? "bg-body-tertiary"
-                      : ""
-                  }`}
-                >
-                  <div className="col-lg-1 align-self-center">
-                    <Checkbox
-                      checked={itemsCheckout.some(
-                        (checkoutItem: any) =>
-                          checkoutItem.product.productId ===
-                          item.product.productId
-                      )}
-                      onChange={(info: any) => {
-                        if (info.target.checked) {
-                          addCheck(item);
-                        } else {
-                          removeCheck(item.product.productId);
-                        }
-                      }}
-                    ></Checkbox>
-                  </div>
-                  <div className="col-lg-4 d-flex flex-column align-self-center">
-                    <div className="row">
-                      <div className="col-lg-8">
-                        {" "}
-                        <Image
-                          width={150}
-                          height={150}
-                          alt=""
-                          src={`${URL_ENV}/${item.product?.imageUrl}`}
-                        />
-                      </div>
-                      <div className="col-lg-4">{item.product.name}</div>
-                    </div>
-                  </div>
-                  <div className="col-lg-2 align-self-center">
-                    {item.product.price.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}
-                  </div>
-                  <div className="col-lg-2 align-self-center">
-                    {" "}
-                    <div className="d-flex justify-content-center">
-                      <button
-                        type="button"
-                        className="btn btn-outline-primary"
-                        onClick={() => {
-                          increase(item.product?._id);
-                        }}
-                      >
-                        +
-                      </button>
-                      <div className="border px-4 py-2 text-center align-self-center justify-content-center ">
-                        {item.quantity}
-                      </div>
-                      <button
-                        type="button"
-                        className="btn btn-outline-danger"
-                        onClick={() => {
-                          decrease(item.product._id);
-                        }}
-                      >
-                        -
-                      </button>
-                    </div>
-                  </div>
-                  <div className="col-lg-2 align-self-center">
-                    {(item.product.price * item.quantity).toLocaleString(
-                      "vi-VN",
-                      {
-                        style: "currency",
-                        currency: "VND",
-                      }
                     )}
+                    onChange={(info: any) => {
+                      if (info.target.checked) {
+                        addCheck(item);
+                      } else {
+                        removeCheck(item.product.productId);
+                      }
+                    }}
+                  ></Checkbox>
+                </div>
+                <div className="flex items-center justify-center">
+                  <div className="">
+                    <div className="flex  justify-center">
+                      {" "}
+                      <Image
+                        width={150}
+                        height={150}
+                        alt=""
+                        src={`${URL_ENV}/${item.product?.imageUrl}`}
+                      />
+                    </div>
+                    <div className="w-auto">
+                      <p className=" text-center text-clip ">
+                        {item.product.name}
+                      </p>
+                    </div>
                   </div>
-                  <div className="col-lg-1 align-self-center">
-                    {" "}
+                </div>
+                <div className="flex items-center justify-center">
+                  {item.product.price.toLocaleString("vi-VN", {
+                    style: "currency",
+                    currency: "VND",
+                  })}
+                </div>
+                <div className="flex items-center justify-center">
+                  <div
+                    className="inline-flex rounded-md shadow-sm"
+                    role="group"
+                  >
+                    <button
+                      onClick={() => {
+                        increase(item.product._id);
+                      }}
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium text-gray-900 border border-gray-200 rounded-l-lg hover:bg-blue-100    dark:focus:text-black"
+                    >
+                      +
+                    </button>
                     <button
                       type="button"
-                      className="btn btn-outline-dark"
-                      onClick={() => {
-                        remove(item.product._id);
-                        removeCheck(item.product._id);
-                      }}
+                      className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border-t border-b border-gray-200 hover:bg-gray-100    dark:focus:text-black"
                     >
-                      Xóa
+                      {item.quantity}
+                    </button>
+                    <button
+                      onClick={() => {
+                        decrease(item.product._id);
+                      }}
+                      type="button"
+                      className="px-4 py-2 text-sm font-medium text-gray-900  border border-gray-200 rounded-r-md hover:bg-red-100    dark:focus:text-black"
+                    >
+                      -
                     </button>
                   </div>
                 </div>
-              </Card>
+                <div className="flex items-center justify-center">
+                  {(item.product.price * item.quantity).toLocaleString(
+                    "vi-VN",
+                    {
+                      style: "currency",
+                      currency: "VND",
+                    }
+                  )}
+                </div>
+                <div className="flex items-center justify-center">
+                  {" "}
+                  <button
+                    type="button"
+                    className="px-4 py-2 text-sm font-medium text-gray-900 bg-white border rounded-lg border-gray-200 hover:bg-gray-100    dark:focus:text-black"
+                    onClick={() => {
+                      remove(item.product._id);
+                      removeCheck(item.product._id);
+                    }}
+                  >
+                    Xóa
+                  </button>
+                </div>
+              </div>
             </Badge.Ribbon>
           ))}
         </div>

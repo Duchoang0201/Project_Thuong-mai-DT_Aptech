@@ -4,7 +4,8 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors"); // cho phép Export API để bên FE get về
-
+const sql = require("mssql");
+const configSQL = require("./config/sql/sql");
 const passport = require("passport");
 require("dotenv").config();
 
@@ -61,6 +62,24 @@ app.use(
     origin: "*",
   })
 );
+
+//CONECT SQL
+// connect to your database
+
+// sql.connect(configSQL, function (err) {
+//   if (err) console.log(err);
+
+//   // create Request object
+//   // const request = new sql.Request();
+
+//   // // query to the database and get the records
+//   // request.query("select * from Student", function (err, recordset) {
+//   //   if (err) console.log(err);
+
+//   //   // send records as a response
+//   //   res.send(recordset);
+//   // });
+// });
 
 // MONGOOSE
 mongoose.set("strictQuery", false);

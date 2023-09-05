@@ -3,13 +3,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-import {
-  Pagination,
-  Navigation,
-  HashNavigation,
-  EffectCards,
-  Autoplay,
-} from "swiper";
+import { Pagination, Navigation, HashNavigation, Autoplay } from "swiper";
 import axios from "axios";
 import Image from "next/image";
 import "./style.module.css";
@@ -62,8 +56,8 @@ const Slides = () => {
 
   return (
     <div>
-      <div className=" row slides ">
-        <div className="col-lg-8 slide w-75 flex-grow-1">
+      <div className="flex py-4 gap-2">
+        <div className="flex-auto w-2/3  ">
           <Swiper
             loop={true}
             pagination={true}
@@ -103,22 +97,20 @@ const Slides = () => {
               ))}
           </Swiper>
         </div>
-        <div className="col-lg-3 slide">
-          <div className="d-flex flex-column">
-            {slides.length > 0 &&
-              slides.map((item: any, index: any) => (
-                <div className="py-3" key={`${item._id}-${index + 1}`}>
-                  <Image
-                    width={0}
-                    height={0}
-                    sizes="100vw"
-                    style={{ width: "100%", height: "auto" }}
-                    alt={item?.summary}
-                    src={`${URL_ENV}${item?.imageUrl}`}
-                  />
-                </div>
-              ))}
-          </div>
+        <div className="flex-auto w-1/3 md:flex md:flex-col md:w-auto hidden">
+          {slides.length > 0 &&
+            slides.map((item: any, index: any) => (
+              <div className="" key={`${item._id}-${index + 1}`}>
+                <Image
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ width: "100%", height: "150px" }}
+                  alt={item?.summary}
+                  src={`${URL_ENV}${item?.imageUrl}`}
+                />
+              </div>
+            ))}
         </div>
       </div>
     </div>

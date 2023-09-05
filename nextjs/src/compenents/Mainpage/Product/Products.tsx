@@ -53,7 +53,7 @@ const Products = (props: Props) => {
               >
                 <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
                   <Card
-                    className="border rounded-4"
+                    className="border rounded-4 cursor-pointer"
                     bordered={false}
                     style={{ backgroundColor: "rgba(0,0,0,0.1)" }}
                   >
@@ -80,7 +80,7 @@ const Products = (props: Props) => {
                     <div
                       style={{ height: 40 }}
                       className={`text-center ${
-                        windowWidth < 1400 ? "text-truncate" : ""
+                        windowWidth < 1400 ? "truncate" : ""
                       }`}
                     >
                       {item.name}
@@ -96,7 +96,7 @@ const Products = (props: Props) => {
                         })}
                       </strong>
                     </div>
-                    <div className="d-flex justify-content-between">
+                    <div className="flex justify-between">
                       {" "}
                       <div className="text-start  ">
                         <StarOutlined style={{ color: "#FFC107" }} /> (

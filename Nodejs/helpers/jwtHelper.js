@@ -30,7 +30,7 @@ const encodeToken = (userId, firstName, lastName, position) => {
     },
     jwtSettings.SECRET,
     {
-      expiresIn: "2h",
+      expiresIn: "30s",
       audience: jwtSettings.AUDIENCE,
       issuer: jwtSettings.ISSUER,
       subject: userId,

@@ -13,16 +13,15 @@ import {
   Space,
   message,
 } from "antd";
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css";
 import { useCartStore } from "@/hook/useCountStore";
-import { useAuthStore } from "@/hook/useAuthStore";
 import Image from "next/image";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import { useRouter } from "next/router";
 import { useSaveOrderId } from "@/hook/useSaveOrderId";
 import CheckoutPay from "@/compenents/Checkout/CheckoutPay";
+import { axiosClient } from "@/libraries/axiosClient";
 const { Option } = Select;
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 const CheckoutPayment = () => {
   const router = useRouter();
@@ -35,16 +34,9 @@ const CheckoutPayment = () => {
   const [payMethod, setPayMethod] = useState<any>("shipCod");
   const [position, setPosition] = useState<any>();
 
-  const [loading, setLoading] = useState(true);
   const [user, setUser] = useState<any>();
-  useEffect(() => {
-    setTimeout(() => {
-      setLoading(false);
-    }, 1000);
-  }, []);
 
   const { itemsCheckout } = useCartStore((state: any) => state);
-  const { auth } = useAuthStore((state: any) => state);
 
   //Lấy danh sách tỉnh thành
   useEffect(() => {
@@ -78,21 +70,17 @@ const CheckoutPayment = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        if (auth?.payload?._id) {
-          const response = await axios.get(
-            `${URL_ENV}/customers/${auth?.payload?._id}`
-          );
-          setUser(response.data.result);
-        } else {
-          setUser(null);
-        }
+        const res = await axiosClient.get("/customers/login/profile");
+        if (res.data) {
+          setUser(res?.data);
+        } else setUser(null);
       } catch (error) {
         console.log(error);
       }
     };
 
     fetchData();
-  }, [auth?.payload._id]);
+  }, []);
 
   const renderCity = () => {
     return cities.map((city: any) => (
@@ -175,7 +163,7 @@ const CheckoutPayment = () => {
       lastName: values.lastName,
       phoneNumber: values.phoneNumber,
     };
-    orderData.customerId = `${auth.payload._id}`;
+    orderData.customerId = `${user?._id}`;
     orderData.position = {
       name: position.regionName,
       lat: position.lat,
@@ -186,13 +174,13 @@ const CheckoutPayment = () => {
       orderData.paymentType = "CASH";
 
       const payPost = async () => {
-        const found: any = await axios.post(`${URL_ENV}/orders`, orderData);
+        const found: any = await axiosClient.post(`/orders`, orderData);
 
         saveOrderId(found?.data?.result?._id);
         if (found) {
           //Change stock of product :
-          const handleChangeStock = await axios
-            .post(`${URL_ENV}/products/orderp/${found?.data?.result._id}/stock`)
+          const handleChangeStock = await axiosClient
+            .post(`/products/orderp/${found?.data?.result._id}/stock`)
             .then((response) => {
               console.log(response.data.message);
             })
@@ -212,15 +200,13 @@ const CheckoutPayment = () => {
         .reduce((accumulator: any, subtotal: any) => accumulator + subtotal, 0);
 
       const payPost = async () => {
-        const postOder: any = await axios.post(`${URL_ENV}/orders`, orderData);
+        const postOder: any = await axiosClient.post(`/orders`, orderData);
         try {
           console.log("««««« postOder »»»»»", postOder);
           if (postOder?.data?.oke === true) {
             //Change stock of product :
-            const handleChangeStock = await axios
-              .post(
-                `${URL_ENV}/products/orderp/${postOder?.data?.result?._id}/stock`
-              )
+            const handleChangeStock = await axiosClient
+              .post(`/products/orderp/${postOder?.data?.result?._id}/stock`)
               .then((response) => {
                 console.log(response.data.message);
               })
@@ -228,8 +214,8 @@ const CheckoutPayment = () => {
                 console.error(error);
               });
 
-            const found = await axios.post(
-              `${URL_ENV}/orders/pay/create_momo_url`,
+            const found = await axiosClient.post(
+              `/orders/pay/create_momo_url`,
               { amount: amount }
             );
 
@@ -237,9 +223,7 @@ const CheckoutPayment = () => {
           }
         } catch (error) {
           console.log("««««« error »»»»»", error);
-          await axios.delete(
-            `${URL_ENV}/orders/${postOder?.data?.result?._id}`
-          );
+          await axiosClient.delete(`/orders/${postOder?.data?.result?._id}`);
           message.error({
             content:
               "Momo chỉ cho phép thanh toán giá trị đơn hàng dưới 10 triệu đồng!!, vui lòng thay đổi cách thanh toán.",
@@ -261,10 +245,10 @@ const CheckoutPayment = () => {
 
       const payPost = async () => {
         try {
-          const postOder = await axios.post(`${URL_ENV}/orders`, orderData);
+          const postOder = await axiosClient.post(`/orders`, orderData);
           if (postOder?.data?.oke === true) {
-            const handleChangeStock = await axios
-              .post(`${URL_ENV}/products/orderp/${postOder?.data?._id}/stock`)
+            const handleChangeStock = await axiosClient
+              .post(`/products/orderp/${postOder?.data?._id}/stock`)
               .then((response) => {
                 console.log(response.data.message);
               })
@@ -272,8 +256,8 @@ const CheckoutPayment = () => {
                 console.error(error);
               });
 
-            const found = await axios.post(
-              `${URL_ENV}/orders/pay/create_vnpay_url`,
+            const found = await axiosClient.post(
+              `/orders/pay/create_vnpay_url`,
               { amount: amount }
             );
 
@@ -348,7 +332,7 @@ const CheckoutPayment = () => {
   // };
 
   return (
-    <div>
+    <div className="bg-gray-300">
       <div style={{ background: "rgb(245,245,245)" }}>
         <div className="container">
           <h4 className="text-center py-4">
@@ -363,17 +347,16 @@ const CheckoutPayment = () => {
       </div>
 
       {user?._id ? (
-        <div className="container ">
-          <Row>
-            <Col xs={24} xl={10} className="px-3 py-2 rounded-start ">
+        <div className="container mx-auto ">
+          <div className="flex flex-col md:flex-row">
+            <div className="px-3 py-2 w-auto md:w-1/2 ">
               {" "}
               <Card
-                loading={loading}
                 className="border border-dark-subtle"
                 title="Thông tin thanh toán"
                 style={{ width: "100%" }}
               >
-                <div className="d-flex justify-content-between border-bottom">
+                <div className="flex justify-between border-bottom">
                   <strong>Sản phẩm</strong>
                   <strong>Tạm tính</strong>
                 </div>
@@ -388,7 +371,7 @@ const CheckoutPayment = () => {
                     onChange={(e: any) => setPayMethod(e?.target?.value)}
                   >
                     <Radio
-                      className="d-flex justify-content-around border-bottom"
+                      className="flex justify-around border-bottom"
                       value="shipCod"
                     >
                       <Space>
@@ -406,7 +389,7 @@ const CheckoutPayment = () => {
                       </Space>
                     </Radio>
                     <Radio
-                      className="d-flex justify-content-around border-bottom"
+                      className="flex justify-around border-bottom"
                       value="momo"
                     >
                       <Space>
@@ -424,7 +407,7 @@ const CheckoutPayment = () => {
                       </Space>
                     </Radio>
                     <Radio
-                      className="d-flex justify-content-around border-bottom"
+                      className="flex justify-around border-bottom"
                       value="vnpay"
                     >
                       <Space>
@@ -444,12 +427,11 @@ const CheckoutPayment = () => {
                   </Space>
                 </Radio.Group>
               </Card>
-            </Col>
+            </div>
 
-            <Col xs={24} xl={14} className="py-2 px-3 rounded-end ">
+            <div className="py-2 px-3 w-auto md:w-1/2">
               {" "}
               <Card
-                loading={loading}
                 className="border border-dark-subtle"
                 title="Đơn hàng của bạn"
                 style={{ width: "100%" }}
@@ -569,14 +551,17 @@ const CheckoutPayment = () => {
                     <Input />
                   </Form.Item>
                   <Form.Item wrapperCol={{ offset: 16, span: 16 }}>
-                    <Button type="primary" htmlType="submit">
+                    <Button
+                      className="text-white border-gray-200 dark:bg-gray-900 hover:text-gray-400"
+                      htmlType="submit"
+                    >
                       Thanh toán
                     </Button>
                   </Form.Item>
                 </Form>
               </Card>
-            </Col>
-          </Row>
+            </div>
+          </div>
         </div>
       ) : (
         <Divider>Vui lòng đăng nhập!!</Divider>

@@ -13,7 +13,7 @@ import {
   Select,
   Space,
 } from "antd";
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css"
 import { useCartStore } from "@/hook/useCountStore";
 import { useAuthStore } from "@/hook/useAuthStore";
 import Image from "next/image";

@@ -1,11 +1,6 @@
-import { useAuthStore } from "@/hook/useAuthStore";
 import numeral from "numeral";
 
-import {
-  DeleteOutlined,
-  RestOutlined,
-  SearchOutlined,
-} from "@ant-design/icons";
+import { RestOutlined, SearchOutlined } from "@ant-design/icons";
 import {
   Button,
   Card,
@@ -16,19 +11,25 @@ import {
   Popconfirm,
   Space,
   Table,
-  Tooltip,
   message,
 } from "antd";
-import axios from "axios";
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { axiosClient } from "@/libraries/axiosClient";
+// import "bootstrap/dist/css/bootstrap.min.css";
 
 type Props = {};
 
 const AccountOrders = (props: Props) => {
-  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+  const [user, setUser] = useState<any>(null);
+  useEffect(() => {
+    axiosClient
+      .get("/customers/login/profile")
+      .then(async (res) => {
+        setUser(res.data);
+      })
+      .catch((err) => console.log(`⚠️⚠️⚠️!! err `, err));
+  }, []);
 
-  const { auth }: any = useAuthStore((state: any) => state);
   const [userOrders, setUserOrders] = useState<any>();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [refresh, setRefresh] = useState(0);
@@ -45,13 +46,13 @@ const AccountOrders = (props: Props) => {
   }, [selectedOrder?.id, userOrders]);
 
   useEffect(() => {
-    axios
-      .get(`${URL_ENV}/orders/personal/${auth?.payload?._id}`)
-      .then((res) => {
+    if (user) {
+      axiosClient.get(`/orders/personal/${user?._id}`).then((res) => {
         setUserOrders(res.data.results);
         setLoadingTable(false);
       });
-  }, [URL_ENV, auth, refresh]);
+    }
+  }, [user, user?._id]);
 
   const ordersColumn = [
     {
@@ -177,6 +178,7 @@ const AccountOrders = (props: Props) => {
         return (
           <Space className="text-end">
             <Button
+              type="dashed"
               onClick={() => {
                 setSelectedOrder(record);
               }}
@@ -190,16 +192,16 @@ const AccountOrders = (props: Props) => {
                   okText="Delete"
                   okType="danger"
                   onConfirm={async () => {
-                    const handleCanceled: any = await axios.patch(
-                      `${URL_ENV}/orders/${record._id}`,
+                    const handleCanceled: any = await axiosClient.patch(
+                      `/orders/${record._id}`,
                       {
                         status: "CANCELED",
                       }
                     );
 
                     if (handleCanceled?.data?._id) {
-                      await axios
-                        .post(`${URL_ENV}/products/orderm/${record._id}/stock`)
+                      await axiosClient
+                        .post(`/products/orderm/${record._id}/stock`)
                         .then((response) => {
                           setTimeout(() => {
                             setRefresh((f) => f + 1);
@@ -215,7 +217,7 @@ const AccountOrders = (props: Props) => {
                   }}
                   title={"Bạn chắc chắn sẽ hủy đơn hàng?"}
                 >
-                  <Button danger icon={<RestOutlined />}></Button>
+                  <Button type="dashed" danger icon={<RestOutlined />}></Button>
                 </Popconfirm>
               </>
             )}
@@ -237,6 +239,7 @@ const AccountOrders = (props: Props) => {
         />
       </div>
       <Modal
+        okType="dashed"
         width={"100%"}
         onCancel={() => {
           setSelectedOrder(null);

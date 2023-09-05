@@ -4,11 +4,11 @@ import React, { useCallback } from "react";
 import { useRouter } from "next/router";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import "bootstrap/dist/css/bootstrap.min.css";
+// import "bootstrap/dist/css/bootstrap.min.css";
 import { Col, Row, message } from "antd";
 import Style from "./DongHo.module.css";
 
-import { MoreOutlined } from "@ant-design/icons";
+// import { MoreOutlined } from "@ant-design/icons";
 import {
   Select,
   Space,

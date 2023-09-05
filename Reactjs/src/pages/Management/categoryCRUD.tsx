@@ -189,6 +189,7 @@ function CategoryCRUD() {
         const formData = new FormData();
         formData.append("file", file);
 
+        console.log(`🚀🚀🚀!..formData`, formData);
         if (file?.uid && file?.type) {
           message.loading("On Updating picture on data!!", 1.5);
           axios
@@ -856,6 +857,26 @@ function CategoryCRUD() {
         defaultCurrent={1}
         total={categoriesData?.data?.amountResults}
       />
+
+      <Upload
+        maxCount={1}
+        listType="picture-card"
+        showUploadList={true}
+        beforeUpload={(file) => {
+          console.log(`🚀🚀🚀!..file`, file);
+          return false;
+        }}
+        onRemove={() => {}}
+      >
+        {!file ? (
+          <div>
+            <PlusOutlined />
+            <div style={{ marginTop: 8 }}>Upload</div>
+          </div>
+        ) : (
+          ""
+        )}
+      </Upload>
     </div>
   );
 }

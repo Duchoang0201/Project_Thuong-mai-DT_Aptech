@@ -52,6 +52,18 @@ const customerBodyPatchSchema = yup.object().shape({
       ),
     address: yup.string().max(500),
     birthday: yup.date().nullable().min(new Date(1900, 0, 1)),
+    // shippingAddress: yup.array({
+    //   phone: yup.number().required(),
+    //   receiverName: yup.string().required(),
+    //   note: yup.string().required(),
+    //   ward: yup.string().required(),
+    //   district: yup.string().required(),
+    //   city: yup.string().required(),
+    //   wardNumber: yup.string().required(),
+    //   districtNumber: yup.string().required(),
+    //   cityNumber: yup.string().required(),
+    //   isActive: yup.boolean(),
+    // }),
   }),
 });
 const getCustomersSchema = yup.object({

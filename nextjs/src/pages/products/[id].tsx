@@ -1,394 +1,318 @@
-import { useState, useRef, useEffect } from "react";
-
-import router, { useRouter } from "next/router";
-
-import axios from "axios";
-import Image from "next/image";
-import "bootstrap/dist/css/bootstrap.min.css";
-import {
-  Modal,
-  Rate,
-  Collapse,
-  Input,
-  Button,
-  List,
-  Form,
-  message,
-  Divider,
-} from "antd";
-import Style from "./index.module.css";
-import { PhoneOutlined } from "@ant-design/icons";
-import { Swiper, SwiperSlide } from "swiper/react";
-
-const { Panel } = Collapse;
-const { TextArea } = Input;
-import "swiper/swiper-bundle.css";
-import "swiper/css/pagination";
-
-// import { Pagination } from "swiper";
-import { Navigation } from "swiper";
-import { useAuthStore } from "@/hook/useAuthStore";
+import { API_URL } from "@/contants/URLS";
 import { useCartStore } from "@/hook/useCountStore";
-// import { Route } from "react-router-dom";
-import ReactPlayer from "react-player";
-import Topmoth from "@/compenents/Mainpage/Topmonth/Topmonth";
-import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
+import { axiosClient } from "@/libraries/axiosClient";
+import { Button, Form, Input, Rate, message } from "antd";
+import axios from "axios";
+import { Image } from "antd";
+import router from "next/router";
+import React, { useEffect, useState } from "react";
+import TextArea from "antd/es/input/TextArea";
+
 type Props = {
   product: any;
   allProduct: any;
   productParams: any;
 };
+const ProductDetails = (props: Props) => {
+  const [user, setUser] = useState<any>(null);
+  const { product } = props;
+  const {
+    add,
+    items: itemsCart,
+    increase,
+  } = useCartStore((state: any) => state);
 
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-
-export default function ProductDetails({ product }: Props) {
   const [commentForm] = Form.useForm();
-  const [visible, setVisible] = useState(false);
-  const [picture, setPicture] = useState<any>();
-  const [data, setData] = useState<any>(product.rateInfo);
-  const [refresh, setRefresh] = useState<any>(0);
-  const { add, items, increase } = useCartStore((state: any) => state);
-
-  const { auth } = useAuthStore((state: any) => state);
-  //////////////////
-
-  const [productMain, setProductMain] = useState<any>();
-
   useEffect(() => {
-    axios.get(`${URL_ENV}/products/${product._id}`).then((res) => {
-      setProductMain(res.data);
-      setData(res.data.rateInfo);
-    });
-  }, [product._id, refresh]);
-
-  // useEffect(() => {
-  //   console.log("update data: ", product);
-  //   setData(product.rateInfo);
-  // }, [product]);
-  const onFinish = async (record: any) => {
-    const customer = {
-      customerId: auth.payload?._id,
-      firstName: auth.payload?.firstName,
-      lastName: auth.payload?.lastName,
-      comment: record.comment,
+    const fetchData = async () => {
+      try {
+        const getUser = await axiosClient.get("/customers/login/profile");
+        if (getUser?.data) {
+          setUser(getUser?.data);
+        } else {
+          setUser(null);
+        }
+      } catch (error) {
+        console.log(error);
+      }
     };
 
-    const response = await axios.get(`${URL_ENV}/products/${product._id}`);
+    fetchData();
+  }, []);
+
+  const handlePostComent = async (record: any) => {
+    const customer = {
+      imageUrl: user.imageUrl,
+      customerId: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      comment: record.comment,
+    };
+    const response = await axiosClient.get(`/products/${product._id}`);
     const updateData = response.data;
 
     if (response.data.rateInfo) {
       updateData.rateInfo.push({
         customer: customer,
         rateNumber: record.rateNumber,
+        createdAt: new Date(),
       });
     } else {
       updateData.rateInfo = [];
       updateData.rateInfo.push({
         customer: customer,
         rateNumber: record.rateNumber,
+        createdAt: new Date(),
       });
     }
 
-    axios
-      .patch(`${URL_ENV}/products/${product._id}`, {
+    axiosClient
+      .patch(`/products/${product._id}`, {
         rateInfo: updateData.rateInfo,
       })
       .then((res) => {
         commentForm.resetFields();
-        message.success(
-          "Cảm ơn quý khách đã đánh giá sản phẩm của chúng tôi",
-          1.5
-        );
-        setRefresh((f: any) => f + 1);
+        message.success({
+          content: "Cảm ơn quý khách đã đánh giá sản phẩm của chúng tôi",
+          style: { marginTop: 150 },
+          duration: 1.5,
+        });
+        // setRefresh((f: any) => f + 1);
       })
       .catch((err) => {
         console.log(err);
       });
   };
-
-  const handleImageClick = (items: any) => {
-    console.log("click");
-    setVisible(true);
-    setPicture(items);
-  };
-
-  const handleModalClose = () => {
-    setVisible(false);
-  };
-
   return (
     <>
-      <div className="container d-flex-column justify-content-center py-3">
-        <div className=" w-75" style={{ margin: "0px 12%" }}>
-          <div className=" d-flex flex-lg-row justify-content-center flex-column ">
-            <div
-              className="p-5 bd-highlight d-flex flex-column"
-              style={{ background: "#fcfcfc" }}
-            >
-              <div>
-                <Image
-                  src={`${URL_ENV}/${productMain?.imageUrl}`}
-                  alt="Description of the image"
-                  width={200}
-                  height={200}
-                  className="w-100 img-fluid"
-                ></Image>
-              </div>
-
-              <div
-                className="d-flex flex-row  mt-2"
-                style={{ width: "200px", height: "100px", marginLeft: "2% " }}
-              >
-                <Swiper
-                  modules={[Navigation]}
-                  className="mySwiper"
-                  navigation={true}
-                  slidesPerView={2}
-                  spaceBetween={30}
-                >
-                  {productMain?.images?.map((items: any, index: any) => {
-                    if (index <= 20)
-                      return (
-                        <>
-                          <SwiperSlide
-                            key={`${items._id}-${index}`}
-                            className="ms-2 w-25"
-                          >
-                            <Image
-                              src={`${URL_ENV}/${items}`}
-                              alt="Description of the image"
-                              width={80}
-                              height={80}
-                              className="border"
-                              onClick={() => handleImageClick(items)}
-                              // style={{ maxHeight: "180px", minHeight: "80px" }}
-                            ></Image>
-                            <Modal
-                              visible={visible}
-                              onCancel={handleModalClose}
-                              footer={null}
-                            >
-                              <Image
-                                src={`${URL_ENV}/${picture}`}
-                                alt="Image"
-                                width={500}
-                                height={500}
-                                style={{ width: "100%" }}
-                              />
-                            </Modal>
-                          </SwiperSlide>
-                        </>
-                      );
-                  })}
-                </Swiper>
-              </div>
-            </div>
-            <div className="p-2 bd-highlight ">
-              <h3 className="fs-5">{product?.name}</h3>
-              <div>
-                {" "}
-                <Rate disabled value={product?.averageRate} />
-                <span className={`${Style.ratingNumber}`}>
-                  {product?.rateInfor?.length}
-                </span>
-              </div>
-              <div className="d-sm-flex justify-content-between d-inline-block ">
-                <p>
-                  Mã: <span className="fs-6">{product?.categoryId}</span>
-                </p>
-                <p>{product?.amountSold} đã bán</p>
-              </div>
-
-              <div>
-                <span className="fs-4">
-                  {product?.price.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  })}
-                </span>
-              </div>
-              <div>
-                <b>{productMain?.active === true ? "Còn hàng" : "Hết hàng"}</b>
-              </div>
-              <div className="mt-1 border border-dark border-1 rounded-3 ">
-                <div
-                  className="  border-dark bg-light rounded-top "
-                  // style={{ background: "#fcfcfc" }}
-                >
-                  <p className="">Chương trình - Ưu đãi</p>
-                </div>
-                <ul>
-                  <li>Giảm giá cho sản phẩm lên đến {product.discount}%</li>
-                  <li>Áp dụng cho mọi địa điểm trên toàn quốc</li>
-                  <li>Áp dụng bảo hành 2 tháng trong toàn quốc</li>
-                </ul>
-              </div>
-              <div className="mt-1 ">
-                <button
-                  onClick={() => {
-                    if (auth?.payload?._id) {
-                      const productId = productMain?._id;
-
-                      console.log("««««« items »»»»»", items);
-                      const productExists = items.some(
-                        (item: any) => item.product._id === productId
-                      );
-                      console.log("««««« productExists »»»»»", productExists);
-                      if (productExists === true) {
-                        increase(productId);
-                        message.success("Thêm 1 sản phẩm vào giỏ hàng!", 1.5);
-                      } else {
-                        add({ product: product, quantity: 1 });
-                        message.success("Đã thêm sản phẩm vào giỏ hàng!", 1.5);
-                      }
-                    } else {
-                      router.push("/login");
-                      message.warning(
-                        "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
-                        1.5
-                      );
-                    }
-                  }}
-                  className="w-100  border-bottom border-dark  rounded bg-gradient text-light"
-                  style={{ background: "#AD2A36", height: "35px" }}
-                >
-                  <b>Đặt hàng ngay</b>
-                </button>
-              </div>
-              <div className="w-100  d-flex ">
-                <div className="mt-2 ">
-                  <PhoneOutlined />
-                </div>
-                <p className={`${Style.guide__tilte}`}>
-                  Liên hệ 1800 000 để được tư vấn miễn phí và các thông tin
-                  khuyến mãi
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-        <br />
-        <div className="  d-flex justify-content-center">
-          <div className="w-75">
-            <Collapse size="small">
-              <Panel header="Thông số và mô tả sản phẩm" key="1">
-                <p>{product.description}</p>
-              </Panel>
-            </Collapse>
-          </div>
-        </div>
-        <div className="d-flex justify-content-center">
-          <div className="w-75">
-            <Collapse size="small">
-              <Panel header="Bình luận" key="1">
-                <div className={Style.scroll__bar}>
-                  <List
-                    itemLayout="horizontal"
-                    dataSource={data}
-                    renderItem={(item: any, index) => (
-                      <List.Item>
-                        <List.Item.Meta
-                          key={`${item._id}-${index}`}
-                          title={
-                            <div>
-                              <span style={{ marginRight: "10px" }}>
-                                {item.customer.firstName}
-                              </span>
-                              <Rate allowHalf defaultValue={item.rateNumber} />
-                            </div>
-                          }
-                          description={item.customer.comment}
-                        />
-                      </List.Item>
-                    )}
+      <section className="py-10 font-poppins ">
+        <div className="max-w-6xl px-4 mx-auto">
+          <div className="flex flex-wrap mb-24 -mx-4">
+            <div className="w-full px-4 mb-8 md:w-1/2 md:mb-0">
+              <div className="sticky top-0 overflow-hidden  ">
+                <div className="relative mb-6 lg:mb-10 lg:h-96 ">
+                  <Image
+                    className="object-contain w-full lg:h-full"
+                    src={`${API_URL}${product.imageUrl}`}
+                    alt="asd"
+                    width={"80%"}
                   />
                 </div>
-                <hr style={{ width: "100%" }} />
-                {/* ////////////////////////////////////////// */}
-                {auth && (
-                  <>
-                    <Form
-                      form={commentForm}
-                      name="commentForm"
-                      labelCol={{ span: 6 }}
-                      wrapperCol={{ span: 14 }}
-                      onFinish={onFinish}
-                      autoComplete="off"
-                      className={Style.comment}
+                <div className="flex-wrap hidden -mx-2 md:flex py-2">
+                  {product?.images?.map((item: any, index: number) => (
+                    <div
+                      key={`${item}-${index}`}
+                      className="w-1/2 p-2 sm:w-1/4"
                     >
-                      <Form.Item
-                        label={"Đánh giá"}
-                        name="rateNumber"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Vui lòng nhập đánh giá!",
-                          },
-                        ]}
-                      >
-                        <Rate />
-                      </Form.Item>
-                      <Form.Item
-                        label={"Bình luận"}
-                        name="comment"
-                        rules={[
-                          {
-                            required: true,
-                            message: "Vui lòng nhập bình luận!",
-                          },
-                        ]}
-                      >
-                        <TextArea showCount maxLength={100} />
-                      </Form.Item>
+                      <a className="block border border-gray-200  dark:border-gray-700 ">
+                        <Image
+                          className="object-contain w-full lg:h-28"
+                          src={`${API_URL}/${item}`}
+                          alt=""
+                        />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+            <div className="w-full px-4 md:w-1/2">
+              <div className="lg:pl-20">
+                <div className="mb-6 ">
+                  <span className="px-2.5 py-0.5 text-xs text-red-600 bg-red-100 dark:bg-gray-700 rounded-xl dark:text-gray-200">
+                    Thông tin sản phẩm:
+                  </span>
+                  <h2 className="max-w-xl mt-6 mb-6 text-xl font-semibold leading-loose tracking-wide text-gray-950 md:text-2xl ">
+                    {product.name}
+                  </h2>
+                  <div className="flex flex-wrap items-center ">
+                    Mã sản phẩm: {product._id}
+                  </div>
+                  <div className="flex flex-wrap items-center mb-6">
+                    <Rate disabled value={product?.averageRate} />
+                  </div>
+                  <div className="flex flex-wrap items-center mb-6">
+                    Còn hàng
+                  </div>
+                  <p className="inline-block text-2xl font-semibold text-gray-700 dark:text-gray-400 ">
+                    <span>
+                      {" "}
+                      {product?.price.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    </span>
+                    <span className="ml-3 text-base font-normal text-gray-500 line-through dark:text-gray-400">
+                      {(product?.price + 5000000).toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      })}
+                    </span>
+                  </p>
+                </div>
+                <div className="mb-6">
+                  <h2 className="mb-2 text-lg font-bold text-gray-700 dark:text-gray-400">
+                    Thông tin:
+                  </h2>
+                  <p className="mt-2 text-sm text-red-500 dark:text-red-200">
+                    {product.description}
+                    <p className="text-gray-600 dark:text-gray-400">
+                      Most customers receive within 3-31 days.
+                    </p>
+                  </p>
+                </div>
+                <div className="py-6 mb-6 border-t border-b border-gray-200 dark:border-gray-700">
+                  <span className="text-base text-gray-600 dark:text-gray-400">
+                    {product.stock} items In Stock
+                  </span>
+                </div>
+                <div className="mb-6 "></div>
+                <div className="flex flex-wrap items-center mb-6">
+                  <button
+                    onClick={() => {
+                      if (user === null) {
+                        router.push("/login");
+                        message.warning(
+                          "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
+                          1.5
+                        );
+                      } else {
+                        const productId = product._id;
+                        const productExists = itemsCart.some(
+                          (item: any) => item.product._id === productId
+                        );
 
-                      <Form.Item wrapperCol={{ offset: 6, span: 16 }}>
-                        <Button type="primary" htmlType="submit">
-                          Submit
-                        </Button>
-                      </Form.Item>
-                    </Form>
-                  </>
-                )}
+                        if (productExists === true) {
+                          increase(productId);
+                          message.success(
+                            {
+                              content: "Thêm 1 sản phẩm vào giỏ hàng!",
+                              style: {
+                                marginTop: 150,
+                              },
+                            },
+                            1.5
+                          );
+                        } else {
+                          add({ product: product, quantity: 1 });
+                          message.success(
+                            {
+                              content: "Đã thêm sản phẩm vào giỏ hàng!",
+                              style: {
+                                paddingTop: 150,
+                              },
+                            },
+                            1.5
+                          );
+                        }
+                      }
+                    }}
+                    type="button"
+                    className="w-full px-4 py-3 text-center text-red-600 bg-red-100 border border-red-600 dark:hover:bg-gray-900 dark:text-gray-400 dark:border-gray-700 dark:bg-gray-700 hover:bg-red-600 hover:text-gray-100 lg:w-1/2 rounded-xl"
+                  >
+                    Thêm vào giỏ hàng
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
 
-                {/* //////////////////////////////////////////////////// */}
-              </Panel>
-            </Collapse>
+      <section className="bg-white dark:bg-gray-900 py-8 lg:py-16">
+        <div className="max-w-2xl mx-auto px-4">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg lg:text-2xl font-bold text-gray-900 dark:text-white">
+              Review
+            </h2>
           </div>
+          {user && (
+            <Form
+              form={commentForm}
+              name="commentForm"
+              // labelCol={{ span: 6 }}
+              wrapperCol={{ span: 14 }}
+              onFinish={handlePostComent}
+              autoComplete="off"
+              // className="mb-6"
+            >
+              <Form.Item
+                className="py-2 px-4 w-96 bg-white rounded-lg rounded-t-lg border border-gray-200 dark:bg-gray-200 dark:border-gray-700"
+                label={"Đánh giá"}
+                name="rateNumber"
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập đánh giá!",
+                  },
+                ]}
+              >
+                <Rate />
+              </Form.Item>
+
+              <Form.Item
+                className="py-2 px-4  w-96 text-sm rounded-lg text-gray-900 border-0 focus:ring-0 focus:outline-none dark:text-white dark:placeholder-gray-400 dark:bg-gray-200"
+                name="comment"
+                label={"Bình luận"}
+                rules={[
+                  {
+                    required: true,
+                    message: "Vui lòng nhập bình luận!",
+                  },
+                ]}
+              >
+                <Input className="w-max" showCount maxLength={100} />
+              </Form.Item>
+              <Button
+                className="inline-flex items-center py-2.5 px-4 text-xs font-medium text-center text-white bg-primary-700 rounded-lg focus:ring-4 focus:ring-primary-200 dark:focus:ring-primary-900 hover:bg-primary-800"
+                htmlType="submit"
+              >
+                Post comment
+              </Button>
+            </Form>
+          )}
+
+          {product?.rateInfo?.map((item: any, index: any) => (
+            <article
+              key={`${item._id}-${index}`}
+              className="p-6 mb-6 text-base bg-white rounded-lg dark:bg-gray-900"
+            >
+              <footer className="flex justify-between items-center mb-2">
+                <div className="flex items-center">
+                  <p className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
+                    <Image
+                      className="mr-2 w-6 h-6 rounded-full"
+                      // src={`${API_URL}/${item.customer.}`}
+                      alt={item.customer._id}
+                    />
+                    {item.customer.firstName} {item.customer.lastName}
+                  </p>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">
+                    <time dateTime="2022-02-08" title="February 8th, 2022">
+                      {item?.createdAt}
+                    </time>
+                  </p>
+                </div>
+              </footer>
+              <p className="">
+                <Rate disabled value={item?.rateNumber} />
+              </p>
+              <p className="text-gray-500 dark:text-gray-400">
+                {item.customer.comment}
+              </p>
+            </article>
+          ))}
         </div>
-        <Divider>
-          <h3>Sản phẩm yêu thích </h3>
-        </Divider>
-        <div
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(208,206,191,1) 19%, rgba(222,221,202,1) 56%, rgba(160,167,151,1) 86%)",
-          }}
-        >
-          <div className="container">
-            <Topmoth />
-          </div>
-        </div>
-        <Divider>
-          <h3>Sản phẩm yêu thích </h3>
-        </Divider>
-        <div
-          style={{
-            background:
-              "linear-gradient(90deg, rgba(208,206,191,1) 19%, rgba(222,221,202,1) 56%, rgba(160,167,151,1) 86%)",
-          }}
-        >
-          <div className="container">
-            <Hotdeal />
-          </div>
-        </div>
-      </div>
+      </section>
     </>
   );
-}
+};
+
+export default ProductDetails;
 
 export async function getStaticPaths() {
   const products = await axios
-    .get(`${URL_ENV}/products?active=true`)
+    .get(`${API_URL}/products?active=true`)
     .then((response) => {
       return response.data;
     });
@@ -411,13 +335,13 @@ export async function getStaticProps({ params }: any) {
 
   const productParams = params;
   const product = await axios
-    .get(`${URL_ENV}/products/${params.id}`)
+    .get(`${API_URL}/products/${params.id}`)
     .then((response) => {
       return response.data;
     });
 
   const allProduct = await axios
-    .get(`${URL_ENV}/products?active=true`)
+    .get(`${API_URL}/products?active=true`)
     .then((response) => {
       return response.data;
     });

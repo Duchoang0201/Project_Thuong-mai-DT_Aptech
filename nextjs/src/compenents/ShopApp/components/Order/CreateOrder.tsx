@@ -27,7 +27,8 @@ export default function CreateOrder() {
   return (
     <div className="container ">
       <button
-        className="btn btn-primary "
+        type="button"
+        className="text-white border rounded-lg bg-blue-500"
         style={{ border: 0, height: 42, width: 120 }}
         onClick={handleCheckout}
       >

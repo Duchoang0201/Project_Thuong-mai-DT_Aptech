@@ -105,7 +105,6 @@ const passportConfig = new JwtStrategy(
       } else {
         return done(null, false);
       }
-
       if (!user) return done(null, false);
 
       return done(null, user);

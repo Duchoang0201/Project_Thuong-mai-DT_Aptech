@@ -17,16 +17,33 @@ router.post("/", async (req, res) => {
 //get
 
 router.get("/:conversationId", async (req, res) => {
+  const { amountSkip } = req.query;
+  const { conversationId } = req.params;
   try {
+    const totalMessageCount = await Message.countDocuments({
+      conversationId: conversationId,
+    });
+
+    const compare =
+      totalMessageCount - amountSkip > 0 ? totalMessageCount - amountSkip : 0;
+
     const messages = await Message.find({
-      conversationId: req.params.conversationId,
-    }).populate("employee");
+      conversationId: conversationId,
+    })
+      .populate("employee")
+      .skip(compare);
 
     const lastMessage = await Message.findOne({
-      conversationId: req.params.conversationId,
+      conversationId: conversationId,
     }).sort({ createdAt: -1 });
-    res.status(200).json({ messages: messages, lastMessage: lastMessage });
+
+    res.status(200).json({
+      messages: messages,
+      totalMessageCount: messages.length,
+      lastMessage: lastMessage,
+    });
   } catch (err) {
+    console.log(`⚠️⚠️⚠️!! err `, err);
     res.status(500).json(err);
   }
 });
