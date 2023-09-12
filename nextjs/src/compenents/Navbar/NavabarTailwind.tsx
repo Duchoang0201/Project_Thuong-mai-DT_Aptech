@@ -158,19 +158,28 @@ const NavabarTailwind = () => {
       ),
     },
   ];
-  // console.log(`🚀🚀🚀!..count`, count);
   return (
     <>
       <div className={scroll > 60 ? style.container : style.contaier__Scroll}>
         <nav className="bg-white border-gray-200 dark:bg-gray-900">
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
             <div className="flex flex-wrap w-32  items-center justify-between p-2">
-              <div className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer ">
+              <div
+                onClick={() => {
+                  router.push("page");
+                }}
+                className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer "
+              >
                 {" "}
                 <ShopOutlined style={{ fontSize: 30, color: "white" }} />
               </div>
 
-              <div className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer">
+              <div
+                onClick={() => {
+                  router.push("phone");
+                }}
+                className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer"
+              >
                 {" "}
                 <PhoneOutlined style={{ fontSize: 30, color: "white" }} />
               </div>

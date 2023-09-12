@@ -7,7 +7,7 @@ type Props = {};
 function AboutUs({}: Props) {
   return (
     <>
-      <div className="container">
+      <div className="container mx-auto w-6/12">
         <h2 className="d-flex justify-content-center pt-5 pb-4">
           Về chúng tôi
         </h2>

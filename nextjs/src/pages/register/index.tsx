@@ -202,11 +202,7 @@ function Register({}: customertype) {
                   </div>
 
                   <Form.Item>
-                    <Button
-                      type="primary"
-                      htmlType="submit"
-                      className="login-form-button"
-                    >
+                    <Button htmlType="submit" className="login-form-button">
                       Đăng ký
                     </Button>
                   </Form.Item>
