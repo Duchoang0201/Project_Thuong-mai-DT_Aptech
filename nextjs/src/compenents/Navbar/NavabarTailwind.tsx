@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import style from "./Navbar.module.css";
 import dinamontImage from "./transparent-jewelry-icon-diamond-icon-60251ec5ca3757.4392206316130454458283.png";
 import Image from "next/image";
@@ -18,13 +18,14 @@ import Link from "next/link";
 import { PropsSearch } from "@/hook/PropsSearch";
 import { signOut, useSession } from "next-auth/react";
 const NavabarTailwind = () => {
+  const timeoutSearch = useRef<any>();
   const { items: itemsCart, removeAllCheck }: any = useCartStore(
     (state: any) => state
   );
 
   const { data: session } = useSession();
   const user = session?.user;
-  const { search } = PropsSearch((state: any) => state);
+  const { productSearch } = PropsSearch((state: any) => state);
   const [scroll, setScroll] = useState<number>(10);
   const [windowWidth, setWindowWidth] = useState<number>(0);
   const [openNavbar, setOpenNavbar] = useState(false);
@@ -125,7 +126,7 @@ const NavabarTailwind = () => {
     <>
       <div className={scroll > 60 ? style.container : style.contaier__Scroll}>
         <nav className="bg-white border-gray-200 dark:bg-gray-900">
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
             <div className="flex flex-wrap w-32  items-center justify-between p-2">
               <div className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer ">
                 {" "}
@@ -257,7 +258,7 @@ const NavabarTailwind = () => {
         </nav>
 
         <nav className="bg-white border-gray-200 dark:bg-gray-900">
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
+          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
             <div className="w-20 md:hidden"></div>
             <div className="text-center justify-center">
               {" "}
@@ -286,13 +287,17 @@ const NavabarTailwind = () => {
                     data-te-ripple-init
                     onClick={() => {
                       if (searchProduct) {
-                        search(searchProduct);
+                        if (timeoutSearch.current) {
+                          clearTimeout(timeoutSearch.current);
+                        }
+                        productSearch(searchProduct);
                         router.push(`/searchpage`);
-                        setTimeout(() => {
+
+                        timeoutSearch.current = setTimeout(() => {
                           setSearchProduct("");
-                        }, 1000);
+                        }, 2000);
                       }
-                      {
+                      if (!searchProduct) {
                         message.error("Vui lòng nhập tên sản phẩm!!");
                       }
                     }}
@@ -370,7 +375,7 @@ const NavabarTailwind = () => {
                     id="button-addon3"
                     onClick={async () => {
                       if (searchProduct) {
-                        await search(searchProduct);
+                        await productSearch(searchProduct);
                         router.push(`/searchpage`);
                         setSearchProduct("");
                         setOpenNavbar(false);

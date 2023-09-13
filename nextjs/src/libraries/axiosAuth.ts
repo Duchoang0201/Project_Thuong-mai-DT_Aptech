@@ -7,7 +7,6 @@ const useAxiosAuth = () => {
   const { data: session } = useSession();
   const refreshToken = useRefreshToken();
   useEffect(() => {
-    // Only modify Axios headers if a session is available
     const requestIntercept = axiosAuth.interceptors.request.use(
       (config) => {
         config.headers["Authorization"] = `Bearer ${session?.user.token}`;

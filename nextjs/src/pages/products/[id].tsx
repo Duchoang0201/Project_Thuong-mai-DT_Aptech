@@ -58,10 +58,9 @@ const ProductDetails = ({ product }: Props) => {
         commentForm.resetFields();
         message.success({
           content: "Cảm ơn quý khách đã đánh giá sản phẩm của chúng tôi",
-          style: { marginTop: 150 },
+          style: { marginTop: 170 },
           duration: 1.5,
         });
-        // setRefresh((f: any) => f + 1);
       })
       .catch((err) => {
         console.log(err);
@@ -172,7 +171,7 @@ const ProductDetails = ({ product }: Props) => {
                             {
                               content: "Thêm 1 sản phẩm vào giỏ hàng!",
                               style: {
-                                marginTop: 150,
+                                marginTop: 170,
                               },
                             },
                             1.5
@@ -183,7 +182,7 @@ const ProductDetails = ({ product }: Props) => {
                             {
                               content: "Đã thêm sản phẩm vào giỏ hàng!",
                               style: {
-                                paddingTop: 150,
+                                paddingTop: 170,
                               },
                             },
                             1.5
