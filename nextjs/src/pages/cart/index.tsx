@@ -3,12 +3,14 @@ import React, { useEffect, useState } from "react";
 import ShopApp from "@/compenents/ShopApp";
 import { Affix, Badge, Card, Checkbox, Divider, Dropdown, Menu } from "antd";
 import CreateOrder from "@/compenents/ShopApp/components/Order/CreateOrder";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosClient } from "@/libraries/axiosConfig";
 import Image from "next/image";
 import { API_URL } from "@/contants/URLS";
+import { useSession } from "next-auth/react";
 
 export default function CounterApp() {
-  const [user, setUser] = useState<any>(null);
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const { selectAllCheck, removeAllCheck, itemsCheckout } = useCartStore(
     (state: any) => state
@@ -16,22 +18,6 @@ export default function CounterApp() {
 
   const [windowWidth, setWindowWidth] = useState<number>(0);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const getUser = await axiosClient.get("/customers/login/profile");
-        if (getUser?.data) {
-          setUser(getUser?.data);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, []);
   useEffect(() => {
     const handleResize = () => {
       setWindowWidth(window.innerWidth);

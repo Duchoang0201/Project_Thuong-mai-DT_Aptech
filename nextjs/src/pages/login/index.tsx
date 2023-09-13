@@ -1,5 +1,5 @@
 import Login from "@/compenents/Account/login/Login";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosClient } from "@/libraries/axiosConfig";
 import axios from "axios";
 import React, { useEffect, useState } from "react";
 

@@ -11,8 +11,8 @@ import Style from "./SearchPage.module.css";
 import { Button } from "antd";
 import { useCartStore } from "@/hook/useCountStore";
 
-import { PropsSearch } from "@/compenents/Navbar/PropsSearch";
 import { useAuthStore } from "@/hook/useAuthStore";
+import { PropsSearch } from "@/hook/PropsSearch";
 
 type Props = {};
 

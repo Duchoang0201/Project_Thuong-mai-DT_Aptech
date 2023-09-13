@@ -1,4 +1,5 @@
 import { Html, Head, Main, NextScript } from "next/document";
+import Proivers from "./Proivers";
 
 export default function Document() {
   return (
@@ -6,8 +7,10 @@ export default function Document() {
       <title>Jewelry Shop</title>
       <Head />
       <body>
-        <Main />
-        <NextScript />
+        <Proivers>
+          <Main />
+          <NextScript />
+        </Proivers>
       </body>
     </Html>
   );

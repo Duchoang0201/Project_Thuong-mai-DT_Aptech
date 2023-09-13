@@ -1,6 +1,8 @@
-import axios from "axios";
-import router from "next/router";
 import { create } from "zustand";
+
+import axios from "axios";
+
+import router from "next/router";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 export const PropsSearch = create((set) => {

@@ -5,7 +5,6 @@ import { Menu, Input, Form } from "antd";
 import Style from "./Navbar.module.css";
 import { useRouter } from "next/router";
 import { useAuthStore } from "@/hook/useAuthStore";
-import { PropsSearch } from "./PropsSearch";
 
 import {
   UserAddOutlined,
@@ -18,6 +17,7 @@ import {
 } from "@ant-design/icons";
 const { Search } = Input;
 import { useCartStore } from "../../hook/useCountStore";
+import { PropsSearch } from "@/hook/PropsSearch";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
@@ -25,7 +25,7 @@ function NavBar() {
   const { items: itemsCart, removeAllCheck }: any = useCartStore(
     (state: any) => state
   );
-  const { search }: any = PropsSearch((state) => state);
+  const { search } = PropsSearch((state: any) => state);
 
   const [user, setUser] = useState<any>();
   const [current, setCurrent] = useState<any>();
@@ -51,7 +51,7 @@ function NavBar() {
     // return () => {
     //   clearTimeout(refreshToken);
     // };
-  }, [auth?.token]);
+  }, [auth?.payload, auth?.token, dataFromToken, setLogout]);
 
   useEffect(() => {
     const handleResize = () => {

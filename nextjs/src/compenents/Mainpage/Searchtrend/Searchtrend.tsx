@@ -11,7 +11,7 @@ import "swiper/css/navigation";
 import { Pagination, Navigation } from "swiper";
 import axios from "axios";
 import { Card, Image } from "antd";
-import { PropsSearch } from "@/compenents/Navbar/PropsSearch";
+import { PropsSearch } from "@/hook/PropsSearch";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 

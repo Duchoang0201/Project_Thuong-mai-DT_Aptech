@@ -1,9 +1,15 @@
 import React from "react";
 import { Collapse } from "antd";
+import useAxiosAuth from "@/libraries/axiosAuth";
 const { Panel } = Collapse;
 type Props = {};
 
 function LienHePage({}: Props) {
+  const axiosAuth = useAxiosAuth();
+
+  const getData = async () => {
+    const res = await axiosAuth.get("");
+  };
   return (
     <>
       <div className="container mx-auto w-6/12">

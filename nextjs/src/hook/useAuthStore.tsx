@@ -1,16 +1,15 @@
 import { create } from "zustand";
+
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
-import axios from "axios";
 import { message } from "antd";
 import router from "next/router";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosClient } from "@/libraries/axiosConfig";
+import { signIn } from "next-auth/react";
 interface isLogin {
   email: string;
   password: string;
 }
-const TIME_REFRESH_TOKEN = 2 * 60 * 60 * 1000;
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export const useAuthStore = create(
   devtools(
@@ -43,13 +42,21 @@ export const useAuthStore = create(
               throw message.error("Account's not found", 1.5);
             }
           },
+          nextLogin: async ({ email, password }: isLogin) => {
+            try {
+              const res = await signIn("credentials", {
+                username: email,
+                password: password,
+              });
+            } catch (error) {}
+          },
           dataFromToken: async (token: any) => {
             try {
               const auth: any = get().auth;
 
               if (auth?.token && auth?.refreshToken) {
-                const response: any = await axios.get(
-                  `${URL_ENV}/customers/login/profile`,
+                const response: any = await axiosClient.get(
+                  `/customers/login/profile`,
                   {
                     headers: {
                       Authorization: `Bearer ${token}`,
@@ -60,7 +67,7 @@ export const useAuthStore = create(
                 if (user._id) {
                   //lastActivity
 
-                  await axios.patch(`${URL_ENV}/customers/${user._id}`, {
+                  await axiosClient.patch(`/customers/${user._id}`, {
                     lastActivity: new Date(),
                   });
                   set({ auth: { ...auth, payload: user } }, false, {
@@ -73,8 +80,8 @@ export const useAuthStore = create(
               if (error?.response?.data?.oke === false) {
                 const auth: any = get().auth;
 
-                const newToken = await axios.post(
-                  `${URL_ENV}/customers/refreshToken`,
+                const newToken = await axiosClient.post(
+                  `/customers/refreshToken`,
                   {
                     id: auth.userId,
                     refreshToken: auth?.refreshToken,
@@ -91,33 +98,11 @@ export const useAuthStore = create(
             }
           },
 
-          setLogout: async () => {
-            const auth: any = get().auth;
-            const dataFromToken = get().dataFromToken;
-
-            setTimeout(() => {
-              set(
-                {
-                  auth: {
-                    token: auth?.token,
-                    refreshToken: auth?.refreshToken,
-                    userId: auth?.userId,
-                  },
-                },
-                false,
-                {
-                  type: "auth/login-success",
-                }
-              );
-              // freshToken();
-              dataFromToken();
-            }, TIME_REFRESH_TOKEN);
-          },
           logout: async () => {
             // Use the loginData in the logout function
 
             if (loginData && loginData.payload && loginData.payload._id) {
-              axios.patch(`${URL_ENV}/customers/${loginData.payload._id}`, {
+              axiosClient.patch(`/customers/${loginData.payload._id}`, {
                 lastActivity: new Date(),
               });
             }

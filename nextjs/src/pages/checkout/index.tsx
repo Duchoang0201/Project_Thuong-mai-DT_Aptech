@@ -20,7 +20,7 @@ import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import { useRouter } from "next/router";
 import { useSaveOrderId } from "@/hook/useSaveOrderId";
 import CheckoutPay from "@/compenents/Checkout/CheckoutPay";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosClient } from "@/libraries/axiosConfig";
 const { Option } = Select;
 
 const CheckoutPayment = () => {

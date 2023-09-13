@@ -6,9 +6,7 @@ import {
   Col,
   Collapse,
   Divider,
-  Form,
   Input,
-  Popconfirm,
   Row,
   Space,
   Typography,
@@ -16,7 +14,6 @@ import {
   message,
 } from "antd";
 import {
-  EditFilled,
   EditOutlined,
   HomeOutlined,
   MailOutlined,
@@ -24,15 +21,17 @@ import {
   SendOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosClient } from "@/libraries/axiosConfig";
 import { API_URL } from "@/contants/URLS";
+import { useSession } from "next-auth/react";
 
 type Props = {};
 const { Text } = Typography;
 const AccountInformation = (props: Props) => {
   const [refresh, setRefresh] = useState(0);
 
-  const [user, setUser] = useState<any>();
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const [disabled, setDisabled] = useState(true);
   const [disabledNewPassword, setDisabledNewPassword] = useState(true);
@@ -40,15 +39,6 @@ const AccountInformation = (props: Props) => {
   //SetPassword:
   const [oldPassWord, setOldPassWord] = useState("");
   const [newPassword, setNewPassword] = useState("");
-
-  useEffect(() => {
-    axiosClient
-      .get("/customers/login/profile")
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch((err) => console.log(err));
-  }, [refresh]);
 
   return (
     <>
