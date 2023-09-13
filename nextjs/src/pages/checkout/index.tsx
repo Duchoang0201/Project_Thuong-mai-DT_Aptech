@@ -21,11 +21,13 @@ import { useRouter } from "next/router";
 import { useSaveOrderId } from "@/hook/useSaveOrderId";
 import CheckoutPay from "@/compenents/Checkout/CheckoutPay";
 import { axiosClient } from "@/libraries/axiosConfig";
+import { useSession } from "next-auth/react";
 const { Option } = Select;
 
 const CheckoutPayment = () => {
   const router = useRouter();
-
+  const { data: session } = useSession();
+  const user = session?.user;
   const { saveOrderId } = useSaveOrderId((state: any) => state);
   const [cities, setCities] = useState<any>([]);
   const [districts, setDistricts] = useState<any>([]);
@@ -33,8 +35,6 @@ const CheckoutPayment = () => {
 
   const [payMethod, setPayMethod] = useState<any>("shipCod");
   const [position, setPosition] = useState<any>();
-
-  const [user, setUser] = useState<any>();
 
   const { itemsCheckout } = useCartStore((state: any) => state);
 
@@ -60,20 +60,6 @@ const CheckoutPayment = () => {
       try {
         const response = await axios.get("http://ip-api.com/json");
         setPosition(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axiosClient.get("/customers/login/profile");
-        if (res.data) {
-          setUser(res?.data);
-        } else setUser(null);
       } catch (error) {
         console.log(error);
       }

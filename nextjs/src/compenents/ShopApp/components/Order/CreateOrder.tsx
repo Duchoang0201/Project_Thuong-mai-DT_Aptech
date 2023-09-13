@@ -25,11 +25,10 @@ export default function CreateOrder() {
   };
 
   return (
-    <div className="container ">
+    <div className="container mx-auto ">
       <button
         type="button"
-        className="text-white border rounded-lg bg-blue-500"
-        style={{ border: 0, height: 42, width: 120 }}
+        className="text-white border rounded-lg bg-blue-500 px-2 py-2"
         onClick={handleCheckout}
       >
         Đặt hàng

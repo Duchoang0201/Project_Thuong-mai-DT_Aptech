@@ -49,7 +49,6 @@ export default function CounterApp() {
               title={
                 <Divider orientation="left">Tạm tính đơn hàng của bạn</Divider>
               }
-              className=""
             >
               <div className="grid grid-cols-1 md:grid-cols-4">
                 <div className="col-lg-2">
