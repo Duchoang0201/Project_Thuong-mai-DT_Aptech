@@ -10,26 +10,11 @@ import router from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function App({ hotDeal }: any) {
-  const [hotDeals, setHotDeals] = useState([]);
   const [autoplayConfig, setAutoplayConfig] = useState({
     delay: 3000,
     disableOnInteraction: false,
     reverseDirection: true,
   });
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${URL_ENV}/products?hotDeal=true`);
-        const data = response.data.results;
-        setHotDeals(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, [hotDeal]);
 
   return (
     <>
@@ -65,8 +50,8 @@ export default function App({ hotDeal }: any) {
         autoplay={autoplayConfig}
         loop={true}
       >
-        {hotDeals.length > 0 &&
-          hotDeals.map((item: any, index: any) => (
+        {hotDeal.length > 0 &&
+          hotDeal.map((item: any, index: any) => (
             <SwiperSlide key={`${item._id}-${index + 1}`}>
               <Badge.Ribbon
                 key={`${item._id}-${index}`}

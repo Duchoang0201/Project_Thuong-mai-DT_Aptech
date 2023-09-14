@@ -20,13 +20,23 @@ import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import Products from "@/compenents/Mainpage/Product/Products";
 import FacebookMsg from "@/compenents/Facebook/FacebookMsg";
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+import { useSession } from "next-auth/react";
+import { useCartStore } from "@/hook/useCountStore";
+import { useEffect } from "react";
+import { API_URL } from "@/contants/URLS";
+import { axiosAuth } from "@/libraries/axiosConfig";
 
 export default function Home(props: any) {
   const { topMonth } = props;
   const { hotTrend } = props;
   const { hotDeal } = props;
+  const { getDataServer } = useCartStore((state: any) => state);
+  const { data: session } = useSession();
 
+  console.log(`🚀🚀🚀!..session`, session);
+  useEffect(() => {
+    getDataServer(session?.carts, session?.carts.customerId);
+  }, [getDataServer, session?.carts]);
   return (
     <>
       <Head>
@@ -90,13 +100,13 @@ export default function Home(props: any) {
 export async function getStaticProps(content: any) {
   try {
     //GET HOTTREND
-    const dataHottrend = await axios.get(`${URL_ENV}/categories?topMonth=true`);
+    const dataHottrend = await axiosAuth.get(`/categories?topMonth=true`);
 
     //GET TOPMONTH
-    const dataTopMonth = await axios.get(`${URL_ENV}/products?topMonth=true`);
+    const dataTopMonth = await axiosAuth.get(`/products?topMonth=true`);
 
     //GET HOTDEAL
-    const dataHotDeal = await axios.get(`${URL_ENV}/products?hotDeal=true`);
+    const dataHotDeal = await axiosAuth.get(`/products?hotDeal=true`);
 
     return {
       props: {

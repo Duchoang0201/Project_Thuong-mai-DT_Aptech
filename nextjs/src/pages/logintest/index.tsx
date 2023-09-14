@@ -28,7 +28,7 @@ const LoginTest = (props: Props) => {
   };
 
   const handleLogout = async () => {
-    signOut();
+    signOut({ redirect: true, callbackUrl: "/" });
   };
   return (
     <div>

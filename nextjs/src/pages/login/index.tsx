@@ -1,19 +1,15 @@
 import Login from "@/compenents/Account/login/Login";
 import { axiosClient } from "@/libraries/axiosConfig";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 type Props = {};
 
 const CheckLogin = (props: Props) => {
-  const [user, setUser] = useState<any>();
+  const { data: session } = useSession();
+  const user = session?.user;
 
-  useEffect(() => {
-    axiosClient
-      .get("/customer/login/profile")
-      .then((res) => setUser(res?.data))
-      .catch((err) => console.log(`⚠️⚠️⚠️!! err `, err));
-  }, []);
   return <>{!user && <Login />}</>;
 };
 

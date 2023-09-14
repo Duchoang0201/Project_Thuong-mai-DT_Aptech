@@ -76,9 +76,9 @@ const NavabarTailwind = () => {
       key: "logout",
       label: (
         <div
-          onClick={() => {
-            signOut();
-            removeAllCheck();
+          onClick={async () => {
+            await signOut({ redirect: false });
+            await removeAllCheck();
           }}
         >
           <Space>

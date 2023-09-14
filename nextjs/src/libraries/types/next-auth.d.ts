@@ -24,6 +24,11 @@ declare module "next-auth" {
       accessToken: string;
       refreshToken: string;
     };
+    carts: {
+      _id: string;
+      customerId: string;
+      products: Array[object];
+    };
   }
 }
 

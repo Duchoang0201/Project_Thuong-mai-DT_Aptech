@@ -14,10 +14,18 @@ const Login = () => {
     const res = await signIn("credentials", {
       username: email,
       password: password,
-      redirect: true,
+      redirect: false,
       callbackUrl: "/",
     });
-    message.success("Đăng nhập thành công !!!");
+
+    console.log(`🚀🚀🚀!..res`, res);
+    if (res?.ok) {
+      router.push("/");
+
+      message.success("Đăng nhập thành công !!!");
+    } else {
+      message.error("Đăng nhập không thành công !!!");
+    }
   };
 
   return (

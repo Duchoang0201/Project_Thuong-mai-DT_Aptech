@@ -1,20 +1,6 @@
 import { API_URL } from "@/contants/URLS";
-import NextAuth, { AuthOptions, User } from "next-auth";
+import { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
-async function fetchUserCart(userId: any, token: any) {
-  const cartString = await fetch(`${API_URL}/carts/customer/${userId}`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-  });
-
-  const cart = await cartString.json();
-
-  return cart;
-}
 
 export const authOptions: AuthOptions = {
   // Configure one or more authentication providers
@@ -28,6 +14,7 @@ export const authOptions: AuthOptions = {
       },
       async authorize(credentials, req) {
         // Add logic here to look up the user from the credentials supplied
+        console.log(`🚀🚀🚀!..credentials`, credentials);
         const res = await fetch(`${API_URL}/customers/login`, {
           method: "POST",
           headers: {
@@ -50,7 +37,6 @@ export const authOptions: AuthOptions = {
           });
 
           const user = await userString.json();
-
           user.token = userInfo.token;
           user.refreshToken = userInfo.refreshToken;
 
@@ -65,19 +51,20 @@ export const authOptions: AuthOptions = {
 
   pages: {
     signIn: "/login",
-    error: "/login",
   },
   callbacks: {
+    async redirect({ baseUrl }) {
+      // Customize the redirect URL here
+      baseUrl = process.env.NEXT_PUBLIC_BASEURL;
+      return baseUrl; // You can return a specific URL or modify it as needed
+    },
     async jwt({ token, user }) {
       return { ...token, ...user };
     },
     async session({ session, token, user }) {
-      const carts = await fetchUserCart(token?._id, token?.token);
-      session.carts = carts.cart;
       session.user = token as any;
 
       return session;
     },
   },
 };
-export default NextAuth(authOptions);

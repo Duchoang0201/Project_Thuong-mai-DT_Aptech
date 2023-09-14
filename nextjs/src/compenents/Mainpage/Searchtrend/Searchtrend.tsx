@@ -16,22 +16,7 @@ import { PropsSearch } from "@/hook/PropsSearch";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function App({ hotTrend }: any) {
-  const [hotDeals, setHotDeals] = useState([]);
   const { searchCategory } = PropsSearch((state: any) => state);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${URL_ENV}/categories`);
-        const data = response.data.results;
-        setHotDeals(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, [hotTrend]);
 
   return (
     <>
@@ -42,22 +27,22 @@ export default function App({ hotTrend }: any) {
           0: {
             slidesPerView: 2,
             centeredSlides: true,
-            initialSlide: 3,
+            initialSlide: 2,
           },
           900: {
             slidesPerView: 3,
             centeredSlides: true,
-            initialSlide: 3,
+            initialSlide: 2,
           },
           1200: {
             slidesPerView: 4,
             centeredSlides: true,
-            initialSlide: 4,
+            initialSlide: 2,
           },
         }}
       >
-        {hotDeals.length > 0 &&
-          hotDeals.map((item: any, index: any) => (
+        {hotTrend.length > 0 &&
+          hotTrend.map((item: any, index: any) => (
             <SwiperSlide
               key={`${item._id}-${index + 1}-${item.name}`}
               onClick={() => {

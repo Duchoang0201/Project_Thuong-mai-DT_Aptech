@@ -20,7 +20,6 @@ import router from "next/router";
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 export default function Topmoth({ topMonth }: any) {
-  const [hotDeals, setHotDeals] = useState([]);
   const [windowWidth, setWindowWidth] = useState(0);
   useEffect(() => {
     const handleResize = () => {
@@ -34,19 +33,6 @@ export default function Topmoth({ topMonth }: any) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${URL_ENV}/products?topMonth=true`);
-        const data = response.data.results;
-        setHotDeals(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, [topMonth]);
 
   return (
     <>
@@ -84,8 +70,8 @@ export default function Topmoth({ topMonth }: any) {
             },
           }}
         >
-          {hotDeals.length > 0 &&
-            hotDeals.map((item: any, index: any) => (
+          {topMonth.length > 0 &&
+            topMonth.map((item: any, index: any) => (
               <SwiperSlide key={`${item._id}-${index + 1}-${item.name}`}>
                 <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
                   <Card
