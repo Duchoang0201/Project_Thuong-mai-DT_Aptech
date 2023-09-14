@@ -4,15 +4,12 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination, Navigation, HashNavigation, Autoplay } from "swiper";
-import axios from "axios";
 import Image from "next/image";
 import "./style.module.css";
 import router from "next/router";
+import { API_URL } from "@/contants/URLS";
 
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
-
-const Slides = () => {
-  const [slides, setSlides] = useState([]);
+const Slides = ({ slides }: any) => {
   const [windowWidth, setWindowWidth] = useState<number>(0);
   const swiperRef = useRef<any>(null);
 
@@ -27,19 +24,6 @@ const Slides = () => {
     return () => {
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${URL_ENV}/slides?active=true`);
-        const data = response.data.results;
-        setSlides(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
   }, []);
 
   useEffect(() => {
@@ -91,7 +75,7 @@ const Slides = () => {
                       e.currentTarget.style.transform = "scale(1)";
                     }}
                     alt={item?.summary}
-                    src={`${URL_ENV}${item?.imageUrl}`}
+                    src={`${API_URL}${item?.imageUrl}`}
                   />
                 </SwiperSlide>
               ))}
@@ -107,7 +91,7 @@ const Slides = () => {
                   sizes="100vw"
                   style={{ width: "100%", height: "150px" }}
                   alt={item?.summary}
-                  src={`${URL_ENV}${item?.imageUrl}`}
+                  src={`${API_URL}${item?.imageUrl}`}
                 />
               </div>
             ))}

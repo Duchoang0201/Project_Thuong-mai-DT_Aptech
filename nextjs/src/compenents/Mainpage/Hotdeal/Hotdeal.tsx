@@ -4,10 +4,10 @@ import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
 import { Pagination, Navigation, Autoplay } from "swiper";
-import axios from "axios";
-import { Button, Card, Divider, Rate, Image, Badge } from "antd";
+import { Button, Card, Divider, Rate, Badge } from "antd";
 import router from "next/router";
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+import { API_URL } from "@/contants/URLS";
+import Image from "next/image";
 
 export default function App({ hotDeal }: any) {
   const [autoplayConfig, setAutoplayConfig] = useState({
@@ -50,8 +50,8 @@ export default function App({ hotDeal }: any) {
         autoplay={autoplayConfig}
         loop={true}
       >
-        {hotDeal.length > 0 &&
-          hotDeal.map((item: any, index: any) => (
+        {hotDeal?.length > 0 &&
+          hotDeal?.map((item: any, index: any) => (
             <SwiperSlide key={`${item._id}-${index + 1}`}>
               <Badge.Ribbon
                 key={`${item._id}-${index}`}
@@ -68,8 +68,10 @@ export default function App({ hotDeal }: any) {
                   >
                     {" "}
                     <Image
+                      width={200}
+                      height={200}
                       alt={item.name}
-                      src={`${URL_ENV}/${item.imageUrl}`}
+                      src={`${API_URL}/${item.imageUrl}`}
                       style={{
                         width: "100%",
                         transition: "transform 1s",

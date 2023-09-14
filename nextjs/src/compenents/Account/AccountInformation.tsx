@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   Avatar,
   Button,
@@ -21,30 +21,95 @@ import {
   SendOutlined,
   UploadOutlined,
 } from "@ant-design/icons";
-import { axiosClient } from "@/libraries/axiosConfig";
 import { API_URL } from "@/contants/URLS";
 import { useSession } from "next-auth/react";
+import useAxiosAuth from "@/libraries/axiosAuth";
+import { axiosClient } from "@/libraries/axiosConfig";
 
 type Props = {};
 const { Text } = Typography;
 const AccountInformation = (props: Props) => {
-  const [refresh, setRefresh] = useState(0);
+  const axiosAuth = useAxiosAuth();
+  const countTimeout = useRef<any>();
 
-  const { data: session } = useSession();
+  const [refresh, setRefresh] = useState(0);
+  const { data: session, status, update } = useSession();
   const user = session?.user;
 
   const [disabled, setDisabled] = useState(true);
   const [disabledNewPassword, setDisabledNewPassword] = useState(true);
 
   //SetPassword:
+  const timeoutOldPass = useRef<any>();
+  const timeoutNewPass = useRef<any>();
   const [oldPassWord, setOldPassWord] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
+  //Function change data
+  const handleChangeData = async (data: any) => {
+    await update(data);
+
+    axiosAuth
+      .patch(`/customers/${user?._id}`, data)
+      .then(async (res) => {
+        if (countTimeout.current) {
+          clearTimeout(countTimeout.current);
+        }
+        countTimeout.current = setTimeout(async () => {
+          message.success(
+            `Change last name to ${res.data.lastName} successfully!!`,
+            1.5
+          );
+
+          setRefresh((f) => f + 1);
+          setDisabled(!disabled);
+        }, 2000);
+
+        message.loading("Changing First Name !!", 1.5);
+      })
+      .catch((err) => console.log(err));
+  };
+
+  const arrData = [
+    {
+      key: 1,
+      header: "First Name",
+      placeholder: user?.firstName,
+      field: "firstName",
+    },
+    {
+      key: 2,
+      header: "Last Name",
+      placeholder: user?.lastName,
+      field: "lastName",
+    },
+    {
+      key: 3,
+      header: "Address",
+      placeholder: user?.address,
+      field: "address",
+    },
+    {
+      key: 4,
+      header: "Phone Number",
+      placeholder: user?.phoneNumber,
+      field: "phoneNumber",
+    },
+    {
+      key: 5,
+      header: "User Name (Email)",
+      placeholder: user?.email,
+      field: "email",
+    },
+    // {
+    //   key: 5,
+    //   header: "User Name (Email)",
+    //   placeholder: user?.email,
+    // },
+  ];
   return (
     <>
       <div
-        // className="px-2 py-2 bg-body-secondary rounded-5 flex justify-evenly"
-        // className="grid grid-cols-1 md:grid-cols-2"
         className="flex flex-col md:flex-row"
         style={{ backgroundColor: "white" }}
       >
@@ -110,220 +175,38 @@ const AccountInformation = (props: Props) => {
           <Card bordered={true}>
             <div>
               <Collapse accordion>
-                <Collapse.Panel header="First Name" key="1">
-                  <Row gutter={10} className="py-2">
-                    <Col span={20}>
-                      <Input.Search
-                        disabled={disabled}
-                        enterButton={<SendOutlined />}
-                        placeholder={user?.firstName}
-                        style={{ width: "100%" }}
-                        onSearch={async (e) => {
-                          axiosClient
-                            .patch(`/customers/${user?._id}`, {
-                              firstName: e,
-                            })
-                            .then((res) => {
-                              const count = setTimeout(() => {
-                                message.success(
-                                  `Change fisrt name to ${res.data.firstName} successfully!!`,
-                                  1.5
-                                );
-                                setRefresh((f) => f + 1);
-                                setDisabled(!disabled);
-                              }, 2000);
-                            })
-                            .catch((err) => console.log(err));
-                          message.loading("Changing First Name !!", 1.5);
-                        }}
-                      />
-                    </Col>
+                {arrData.map((item, index) => {
+                  const dataChange: { [key: string]: any } = {};
+                  return (
+                    <Collapse.Panel header={item.header} key={item.key}>
+                      <Row gutter={10} className="py-2">
+                        <Col span={20}>
+                          <Input.Search
+                            disabled={disabled}
+                            enterButton={<SendOutlined />}
+                            placeholder={item.placeholder}
+                            style={{ width: "100%" }}
+                            onSearch={async (e) => {
+                              dataChange[item.field] = e;
+                              handleChangeData(dataChange);
+                            }}
+                          />
+                        </Col>
 
-                    <Col span={4}>
-                      <Button
-                        danger={!disabled}
-                        type="dashed"
-                        icon={<EditOutlined />}
-                        onClick={() => {
-                          setDisabled(!disabled);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Collapse.Panel>
-                <Collapse.Panel header="Last Name" key="2">
-                  <Row gutter={10} className="py-2">
-                    <Col span={20}>
-                      <Input.Search
-                        disabled={disabled}
-                        enterButton={<SendOutlined />}
-                        placeholder={user?.lastName}
-                        style={{ width: "100%" }}
-                        onSearch={async (e) => {
-                          axiosClient
-                            .patch(`/customers/${user?._id}`, {
-                              lastName: e,
-                            })
-                            .then((res) => {
-                              const count = setTimeout(() => {
-                                message.success(
-                                  `Change last name to ${res.data.lastName} successfully!!`,
-                                  1.5
-                                );
-                                setRefresh((f) => f + 1);
-                                setDisabled(!disabled);
-                              }, 2000);
-                            })
-                            .catch((err) => console.log(err));
-                          message.loading("Changing Last Name !!", 1.5);
-                        }}
-                      />
-                    </Col>
-
-                    <Col span={4}>
-                      <Button
-                        danger={!disabled}
-                        type="dashed"
-                        icon={<EditOutlined />}
-                        onClick={() => {
-                          setDisabled(!disabled);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Collapse.Panel>
-                <Collapse.Panel header="Address" key="3">
-                  <Row gutter={10} className="py-2">
-                    <Col span={20}>
-                      <Input.Search
-                        disabled={disabled}
-                        enterButton={<SendOutlined />}
-                        placeholder={user?.address}
-                        style={{ width: "100%" }}
-                        onSearch={async (e) => {
-                          axiosClient
-                            .patch(`/customers/${user?._id}`, {
-                              address: e,
-                            })
-                            .then((res) => {
-                              const count = setTimeout(() => {
-                                message.success(
-                                  `Change address to ${res.data.address} successfully!!`,
-                                  1.5
-                                );
-                                setRefresh((f) => f + 1);
-                                setDisabled(!disabled);
-                              }, 2000);
-                            })
-                            .catch((err) => console.log(err));
-                          message.loading("Changing address !!", 1.5);
-                        }}
-                      />
-                    </Col>
-
-                    <Col span={4}>
-                      <Button
-                        danger={!disabled}
-                        type="dashed"
-                        icon={<EditOutlined />}
-                        onClick={() => {
-                          setDisabled(!disabled);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Collapse.Panel>
-                <Collapse.Panel header="Phone Number" key="4">
-                  <Row gutter={10} className="py-2">
-                    <Col span={20}>
-                      <Input.Search
-                        disabled={disabled}
-                        enterButton={<SendOutlined />}
-                        placeholder={user?.phoneNumber}
-                        style={{ width: "100%" }}
-                        onSearch={async (e) => {
-                          axiosClient
-                            .patch(`/customers/${user?._id}`, {
-                              phoneNumber: e,
-                            })
-                            .then((res) => {
-                              message.loading("Changing Phone Number !!", 1.5);
-
-                              console.log("««««« res »»»»»", res);
-                              const count = setTimeout(() => {
-                                message.success(
-                                  `Change Phone Number to ${res.data.result.phoneNumber} successfully!!`,
-                                  1.5
-                                );
-                                setRefresh((f) => f + 1);
-                                setDisabled(!disabled);
-                              }, 2000);
-                            })
-                            .catch((err) => {
-                              console.log(err);
-                              message.error(`${err.response.data.message}`);
-                            });
-                        }}
-                      />
-                    </Col>
-
-                    <Col span={4}>
-                      <Button
-                        danger={!disabled}
-                        type="dashed"
-                        icon={<EditOutlined />}
-                        onClick={() => {
-                          setDisabled(!disabled);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Collapse.Panel>
-                <Collapse.Panel header="User Name (Email)" key="5">
-                  <Row gutter={10} className="py-2">
-                    <Col span={20}>
-                      <Input.Search
-                        disabled={disabled}
-                        enterButton={<SendOutlined />}
-                        placeholder={user?.email}
-                        style={{ width: "100%" }}
-                        onSearch={async (e) => {
-                          axiosClient
-                            .patch(`/customers/${user?._id}`, {
-                              email: e,
-                            })
-                            .then((res) => {
-                              message.loading("Changing Email !!", 1.5);
-
-                              const count = setTimeout(() => {
-                                message.success(
-                                  `Change email to ${res.data.result.email} successfully!!`,
-                                  1.5
-                                );
-                                setRefresh((f) => f + 1);
-                                setDisabled(!disabled);
-                              }, 2000);
-                            })
-                            .catch((err) => {
-                              console.log(err);
-                              message.error(`${err.response.data.message}`);
-                            });
-                        }}
-                      />
-                    </Col>
-
-                    <Col span={4}>
-                      <Button
-                        danger={!disabled}
-                        type="dashed"
-                        icon={<EditOutlined />}
-                        onClick={() => {
-                          setDisabled(!disabled);
-                        }}
-                      />
-                    </Col>
-                  </Row>
-                </Collapse.Panel>
+                        <Col span={4}>
+                          <Button
+                            danger={!disabled}
+                            type="dashed"
+                            icon={<EditOutlined />}
+                            onClick={() => {
+                              setDisabled(!disabled);
+                            }}
+                          />
+                        </Col>
+                      </Row>
+                    </Collapse.Panel>
+                  );
+                })}
 
                 <Collapse.Panel header="Password" key="6">
                   Đổi mật khẩu{" "}
@@ -363,7 +246,10 @@ const AccountInformation = (props: Props) => {
                                     );
                                     setOldPassWord("");
 
-                                    const count = setTimeout(() => {
+                                    if (timeoutOldPass.current) {
+                                      clearTimeout(timeoutOldPass.current);
+                                    }
+                                    timeoutOldPass.current = setTimeout(() => {
                                       setDisabled(!disabled);
                                       setDisabledNewPassword(false);
                                     }, 2000);
@@ -371,9 +257,7 @@ const AccountInformation = (props: Props) => {
                                 })
                                 .catch((err) => {
                                   console.log(err);
-                                  message.error(
-                                    `${err?.response?.data?.message}`
-                                  );
+                                  message.error(`${err?.response?.data} `);
                                 });
                             }}
                             icon={<SendOutlined />}
@@ -399,14 +283,16 @@ const AccountInformation = (props: Props) => {
                           <Button
                             disabled={disabledNewPassword}
                             onClick={async (e: any) => {
-                              axiosClient
+                              axiosAuth
                                 .patch(`/customers/${user?._id}`, {
                                   password: newPassword,
                                 })
                                 .then((res) => {
                                   message.loading("Changing Password !!", 1.5);
-
-                                  const count = setTimeout(() => {
+                                  if (timeoutNewPass.current) {
+                                    clearTimeout(timeoutNewPass.current);
+                                  }
+                                  timeoutNewPass.current = setTimeout(() => {
                                     message.success(
                                       `Change Password  successfully!!`,
                                       1.5

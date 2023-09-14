@@ -1,18 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Button, Card, Col, Divider, Row, Space, Statistic } from "antd";
-
+import { Button, Card, Col, Row, Space, Statistic } from "antd";
 import Image from "next/image";
-import axios from "axios";
-type Props = {};
-const CheckoutMethod = (props: Props) => {
-  const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
+import axios from "axios";
+import { API_URL } from "@/contants/URLS";
+const CheckoutMethod = () => {
   const [methodPay, setMethodPay] = useState<any>();
   useEffect(() => {
-    axios.get(`${URL_ENV}/features`).then((res) => {
+    axios.get(`${API_URL}/features`).then((res) => {
       setMethodPay(res.data.results);
     });
-  }, [URL_ENV]);
+  }, []);
 
   return (
     <div className="container mx-auto">
@@ -39,7 +37,7 @@ const CheckoutMethod = (props: Props) => {
                     <Image
                       className="ml-1"
                       alt={item.title}
-                      src={`${URL_ENV}${item.imageUrl}`}
+                      src={`${API_URL}${item.imageUrl}`}
                       width={50}
                       height={50}
                     />

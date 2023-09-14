@@ -68,10 +68,14 @@ export const authOptions: AuthOptions = {
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger, session }) {
+      if (trigger === "update" && session) {
+        // Note, that `session` can be any arbitrary object, remember to validate it!
+        token = { ...token, ...session };
+      }
       return { ...token, ...user };
     },
-    async session({ session, token, user }) {
+    async session({ session, token, newSession, trigger }) {
       const carts = await fetchUserCart(token?._id, token?.token);
       session.carts = carts.cart;
       session.user = token as any;
