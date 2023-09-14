@@ -7,15 +7,26 @@ import { Badge, Card, message } from "antd";
 import router from "next/router";
 import React, { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
+import ProductFilter from "@/compenents/Products/filter";
+import { useAuthStore } from "@/hook/useAuthStore";
+import { useFilterProduct } from "@/hook/useFilterProduct";
+import SuppliersFilter from "@/compenents/Products/SuppliersFilter";
 
 type Props = {
   data: any[];
 };
 
-const Products = ({ data }: Props) => {
-  const products = data;
+const Products = ({ data }: any) => {
+  const { products } = data;
+  const { filterValue, getDataProduct, setValueFilterNull, filter } =
+    useFilterProduct((state: any) => state);
   const { data: session } = useSession();
+
+  useEffect(() => {
+    getDataProduct(products);
+  }, [getDataProduct, products]);
   const user = session?.user;
+
   const [windowWidth, setWindowWidth] = useState(0);
   const {
     add,
@@ -38,9 +49,28 @@ const Products = ({ data }: Props) => {
 
   return (
     <div className="container mx-auto">
+      <div className="flex flex-row justify-center">
+        <ProductFilter />
+        <SuppliersFilter />
+        <button
+          className="px-10"
+          onClick={() => {
+            filter();
+          }}
+        >
+          Filter
+        </button>
+        <button
+          onClick={() => {
+            setValueFilterNull();
+          }}
+        >
+          Clear
+        </button>
+      </div>
       <div className="grid lg:grid-cols-4 gap-10 md:grid-cols-3  sm:grid-cols-2">
-        {products.length > 0 &&
-          products.map((item: any, index: any) => (
+        {filterValue.length > 0 &&
+          filterValue.map((item: any, index: any) => (
             <div key={`${item._id}-${index + 1}`}>
               <div>
                 <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
@@ -98,9 +128,9 @@ const Products = ({ data }: Props) => {
                       <div className="">
                         <button
                           type="button"
-                          className="text-black text-center border rounded-lg px-1 py-1 hover:text-white hover:bg-slate-400 "
+                          className="text-white bg-slate-600 text-center border rounded-lg px-2 py-1 hover:text-white hover:bg-slate-400 "
                           onClick={() => {
-                            if (user === null) {
+                            if (user === undefined) {
                               router.push("/login");
                               message.warning(
                                 "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
@@ -160,11 +190,9 @@ export async function getStaticProps() {
   const response = await axiosClient.get(`/products?active=true`);
   const data = response.data.results;
 
-  // By returning { props: { posts } }, the Blog component
-  // will receive `posts` as a prop at build time
   return {
     props: {
-      data,
+      data: { products: data },
     },
   };
 }

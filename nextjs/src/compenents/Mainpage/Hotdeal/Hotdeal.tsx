@@ -107,7 +107,7 @@ export default function App({ hotDeal }: any) {
                   <Divider>
                     <Button
                       // type="primary"
-                      className="bg-gray-400 text-white hover:bg-slate-800"
+                      className="bg-slate-800 text-white hover:bg-gray-800"
                       onClick={() => {
                         router.push(`/products/${item._id}`);
                       }}
