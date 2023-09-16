@@ -1,6 +1,6 @@
 import { StarOutlined } from "@ant-design/icons";
-import { Badge, Button, Card, Col, Divider, Rate, Image, Row } from "antd";
-import axios from "axios";
+import { Badge, Button, Card, Col, Row } from "antd";
+import Image from "next/image";
 import router from "next/router";
 import React, { useEffect, useState } from "react";
 import { SwiperSlide } from "swiper/react";
@@ -44,7 +44,8 @@ const Products = ({ products }: any) => {
                       style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
                     >
                       <Image
-                        preview={false}
+                        width={400}
+                        height={400}
                         alt={item.name}
                         src={`${URL_ENV}/${item.imageUrl}`}
                         style={{

@@ -1,12 +1,10 @@
 import { API_URL } from "@/contants/URLS";
 import { useCartStore } from "@/hook/useCountStore";
 import { axiosClient } from "@/libraries/axiosConfig";
-import { Button, Form, Input, Rate, message } from "antd";
-import axios from "axios";
-import { Image } from "antd";
+import { Button, Form, Input, Rate, message, Avatar } from "antd";
+import Image from "next/image";
 import router from "next/router";
-import React, { useEffect, useState } from "react";
-import TextArea from "antd/es/input/TextArea";
+import React from "react";
 import { useSession } from "next-auth/react";
 
 type Props = {
@@ -78,7 +76,8 @@ const ProductDetails = ({ product }: Props) => {
                     className="object-contain w-full lg:h-full"
                     src={`${API_URL}${product.imageUrl}`}
                     alt="asd"
-                    width={"80%"}
+                    width={"400"}
+                    height={"400"}
                   />
                 </div>
                 <div className="flex-wrap hidden -mx-2 md:flex py-2">
@@ -91,7 +90,9 @@ const ProductDetails = ({ product }: Props) => {
                         <Image
                           className="object-contain w-full lg:h-28"
                           src={`${API_URL}/${item}`}
-                          alt=""
+                          alt={item}
+                          width={"100"}
+                          height={"100"}
                         />
                       </a>
                     </div>
@@ -263,9 +264,9 @@ const ProductDetails = ({ product }: Props) => {
               <footer className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
                   <p className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
-                    <Image
+                    <Avatar
                       className="mr-2 w-6 h-6 rounded-full"
-                      // src={`${API_URL}/${item.customer.}`}
+                      src={`${API_URL}/${item.customer.imageUrl}`}
                       alt={item.customer._id}
                     />
                     {item.customer.firstName} {item.customer.lastName}
