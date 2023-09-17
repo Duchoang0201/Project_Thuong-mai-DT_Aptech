@@ -837,13 +837,29 @@ function ProductCRUD() {
 
   const handleFileUpload = async ({ file }: any) => {
     const loadingMessage = message.loading("Uploading !!", 0);
+
     const formData = new FormData();
     formData.append("file", file);
+    // const getFileObject = (progress: any) => {
+    //   return {
+    //     name: file.name,
+    //     uid: file.uid,
+    //     progress: progress,
+    //   };
+    // };
 
     try {
       await axios.post(
         `${API_URL}/upload/products/${updateId?._id}/images`,
         formData
+        // {
+        //   onUploadProgress: (event) => {
+        //     console.log(`🚀🚀🚀!..event`, event);
+        //     setFileData((pre: any) => {
+        //       return { ...pre, [file.uid]: getFileObject(event.progress) };
+        //     });
+        //   },
+        // }
       );
 
       await refetch();
@@ -1028,6 +1044,13 @@ function ProductCRUD() {
                     className="transition ease-in-out delay-300 w-24 h-24 border-dashed rounded-lg border-2 flex flex-1 justify-center items-center hover:border-slate-500"
                     direction="vertical"
                   >
+                    {/* {Object.values(fileData).map((item: any, index: any) => {
+                      return (
+                        <Space key={index}>
+                          <Progress percent={Math.ceil(item.progress * 100)} />
+                        </Space>
+                      );
+                    })} */}
                     <Button icon={<UploadOutlined />} />
                   </Space>
                 </Upload>

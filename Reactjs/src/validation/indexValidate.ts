@@ -1,5 +1,6 @@
 import { categoryIdValidate, getCategoryValidate } from "./CategoryValidate";
 import { customerIdValidate, getCustomersValidate } from "./CustomerValidate";
+import { getProductsValidate, productIdValidate } from "./ProductValidate";
 import { supplierIdValidate, getSuppliersValidate } from "./SupplierValidate";
 
 export {
@@ -9,4 +10,6 @@ export {
   getCustomersValidate,
   supplierIdValidate,
   getSuppliersValidate,
+  productIdValidate,
+  getProductsValidate,
 };

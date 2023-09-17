@@ -5,6 +5,8 @@ import {
   getCustomersValidate,
   supplierIdValidate,
   getSuppliersValidate,
+  productIdValidate,
+  getProductsValidate,
 } from "./indexValidate";
 export const functionValidate = async (data: any) => {
   try {
@@ -23,6 +25,11 @@ export const functionValidate = async (data: any) => {
       case "Customer":
         await customerIdValidate.validate(data.data._id);
         await getCustomersValidate.validate(data.data);
+        res.oke = true;
+        return res;
+      case "Product":
+        await productIdValidate.validate(data.data._id);
+        await getProductsValidate.validate(data.data);
         res.oke = true;
         return res;
 

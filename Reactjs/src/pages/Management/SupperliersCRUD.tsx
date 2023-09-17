@@ -244,18 +244,18 @@ function SupplierCRUD() {
                   let searchValue: any = {};
                   if (e === "active") {
                     searchValue.type = "active";
-                    searchValue.value = true;
+                    searchValue.value = "true";
                   }
                   if (e === "unActive") {
                     searchValue = {};
                     searchValue.type = "active";
-                    searchValue.value = false;
+                    searchValue.value = "false";
                   }
                   if (e === "isDeleted") {
                     searchValue = {};
 
                     searchValue.type = "isDeleted";
-                    searchValue.value = true;
+                    searchValue.value = "true";
                   }
                   console.log(`🚀🚀🚀!..e`, e);
                   onSearchItem(searchValue);
@@ -467,10 +467,14 @@ function SupplierCRUD() {
             <Space direction="vertical">
               <Button
                 style={{ width: "150px" }}
-                onClick={() => {
-                  searchParams.forEach((value, key) => {
-                    const valueSearch = { type: key, value: "" };
-                    onSearchItem(valueSearch);
+                onClick={async () => {
+                  const arrValue: any = [];
+                  await searchParams.forEach((value, key) => {
+                    arrValue.push({ value: "", type: key });
+                  });
+
+                  await arrValue.map(async (item: any) => {
+                    await onSearchItem(item);
                   });
                 }}
                 icon={<ClearOutlined />}

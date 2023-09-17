@@ -26,14 +26,12 @@ import { useAuthStore } from "../../hooks/useAuthStore";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { handleCustomData } from "../../util/handleCustomData";
-import SupplierForm from "../Form/SupplierForm";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 
 import { functionValidate } from "../../validation/FunctionValidate";
 import { customeDataValidate } from "../../validation/customDataValidate";
 import { API_URL } from "../../constants/URLS";
-import moment from "moment";
 import CustomerForm from "../Form/CustomerForm";
 const { RangePicker } = DatePicker;
 dayjs.extend(customParseFormat);
@@ -58,7 +56,6 @@ function CustomerCRUD() {
   const [deleteItem, setDeleteItem] = useState<any>();
 
   const onSearchItem = async (record: any) => {
-    console.log(`🚀🚀🚀!..record`, record);
     searchParams.set("limit", "10");
     try {
       if (record.type && record.value) {
@@ -466,7 +463,6 @@ function CustomerCRUD() {
               ]}
               format={dateFormat}
               onChange={async (e: any) => {
-                console.log(`🚀🚀🚀!..e`, e);
                 const searchValues: any[] = [
                   { type: "birthdayFrom", value: null },
                   { type: "birthdayTo", value: null },
@@ -558,10 +554,14 @@ function CustomerCRUD() {
             <Space direction="vertical">
               <Button
                 style={{ width: "150px" }}
-                onClick={() => {
-                  searchParams.forEach((value, key) => {
-                    const valueSearch = { type: key, value: "" };
-                    onSearchItem(valueSearch);
+                onClick={async () => {
+                  const arrValue: any = [];
+                  await searchParams.forEach((value, key) => {
+                    arrValue.push({ value: "", type: key });
+                  });
+
+                  await arrValue.map(async (item: any) => {
+                    await onSearchItem(item);
                   });
                 }}
                 icon={<ClearOutlined />}

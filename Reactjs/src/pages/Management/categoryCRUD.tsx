@@ -28,6 +28,8 @@ import { useMutation, useQuery } from "@tanstack/react-query";
 import { useSearchParams } from "react-router-dom";
 import { handleCustomData } from "../../util/handleCustomData";
 import CategoryForm from "../Form/CategoryForm";
+import { customeDataValidate } from "../../validation/customDataValidate";
+import { functionValidate } from "../../validation/FunctionValidate";
 
 const BASE_URL = "/categories";
 function CategoryCRUD() {
@@ -53,16 +55,34 @@ function CategoryCRUD() {
 
   const onSearchItem = async (record: any) => {
     searchParams.set("limit", "10");
-    if (searchParams.has("active") && searchParams.has("isDeleted")) {
-      searchParams.delete("active");
-      searchParams.delete("isDeleted");
-    }
-    if (record.type) {
-      searchParams.set(record.type, record.value);
-      refetch();
-    } else {
-      searchParams.delete(record.type);
-      refetch();
+    try {
+      if (searchParams.has("active") && searchParams.has("isDeleted")) {
+        searchParams.delete("active");
+        searchParams.delete("isDeleted");
+      }
+      if (record.type && record.value) {
+        searchParams.set(record.type, record.value);
+
+        const res = await customeDataValidate({
+          collection: "Supplier",
+          searchParams,
+        });
+
+        const result: any = await functionValidate(res);
+
+        if (result.oke) {
+          refetch();
+        } else {
+          message.error(result.message);
+          searchParams.delete(record.type);
+        }
+      } else if (record.type && record.value === "") {
+        searchParams.delete(record.type);
+        await refetch();
+      }
+    } catch (error: any) {
+      console.log(`🚀🚀🚀!..error`, error.message);
+      message.error(error.message || error.reponse.data.message);
     }
   };
 
@@ -230,20 +250,19 @@ function CategoryCRUD() {
                   let searchValue: any = {};
                   if (e === "active") {
                     searchValue.type = "active";
-                    searchValue.value = true;
+                    searchValue.value = "true";
                   }
                   if (e === "unActive") {
                     searchValue = {};
                     searchValue.type = "active";
-                    searchValue.value = false;
+                    searchValue.value = "false";
                   }
                   if (e === "isDeleted") {
                     searchValue = {};
 
                     searchValue.type = "isDeleted";
-                    searchValue.value = true;
+                    searchValue.value = "true";
                   }
-                  console.log(`🚀🚀🚀!..e`, e);
                   onSearchItem(searchValue);
                 }}
                 filterOption={(input, option) =>
@@ -422,10 +441,14 @@ function CategoryCRUD() {
             <Space direction="vertical">
               <Button
                 style={{ width: "150px" }}
-                onClick={() => {
-                  searchParams.forEach((value, key) => {
-                    const valueSearch = { type: key, value: "" };
-                    onSearchItem(valueSearch);
+                onClick={async () => {
+                  const arrValue: any = [];
+                  await searchParams.forEach((value, key) => {
+                    arrValue.push({ value: "", type: key });
+                  });
+
+                  await arrValue.map(async (item: any) => {
+                    await onSearchItem(item);
                   });
                 }}
                 icon={<ClearOutlined />}
