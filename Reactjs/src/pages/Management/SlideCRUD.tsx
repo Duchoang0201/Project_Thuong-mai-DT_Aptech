@@ -10,116 +10,156 @@ import {
 import {
   Button,
   Form,
-  Input,
-  InputNumber,
   message,
   Modal,
-  Pagination,
   Popconfirm,
   Select,
   Space,
-  Switch,
   Table,
   Upload,
 } from "antd";
-import FormItem from "antd/es/form/FormItem";
-import axios from "axios";
 import { API_URL } from "../../constants/URLS";
-import React, { useCallback, useState } from "react";
+import { axiosClient } from "../../libraries/axiosClient";
+import { useRef, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
-// Date Picker
-import dayjs from "dayjs";
-import customParseFormat from "dayjs/plugin/customParseFormat";
-import moment from "moment";
-import { useQuery } from "@tanstack/react-query";
-import { axiosClient } from "../../libraries/axiosClient";
-moment().format();
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { useSearchParams } from "react-router-dom";
+import { handleCustomData } from "../../util/handleCustomData";
+import { customeDataValidate } from "../../validation/customDataValidate";
+import { functionValidate } from "../../validation/FunctionValidate";
+import SlideForm from "../Form/SlideForm";
+
+const BASE_URL = "/slides";
 function SlidesCRUD() {
-  //Set File avatar
+  // Inside your component
+  const customizeData: any = {
+    collection: "slides",
+  };
+  const [searchParams] = useSearchParams();
+  searchParams.set("limit", "10");
 
+  const timeoutSucess = useRef<any>();
   const [file, setFile] = useState<any>(null);
-
+  //Create, Update Form setting
+  const [createForm] = Form.useForm();
+  const [updateForm] = Form.useForm();
   const { auth } = useAuthStore((state: any) => state);
-
   const [refresh, setRefresh] = useState(0);
 
-  // Date Picker Setting
-
-  dayjs.extend(customParseFormat);
-
-  // API OF COLLECTIOn
-  let WEB_URL = `/slides`;
-
-  // MODAL:
-  // Modal open Create:
   const [openCreate, setOpenCreate] = useState(false);
 
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
-  //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
-  //For fillter:
+  const onSearchItem = async (record: any) => {
+    searchParams.set("skip", "0");
+    try {
+      if (record.type && record.value) {
+        searchParams.set(record.type, record.value);
 
-  // Change fillter (f=> f+1)
+        const res = await customeDataValidate({
+          collection: "Product",
+          searchParams,
+        });
 
-  const [updateId, setUpdateId] = useState(0);
+        const result: any = await functionValidate(res);
 
-  //Create, Update Form setting
-  const [createForm] = Form.useForm();
-  const [updateForm] = Form.useForm();
+        if (result.oke) {
+          await refetch();
+        } else {
+          message.error(result.message);
+          searchParams.delete(record.type);
+        }
+      } else if (
+        record.type &&
+        (record.value === "" ||
+          record.value === undefined ||
+          record.value === null)
+      ) {
+        searchParams.delete(record.type);
+        await refetch();
+      }
+      setCurrentPage(1);
+    } catch (error: any) {
+      message.error(error.message || error.reponse.data.message);
+    }
+  };
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const slideCurrent = (value: any) => {
+    const skipValue = (value - 1) * 10;
+    searchParams.set("skip", skipValue.toString());
+    refetch();
+  };
+
+  const {
+    data: slidesData,
+    isFetching,
+    refetch,
+    isLoading,
+  } = useQuery({
+    queryKey: ["getslides", searchParams.toString(), searchParams],
+    queryFn: () => {
+      customizeData.type = "GET";
+
+      return axiosClient.get(`${BASE_URL}?${searchParams.toString()}`);
+    },
+  });
+
+  const { mutate, isLoading: isMutating } = useMutation(handleCustomData, {
+    onSuccess: (data) => {
+      if (timeoutSucess.current) {
+        clearTimeout(timeoutSucess.current);
+      }
+      timeoutSucess.current = setTimeout(() => {
+        refetch();
+      }, 2000);
+    },
+    onSettled(data: any) {
+      if (data.ok) {
+        message.success("Created Feature Sucessfully!!");
+        refetch();
+      }
+      if (data.response?.data?.message) {
+        message.error(data.response?.data?.message);
+      }
+    },
+  });
 
   //Create data
-  const handleCreate = (record: any) => {
+  const handleCreate = async (record: any) => {
+    delete record._id;
     record.createdBy = {
       employeeId: auth.payload._id,
       firstName: auth.payload.firstName,
       lastName: auth.payload.lastName,
     };
+    record.isDeleted = false;
     record.createdDate = new Date().toISOString();
     if (record.active === undefined) {
       record.active = false;
     }
 
-    axios
-      .post(WEB_URL, record)
-      .then((res) => {
-        // UPLOAD FILE
-        const { _id } = res.data.result;
+    customizeData.type = "CREATE";
 
-        const formData = new FormData();
-        formData.append("file", file);
+    if (file.type) {
+      customizeData.file = file;
+    }
+    customizeData.data = record;
+    mutate(customizeData);
 
-        axios
-          .post(`${API_URL}/upload/slides/${_id}/image`, formData)
-          .then((respose) => {
-            message.success("Thêm mới thành công!");
-            createForm.resetFields();
-            setFile(null);
-            setOpenCreate(false);
-          });
-        setTimeout(() => {
-          setRefresh((f) => f + 1);
-        }, 4000);
-      })
-      .catch((err) => {
-        console.log(err);
-        message.error(err.response.data.message);
-      });
+    setOpenCreate(false);
+    setFile(null);
+    createForm.resetFields();
   };
   //Delete a Data
   const handleDelete = (record: any) => {
-    axios
-      .delete(WEB_URL + "/" + record._id)
-      .then((res) => {
-        message.success(" Delete item sucessfully!!", 1.5);
-        setRefresh((f) => f + 1);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    customizeData.type = "DELETE";
+    customizeData.id = record._id;
+    mutate(customizeData);
   };
   //Update a Data
   const handleUpdate = (record: any) => {
@@ -129,89 +169,18 @@ function SlidesCRUD() {
       lastName: auth.payload.lastName,
     };
     record.updatedDate = new Date().toISOString();
-
-    axios
-      .patch(WEB_URL + "/" + updateId, record)
-      .then((res) => {
-        setOpen(false);
-        setOpenCreate(false);
-        setRefresh((f) => f + 1);
-        message.success("Updated sucessfully!!", 1.5);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    if (record.active === undefined) {
+      record.active = false;
+    }
+    if (record.isDeleted === undefined) {
+      record.isDeleted = false;
+    }
+    customizeData.type = "PATCH";
+    customizeData.id = record._id;
+    customizeData.data = record;
+    mutate(customizeData);
+    setOpen(false);
   };
-
-  //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
-
-  const [isActive, setIsActive] = useState("");
-  const onSearchIsActive = useCallback((value: any) => {
-    if (value) {
-      setIsActive(value);
-    } else {
-      setIsActive("");
-    }
-  }, []);
-
-  //SEARCH DEPEN ON TITLE
-  const [slideTitle, setSlideTitle] = useState("");
-
-  const onSearchSlidesTitle = useCallback((value: any) => {
-    if (value) {
-      setSlideTitle(value);
-    } else {
-      setSlideTitle("");
-    }
-  }, []);
-
-  //SEARCH DEPEN ON NAME
-  const [slideSummary, setSlideSummary] = useState("");
-
-  const onSearchSlidesSumary = useCallback((value: any) => {
-    if (value) {
-      setSlideSummary(value);
-    } else {
-      setSlideSummary("");
-    }
-  }, []);
-
-  //SEARCH DEPEN ON LastName
-  const [slideUrl, setSlideUrl] = useState("");
-
-  const onSearchSlidesUrl = (record: any) => {
-    if (record) {
-      setSlideUrl(record);
-    } else {
-      setSlideUrl("");
-    }
-  };
-
-  //Search on Skip and Limit
-
-  const [skip, setSkip] = useState(0);
-  const [currentPage, setCurrentPage] = useState(1);
-  const slideCurrent = (value: any) => {
-    setSkip(value * 10 - 10);
-    setCurrentPage(value);
-  };
-  //GET DATA ON FILLTER
-  const URL_FILTER = `${WEB_URL}?${[
-    slideTitle && `&title=${slideTitle}`,
-    slideSummary && `&summary=${slideSummary}`,
-    slideUrl && `&url=${slideUrl}`,
-    isActive && `&active=${isActive}`,
-    skip && `&skip=${skip}`,
-  ]
-    .filter(Boolean)
-    .join("")}&limit=10`;
-
-  const { data: slidesData, isLoading } = useQuery({
-    queryKey: ["getSlides", URL_FILTER],
-    queryFn: () => {
-      return axiosClient.get(URL_FILTER);
-    },
-  });
 
   //Setting column
   const columns = [
@@ -220,7 +189,7 @@ function SlidesCRUD() {
       title: () => {
         return (
           <div>
-            {isActive ? (
+            {searchParams.get("active") || searchParams.get("isDeleted") ? (
               <div className="text-danger">No</div>
             ) : (
               <div className="secondary">No</div>
@@ -257,13 +226,33 @@ function SlidesCRUD() {
               <Select
                 allowClear
                 onClear={() => {
-                  setIsActive("");
+                  searchParams.delete("active");
+                  searchParams.delete("isDeleted");
+                  refetch();
                 }}
                 style={{ width: "125px" }}
                 placeholder="Select a supplier"
                 optionFilterProp="children"
                 showSearch
-                onChange={onSearchIsActive}
+                onChange={(e) => {
+                  let searchValue: any = {};
+                  if (e === "active") {
+                    searchValue.type = "active";
+                    searchValue.value = "true";
+                  }
+                  if (e === "unActive") {
+                    searchValue = {};
+                    searchValue.type = "active";
+                    searchValue.value = "false";
+                  }
+                  if (e === "isDeleted") {
+                    searchValue = {};
+
+                    searchValue.type = "isDeleted";
+                    searchValue.value = "true";
+                  }
+                  onSearchItem(searchValue);
+                }}
                 filterOption={(input, option) =>
                   (option?.label ?? "")
                     .toLowerCase()
@@ -312,7 +301,7 @@ function SlidesCRUD() {
       title: () => {
         return (
           <div>
-            {slideTitle ? (
+            {searchParams.get("title") ? (
               <div className="text-danger">Title</div>
             ) : (
               <div className="secondary">Title</div>
@@ -327,7 +316,10 @@ function SlidesCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              onSearch={onSearchSlidesTitle}
+              onSearch={(e: any) => {
+                const valueSearch = { type: "title", value: e };
+                onSearchItem(valueSearch);
+              }}
               placeholder="input search text"
               style={{ width: 200 }}
             />
@@ -340,7 +332,7 @@ function SlidesCRUD() {
       title: () => {
         return (
           <div>
-            {slideSummary ? (
+            {searchParams.get("summary") ? (
               <div className="text-danger">Summary</div>
             ) : (
               <div className="secondary">Summary</div>
@@ -356,7 +348,10 @@ function SlidesCRUD() {
             <Search
               allowClear
               placeholder="input search text"
-              onSearch={onSearchSlidesSumary}
+              onSearch={(e: any) => {
+                const valueSearch = { type: "summary", value: e };
+                onSearchItem(valueSearch);
+              }}
               style={{ width: 200 }}
             />
           </div>
@@ -364,34 +359,6 @@ function SlidesCRUD() {
       },
     },
 
-    //URL
-    {
-      title: () => {
-        return (
-          <div>
-            {slideUrl ? (
-              <div className="text-danger">URL</div>
-            ) : (
-              <div className="secondary">URL</div>
-            )}
-          </div>
-        );
-      },
-      dataIndex: "url",
-      key: "url",
-      filterDropdown: () => {
-        return (
-          <div style={{ padding: 8 }}>
-            <Search
-              allowClear
-              onSearch={onSearchSlidesUrl}
-              placeholder="input search text"
-              style={{ width: 200 }}
-            />
-          </div>
-        );
-      },
-    },
     //Note
 
     { title: "Note", dataIndex: "note", key: "note", width: "10%" },
@@ -407,9 +374,6 @@ function SlidesCRUD() {
             icon={<EditOutlined />}
             onClick={() => {
               setOpen(true);
-              setUpdateId(record._id);
-              const birthdayFormat = moment(record.birthday);
-              record.birthday = birthdayFormat;
               updateForm.setFieldsValue(record);
             }}
           ></Button>
@@ -459,10 +423,15 @@ function SlidesCRUD() {
             <Space direction="vertical">
               <Button
                 style={{ width: "150px" }}
-                onClick={() => {
-                  setSlideTitle("");
-                  setSlideSummary("");
-                  onSearchSlidesUrl("");
+                onClick={async () => {
+                  const arrValue: any = [];
+                  await searchParams.forEach((value, key) => {
+                    arrValue.push({ value: "", type: key });
+                  });
+
+                  await arrValue.map(async (item: any) => {
+                    await onSearchItem(item);
+                  });
                 }}
                 icon={<ClearOutlined />}
               >
@@ -486,9 +455,9 @@ function SlidesCRUD() {
 
   return (
     <div>
-      {/* Modal Create A Slides */}
+      {/* Modal Create A Feature */}
       <Modal
-        title={`Create Slides `}
+        title="Create Feature"
         open={openCreate}
         onCancel={() => {
           setOpenCreate(false);
@@ -496,99 +465,16 @@ function SlidesCRUD() {
         onOk={() => {
           createForm.submit();
         }}
+        okType="dashed"
         okText="Submit"
       >
-        <div className="container ">
+        <div className="container d-flex flex-row ">
           <Form form={createForm} name="createForm" onFinish={handleCreate}>
             <div className="row">
-              <FormItem
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="Title"
-                name="title"
-                rules={[{ required: true, message: "Please input Title!" }]}
-              >
-                <Input />
-              </FormItem>
-              <FormItem
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="Summary"
-                name="summary"
-                rules={[{ required: true, message: "Please input Summary!" }]}
-              >
-                <Input />
-              </FormItem>
-              <FormItem
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="URL"
-                name="url"
-                rules={[{ required: true, message: "Please input URL!" }]}
-              >
-                <Input />
-              </FormItem>
-
-              <FormItem
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="Sort Oder"
-                name="sortOder"
-                rules={[{ required: true, message: "Please input Sort Oder!" }]}
-              >
-                <InputNumber />
-              </FormItem>
-
-              <FormItem
-                labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="Active"
-                name="active"
-                valuePropName="checked"
-              >
-                <Switch />
-              </FormItem>
+              <SlideForm />
               <Form.Item
                 labelCol={{
-                  span: 6,
-                }}
-                wrapperCol={{
-                  span: 16,
-                }}
-                hasFeedback
-                label="Note"
-                name="note"
-              >
-                <Input />
-              </Form.Item>
-              <Form.Item
-                labelCol={{
-                  span: 6,
+                  span: 7,
                 }}
                 wrapperCol={{
                   span: 16,
@@ -625,142 +511,51 @@ function SlidesCRUD() {
 
       {/* List and function  */}
 
-      <div>
-        <Table
-          // loading={!slidesTEST ? true : false}
-          loading={isLoading}
-          rowKey="_id"
-          columns={columns}
-          dataSource={slidesData?.data?.results}
-          pagination={false}
-          scroll={{ x: "max-content", y: 610 }}
-          rowClassName={(record) => {
-            return record.active === false
-              ? "text-danger bg-success-subtle"
-              : "";
-          }}
-        />
-        <Pagination
-          className="container text-end"
-          onChange={(e) => slideCurrent(e)}
-          defaultCurrent={1}
-          total={slidesData?.data?.amountResults}
-        />
-      </div>
+      <Table
+        bordered
+        loading={isLoading || isFetching || isMutating}
+        rowKey="_id"
+        columns={columns}
+        dataSource={slidesData?.data?.results}
+        pagination={{
+          // pageSize: 10,
+          onChange: (e) => {
+            slideCurrent(e);
+            setCurrentPage(e);
+          },
+          total: slidesData?.data?.amountResults,
 
-      {/* Modal confirm Delte */}
+          showTotal: (total, range) =>
+            `Showing ${range[0]}-${range[1]} of ${total} items`,
+
+          size: "small",
+          current: currentPage,
+        }}
+        scroll={{ x: "max-content", y: 630 }}
+        rowClassName={(record) => {
+          if (record.active === false && record.isDeleted === false) {
+            return "bg-dark-subtle";
+          } else if (record.isDeleted) {
+            return "text-danger bg-success-subtle";
+          } else {
+            return "";
+          }
+        }}
+      />
 
       {/* Model Update */}
       <Modal
         open={open}
-        title="Update Slides"
-        onCancel={() => {
-          setOpen(false);
-        }}
+        title="Update Feature"
+        onCancel={() => setOpen(false)}
         onOk={() => {
           updateForm.submit();
         }}
+        okType="dashed"
       >
         <Form form={updateForm} name="updateForm" onFinish={handleUpdate}>
           <div className="row">
-            <FormItem
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="Title"
-              name="title"
-              rules={[{ required: true, message: "Please input Title!" }]}
-            >
-              <Input />
-            </FormItem>
-            <FormItem
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="Summary"
-              name="summary"
-              rules={[{ required: true, message: "Please input Summary!" }]}
-            >
-              <Input />
-            </FormItem>
-            <FormItem
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="URL"
-              name="url"
-              rules={[{ required: true, message: "Please input URL!" }]}
-            >
-              <Input />
-            </FormItem>
-            <FormItem
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="Image Url"
-              name="imageUrl"
-              rules={[{ required: true, message: "Please input Image Url!" }]}
-            >
-              <Input />
-            </FormItem>
-            <FormItem
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="Sort Oder"
-              name="sortOder"
-              rules={[{ required: true, message: "Please input Sort Oder!" }]}
-            >
-              <Input />
-            </FormItem>
-
-            <FormItem
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="Active"
-              name="active"
-              valuePropName="checked"
-            >
-              <Switch />
-            </FormItem>
-            <Form.Item
-              labelCol={{
-                span: 6,
-              }}
-              wrapperCol={{
-                span: 16,
-              }}
-              hasFeedback
-              label="Note"
-              name="note"
-            >
-              <Input />
-            </Form.Item>
+            <SlideForm />
           </div>
         </Form>
       </Modal>

@@ -42,10 +42,6 @@ const Information = (props: Props) => {
   const [oldPassWord, setOldPassWord] = useState("");
   const [newPassword, setNewPassword] = useState("");
 
-  setTimeout(() => {
-    setLoading(false);
-  }, 1000);
-
   const E_URL = `/employees/personal`;
   const token = window.localStorage.getItem("token");
 

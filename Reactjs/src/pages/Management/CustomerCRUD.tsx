@@ -533,12 +533,8 @@ function CustomerCRUD() {
               }
 
               if (info.file.status === "done") {
-                setTimeout(() => {
-                  refetch();
-                  message.success(
-                    `${info.file.name} file uploaded successfully`
-                  );
-                }, 2000);
+                refetch();
+                message.success(`${info.file.name} file uploaded successfully`);
               } else if (info.file.status === "error") {
                 message.error(`${info.file.name} file upload failed.`);
               }
