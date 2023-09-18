@@ -1,5 +1,4 @@
 import React, { useEffect, useRef, useState } from "react";
-import style from "./Navbar.module.css";
 import dinamontImage from "./transparent-jewelry-icon-diamond-icon-60251ec5ca3757.4392206316130454458283.png";
 import Image from "next/image";
 import { Avatar, Badge, Dropdown, Space, message } from "antd";
@@ -26,22 +25,9 @@ const NavabarTailwind = () => {
   const { data: session } = useSession();
   const user = session?.user;
   const { productSearch } = PropsSearch((state: any) => state);
-  const [scroll, setScroll] = useState<number>(10);
   const [windowWidth, setWindowWidth] = useState<number>(0);
-  const [openNavbar, setOpenNavbar] = useState(false);
+  const [openNavbar, setOpenNavbar] = useState(true);
   const [searchProduct, setSearchProduct] = useState("");
-  useEffect(() => {
-    const handleResize = () => {
-      setScroll(window.scrollY);
-    };
-
-    handleResize(); // Set initial window width
-    window.addEventListener("scroll", handleResize);
-
-    return () => {
-      window.removeEventListener("scroll", handleResize);
-    };
-  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -124,27 +110,82 @@ const NavabarTailwind = () => {
   ];
   return (
     <>
-      <div className={scroll > 60 ? style.container : style.contaier__Scroll}>
+      <div>
         <nav className="bg-white border-gray-200 dark:bg-gray-900">
           <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
-            <div className="flex flex-wrap w-32  items-center justify-between p-2">
-              <div className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer ">
-                {" "}
-                <ShopOutlined style={{ fontSize: 30, color: "white" }} />
-              </div>
-
-              <div className="transition duration-300 ease-in-out hover:scale-110 cursor-pointer">
-                {" "}
-                <PhoneOutlined style={{ fontSize: 30, color: "white" }} />
-              </div>
+            <div className="text-center justify-center">
+              {" "}
+              <Link href="/" className="items-center ">
+                <Image width={40} src={dinamontImage} alt={"Dianamont"} />
+                <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"></span>
+              </Link>
             </div>
-            <Link href="/" className="items-center md:flex hidden">
-              <Image width={80} src={dinamontImage} alt={"Dianamont"} />
-              <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-                Diamont
-              </span>
-            </Link>
-            <div className="flex flex-wrap w-32  items-center justify-between p-2">
+
+            <div className="flex md:order-2 items-center justify-between gap-x-3">
+              <button
+                onClick={() => {
+                  setOpenNavbar(!openNavbar);
+                }}
+                data-collapse-toggle="navbar-search"
+                type="button"
+                className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
+                aria-controls="navbar-search"
+                aria-expanded="false"
+              >
+                <span className="sr-only">Open main menu</span>
+                <svg
+                  className="w-5 h-5"
+                  aria-hidden="true"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 17 14"
+                >
+                  <path
+                    stroke="currentColor"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M1 1h15M1 7h15M1 13h15"
+                  />
+                </svg>
+              </button>
+              <div className="relative hidden md:block">
+                <div className="Search relative">
+                  <input
+                    value={searchProduct}
+                    type="text"
+                    id="search-navbar"
+                    className="block w-full p-2 pl-10 pr-12 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                    placeholder="Nhập sản phẩm ..."
+                    onChange={(e: any) => {
+                      setSearchProduct(e?.target?.value);
+                    }}
+                  />
+                  <button
+                    className="absolute inset-y-0 right-0 text-white  border-l-2 border-primary px-2 py-2 text-xs font-medium uppercase text-primary transition duration-150 ease-in-out hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
+                    type="button"
+                    id="button-addon3"
+                    data-te-ripple-init
+                    onClick={() => {
+                      if (searchProduct) {
+                        if (timeoutSearch.current) {
+                          clearTimeout(timeoutSearch.current);
+                        }
+                        productSearch(searchProduct);
+                        router.push(`/searchpage`);
+
+                        timeoutSearch.current = setTimeout(() => {
+                          setSearchProduct("");
+                        }, 2000);
+                      }
+                      if (!searchProduct) {
+                        message.error("Vui lòng nhập tên sản phẩm!!");
+                      }
+                    }}
+                  >
+                    <SearchOutlined />
+                  </button>
+                </div>
+              </div>
               {user ? (
                 <Dropdown
                   overlayStyle={{ zIndex: 10000 }}
@@ -176,7 +217,6 @@ const NavabarTailwind = () => {
                       ),
                     })),
                   }}
-                  className="flex"
                 >
                   <Badge count={itemsCart?.length}>
                     <ShoppingCartOutlined
@@ -205,7 +245,7 @@ const NavabarTailwind = () => {
                     ],
                   }}
                   className="d-flex"
-                  trigger={["hover"]} // Change this to "hover" if you want the dropdown to appear on hover instead of click
+                  trigger={["hover"]}
                 >
                   <Badge count={0}>
                     <ShoppingCartOutlined
@@ -254,92 +294,17 @@ const NavabarTailwind = () => {
                 </Dropdown>
               )}
             </div>
-          </div>
-        </nav>
-
-        <nav className="bg-white border-gray-200 dark:bg-gray-900">
-          <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-1">
-            <div className="w-20 md:hidden"></div>
-            <div className="text-center justify-center">
-              {" "}
-              <Link href="/" className="items-center md:hidden">
-                <Image width={80} src={dinamontImage} alt={"Dianamont"} />
-                <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"></span>
-              </Link>
-            </div>
-            <div className="flex md:order-2">
-              <div className="relative hidden md:block">
-                <div className="Search relative">
-                  <input
-                    value={searchProduct}
-                    type="text"
-                    id="search-navbar"
-                    className="block w-full p-2 pl-10 pr-12 text-sm text-gray-900 border border-gray-300 rounded-lg bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
-                    placeholder="Nhập sản phẩm ..."
-                    onChange={(e: any) => {
-                      setSearchProduct(e?.target?.value);
-                    }}
-                  />
-                  <button
-                    className="absolute inset-y-0 right-0 text-white  border-l-2 border-primary px-2 py-2 text-xs font-medium uppercase text-primary transition duration-150 ease-in-out hover:bg-black hover:bg-opacity-5 focus:outline-none focus:ring-0"
-                    type="button"
-                    id="button-addon3"
-                    data-te-ripple-init
-                    onClick={() => {
-                      if (searchProduct) {
-                        if (timeoutSearch.current) {
-                          clearTimeout(timeoutSearch.current);
-                        }
-                        productSearch(searchProduct);
-                        router.push(`/searchpage`);
-
-                        timeoutSearch.current = setTimeout(() => {
-                          setSearchProduct("");
-                        }, 2000);
-                      }
-                      if (!searchProduct) {
-                        message.error("Vui lòng nhập tên sản phẩm!!");
-                      }
-                    }}
-                  >
-                    <SearchOutlined />
-                  </button>
-                </div>
-              </div>
-              <button
-                onClick={() => {
-                  setOpenNavbar(!openNavbar);
-                }}
-                data-collapse-toggle="navbar-search"
-                type="button"
-                className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-                aria-controls="navbar-search"
-                aria-expanded="false"
-              >
-                <span className="sr-only">Open main menu</span>
-                <svg
-                  className="w-5 h-5"
-                  aria-hidden="true"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 17 14"
-                >
-                  <path
-                    stroke="currentColor"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M1 1h15M1 7h15M1 13h15"
-                  />
-                </svg>
-              </button>
-            </div>
             <div
               className={`${
-                openNavbar ? `` : "hidden"
-              }   items-center justify-between  w-full md:flex md:w-auto md:order-1`}
+                openNavbar ? `h-0` : "h-72"
+              }   items-center justify-between md:h-5  w-full md:flex  md:w-auto md:order-1 transition-all ease-out duration-500 md:transition-none`}
               id="navbar-search"
             >
-              <div className="relative mt-3 md:hidden">
+              <div
+                className={`${
+                  openNavbar ? `h-0 hidden` : "h-10"
+                } mt-3 md:hidden `}
+              >
                 <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                   <svg
                     className="w-4 h-4 text-gray-500 dark:text-gray-400"
@@ -387,7 +352,11 @@ const NavabarTailwind = () => {
                   </button>
                 </div>
               </div>
-              <ul className=" md:flex p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700">
+              <ul
+                className={`${
+                  openNavbar ? `h-0 hidden` : ""
+                } md:flex items-center p-4 md:p-0 mt-4 font-medium border border-gray-100 rounded-lg bg-gray-50 md:flex-row md:space-x-8 md:mt-0 md:border-0 md:bg-white dark:bg-gray-800 md:dark:bg-gray-900 dark:border-gray-700`}
+              >
                 <li>
                   <Link
                     href="/"

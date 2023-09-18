@@ -1,22 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Button, Card, Col, Row, Space, Statistic } from "antd";
 import Image from "next/image";
 
-import axios from "axios";
 import { API_URL } from "@/contants/URLS";
-const CheckoutMethod = () => {
-  const [methodPay, setMethodPay] = useState<any>();
-  useEffect(() => {
-    axios.get(`${API_URL}/features`).then((res) => {
-      setMethodPay(res.data.results);
-    });
-  }, []);
-
+const CheckoutMethod = ({ dataMethod }: any) => {
   return (
     <div className="container mx-auto">
       {" "}
       <Row className="py-3 ">
-        {methodPay?.map((item: any, index: any) => (
+        {dataMethod?.map((item: any, index: any) => (
           <Col
             style={{ width: "90%" }}
             key={`${item._id}-${index + 1}`}

@@ -21,10 +21,11 @@ import FacebookMsg from "@/compenents/Facebook/FacebookMsg";
 import { useSession } from "next-auth/react";
 import { useCartStore } from "@/hook/useCountStore";
 import { useEffect } from "react";
-import { axiosAuth } from "@/libraries/axiosConfig";
+import { axiosAuth, axiosClient } from "@/libraries/axiosConfig";
 
 export default function Home(props: any) {
-  const { topMonth, hotTrend, hotDeal, slides, productView } = props;
+  const { topMonth, hotTrend, hotDeal, slides, productView, dataMethod } =
+    props;
   const { getDataServer } = useCartStore((state: any) => state);
   const { data: session } = useSession();
 
@@ -51,7 +52,7 @@ export default function Home(props: any) {
         <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
           <h3 className=" py-2 text-center">Phương thức thanh toán</h3>
 
-          <CheckoutMethod />
+          <CheckoutMethod dataMethod={dataMethod} />
         </div>
         <Divider>
           <h3>Danh mục yêu thích</h3>
@@ -93,6 +94,8 @@ export default function Home(props: any) {
 
 export async function getStaticProps(content: any) {
   try {
+    //METHOD PAY
+    const dataMethod = await axiosClient.get(`/features`);
     //Slides
     const dataSlides = await axiosAuth.get(`/slides?active=true`);
     //GET HOTTREND
@@ -116,6 +119,7 @@ export async function getStaticProps(content: any) {
         hotTrend: dataHottrend.data.results,
         hotDeal: dataHotDeal.data.results,
         productView: dataProduct.data.results,
+        dataMethod: dataMethod.data.results,
       },
       revalidate: 24 * 60 * 60,
     };
