@@ -38,6 +38,8 @@ function CategoryCRUD() {
     collection: "categories",
   };
   const [searchParams] = useSearchParams();
+  searchParams.set("limit", "10");
+
   const timeoutSucess = useRef<any>();
   const [file, setFile] = useState<any>(null);
   //Create, Update Form setting
@@ -54,45 +56,43 @@ function CategoryCRUD() {
   const [deleteItem, setDeleteItem] = useState<any>();
 
   const onSearchItem = async (record: any) => {
-    searchParams.set("limit", "10");
+    searchParams.set("skip", "0");
     try {
-      if (searchParams.has("active") && searchParams.has("isDeleted")) {
-        searchParams.delete("active");
-        searchParams.delete("isDeleted");
-      }
       if (record.type && record.value) {
         searchParams.set(record.type, record.value);
 
         const res = await customeDataValidate({
-          collection: "Supplier",
+          collection: "Product",
           searchParams,
         });
 
         const result: any = await functionValidate(res);
 
         if (result.oke) {
-          refetch();
+          await refetch();
         } else {
           message.error(result.message);
           searchParams.delete(record.type);
         }
-      } else if (record.type && record.value === "") {
+      } else if (
+        record.type &&
+        (record.value === "" ||
+          record.value === undefined ||
+          record.value === null)
+      ) {
         searchParams.delete(record.type);
         await refetch();
       }
+      setCurrentPage(1);
     } catch (error: any) {
-      console.log(`🚀🚀🚀!..error`, error.message);
       message.error(error.message || error.reponse.data.message);
     }
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const slideCurrent = (value: any) => {
-    // setSkip(value * 10 - 10);
-    const skipValue = (value * 10 - 10).toString();
-    searchParams.set("skip", skipValue);
-    setCurrentPage(value);
-
+    const skipValue = (value - 1) * 10;
+    searchParams.set("skip", skipValue.toString());
     refetch();
   };
 
@@ -204,7 +204,8 @@ function CategoryCRUD() {
         return (
           <div>
             <Space>
-              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {index + 1 + (currentPage - 1) * 10}
+
               {record.active === true && !record.isDeleted && (
                 <span style={{ fontSize: "16px", color: "#08c" }}>
                   <CheckCircleOutlined /> Active
@@ -299,7 +300,7 @@ function CategoryCRUD() {
       dataIndex: "imageUrl",
       render: (text: any, record: any, index: any) => {
         return (
-          <div>
+          <div className="flex justify-center items-center">
             {record.imageUrl && (
               <img
                 src={`${API_URL}${record.imageUrl}`}
@@ -530,14 +531,24 @@ function CategoryCRUD() {
       {/* List and function  */}
 
       <Table
+        bordered
         loading={isLoading || isFetching || isMutating}
         rowKey="_id"
         columns={columns}
         dataSource={categoriesData?.data?.results}
         pagination={{
-          pageSize: 10,
-          onChange: (e) => slideCurrent(e),
+          // pageSize: 10,
+          onChange: (e) => {
+            slideCurrent(e);
+            setCurrentPage(e);
+          },
           total: categoriesData?.data?.amountResults,
+
+          showTotal: (total, range) =>
+            `Showing ${range[0]}-${range[1]} of ${total} items`,
+
+          size: "small",
+          current: currentPage,
         }}
         scroll={{ x: "max-content", y: 630 }}
         rowClassName={(record) => {
@@ -567,26 +578,6 @@ function CategoryCRUD() {
           </div>
         </Form>
       </Modal>
-
-      <Upload
-        maxCount={1}
-        listType="picture-card"
-        showUploadList={true}
-        beforeUpload={(file) => {
-          console.log(`🚀🚀🚀!..file`, file);
-          return false;
-        }}
-        onRemove={() => {}}
-      >
-        {!file ? (
-          <div>
-            <PlusOutlined />
-            <div style={{ marginTop: 8 }}>Upload</div>
-          </div>
-        ) : (
-          ""
-        )}
-      </Upload>
     </div>
   );
 }

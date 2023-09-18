@@ -47,6 +47,8 @@ function ProductCRUD() {
 
   const [files, setFiles] = useState<any>(null);
   const [searchParams] = useSearchParams();
+  searchParams.set("limit", "10");
+
   const timeoutSucess = useRef<any>();
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
@@ -145,17 +147,18 @@ function ProductCRUD() {
       }
       timeoutSucess.current = setTimeout(() => {
         refetch();
+        message.success("Created Customer Sucessfully!!");
       }, 500);
     },
-    onSettled(data: any) {
-      if (data.ok) {
-        message.success("Created Customer Sucessfully!!");
-        refetch();
-      }
-      if (data.response?.data?.message) {
-        message.error(data.response?.data?.message);
-      }
-    },
+    // onSettled(data: any) {
+    //   if (data.ok) {
+    //     refetch();
+    //     setFiles(null);
+    //   }
+    //   if (data.response?.data?.message) {
+    //     message.error(data.response?.data?.message);
+    //   }
+    // },
   });
 
   //Create data
@@ -173,6 +176,7 @@ function ProductCRUD() {
     }
 
     customizeData.type = "CREATE";
+    customizeData.file = files;
 
     customizeData.data = record;
     mutate(customizeData);
@@ -923,7 +927,6 @@ function ProductCRUD() {
         columns={columns}
         dataSource={productsData?.data?.results}
         pagination={{
-          // pageSize: 10,
           onChange: (e) => {
             slideCurrent(e);
             setCurrentPage(e);

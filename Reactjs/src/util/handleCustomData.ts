@@ -23,6 +23,7 @@ export const handleCustomData = async (item: any) => {
       case "CREATE":
         res = await axiosClient.post(`/${item.collection}`, item.data);
 
+        console.log(`🚀🚀🚀!..res`, res);
         const { _id } = res.data.result;
         const formData = new FormData();
 
@@ -30,7 +31,7 @@ export const handleCustomData = async (item: any) => {
           formData.append("file", item.file);
 
           res = await axios.post(
-            `${API_URL}/upload/categories/${_id}/image`,
+            `${API_URL}/upload/${item.collection}/${_id}/image`,
             formData
           );
           // Handle the response here if needed

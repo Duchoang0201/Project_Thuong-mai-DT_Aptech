@@ -34,6 +34,8 @@ function SupplierCRUD() {
     collection: "suppliers",
   };
   const [searchParams] = useSearchParams();
+  searchParams.set("limit", "10");
+
   const timeoutSucess = useRef<any>();
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
@@ -47,45 +49,43 @@ function SupplierCRUD() {
   const [deleteItem, setDeleteItem] = useState<any>();
 
   const onSearchItem = async (record: any) => {
-    searchParams.set("limit", "10");
+    searchParams.set("skip", "0");
     try {
-      if (searchParams.has("active") && searchParams.has("isDeleted")) {
-        searchParams.delete("active");
-        searchParams.delete("isDeleted");
-      }
       if (record.type && record.value) {
         searchParams.set(record.type, record.value);
 
         const res = await customeDataValidate({
-          collection: "Supplier",
+          collection: "Product",
           searchParams,
         });
 
         const result: any = await functionValidate(res);
 
         if (result.oke) {
-          refetch();
+          await refetch();
         } else {
           message.error(result.message);
           searchParams.delete(record.type);
         }
-      } else if (record.type && record.value === "") {
+      } else if (
+        record.type &&
+        (record.value === "" ||
+          record.value === undefined ||
+          record.value === null)
+      ) {
         searchParams.delete(record.type);
         await refetch();
       }
+      setCurrentPage(1);
     } catch (error: any) {
-      console.log(`🚀🚀🚀!..error`, error.message);
       message.error(error.message || error.reponse.data.message);
     }
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const slideCurrent = (value: any) => {
-    // setSkip(value * 10 - 10);
-    const skipValue = (value * 10 - 10).toString();
-    searchParams.set("skip", skipValue);
-    setCurrentPage(value);
-
+    const skipValue = (value - 1) * 10;
+    searchParams.set("skip", skipValue.toString());
     refetch();
   };
 
@@ -198,7 +198,8 @@ function SupplierCRUD() {
         return (
           <div>
             <Space>
-              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {index + 1 + (currentPage - 1) * 10}
+
               {record.active === true && !record.isDeleted && (
                 <span style={{ fontSize: "16px", color: "#08c" }}>
                   <CheckCircleOutlined /> Active
@@ -520,14 +521,24 @@ function SupplierCRUD() {
       {/* List and function  */}
 
       <Table
+        bordered
         loading={isLoading || isFetching || isMutating}
         rowKey="_id"
         columns={columns}
         dataSource={suppliersData?.data?.results}
         pagination={{
-          pageSize: 10,
-          onChange: (e) => slideCurrent(e),
+          // pageSize: 10,
+          onChange: (e) => {
+            slideCurrent(e);
+            setCurrentPage(e);
+          },
           total: suppliersData?.data?.amountResults,
+
+          showTotal: (total, range) =>
+            `Showing ${range[0]}-${range[1]} of ${total} items`,
+
+          size: "small",
+          current: currentPage,
         }}
         scroll={{ x: "max-content", y: 630 }}
         rowClassName={(record) => {

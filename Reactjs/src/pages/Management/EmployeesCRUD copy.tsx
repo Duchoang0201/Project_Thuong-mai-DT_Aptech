@@ -23,25 +23,26 @@ import {
   Upload,
 } from "antd";
 import FormItem from "antd/es/form/FormItem";
-import { API_URL } from "../../constants/URLS";
-import React, { useCallback, useMemo, useState } from "react";
+import axios from "axios";
+import { axiosClient } from "../../libraries/axiosClient";
+import React, { useCallback, useState } from "react";
 import Search from "antd/es/input/Search";
 import { useAuthStore } from "../../hooks/useAuthStore";
 // Date Picker
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 import moment from "moment";
-import { axiosClient } from "../../libraries/axiosClient";
 import { useQuery } from "@tanstack/react-query";
-import axios from "axios";
-import CustomerForm from "../Form/CustomerForm";
+function EmployeeCRUD() {
+  const URL_ENV = process.env.REACT_APP_BASE_URL || "http://localhost:9000";
 
-function CustomerCRUD() {
   //Set File avatar
 
   const [file, setFile] = useState<any>(null);
 
   const { auth } = useAuthStore((state: any) => state);
+
+  const [refresh, setRefresh] = useState(0);
 
   // Date Picker Setting
 
@@ -51,7 +52,7 @@ function CustomerCRUD() {
   const dateFormat = "DD/MM/YYYY";
 
   // API OF COLLECTIOn
-  let WEB_URL = `/customers`;
+  let API_URL = `${URL_ENV}/employees`;
 
   // MODAL:
   // Modal open Create:
@@ -60,23 +61,24 @@ function CustomerCRUD() {
   // Modal open Update:
   const [open, setOpen] = useState(false);
 
+  //Model open Confirm Delete
   //Delete Item
   const [deleteItem, setDeleteItem] = useState<any>();
 
   //For fillter:
 
-  //Data fillter
-  // const [customersTEST, setCustomersTEST] = useState<any>([]);
-
   // Change fillter (f=> f+1)
 
-  const [updateId, setUpdateId] = useState(0);
+  const [updateId, setUpdateId] = useState<any>();
 
   //Create, Update Form setting
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
 
   //Text of Tyography:
+
+  ///GET TOKEM FORM LOCALSTORAGE
+  const token = window.localStorage.getItem("token");
 
   //Create data
   const handleCreate = (record: any) => {
@@ -91,26 +93,36 @@ function CustomerCRUD() {
     }
 
     axiosClient
-      .post(WEB_URL, record)
+      .post(
+        API_URL,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+        record
+      )
       .then((res) => {
         // UPLOAD FILE
         const { _id } = res.data.result;
+
+        ///FormData() giúp sumbit form mà k có nút sumbit
+        //Túm váy lại, với FormData, chúng ta có thể submit dữ liệu lên server thông qua AJAX như là đang submit form bình thường.
         const formData = new FormData();
+        //Phương thức append cho phép chúng ta chèn thêm một cặp key => value vào trong FormData
         formData.append("file", file);
 
         if (file?.uid && file?.type) {
           message.loading("On Updating picture on data!!", 1.5);
           axios
-            .post(`${API_URL}/upload/customers/${_id}/image`, formData)
+            .post(`${URL_ENV}/upload/employees/${_id}/image`, formData)
             .then((respose) => {
               message.success("Created Successfully!!", 1.5);
               createForm.resetFields();
               setOpenCreate(false);
               setFile(null);
-
               setTimeout(() => {
-                // setRefresh((f) => f + 1);
-                refetch();
+                setRefresh((f) => f + 1);
               }, 2000);
             });
         } else {
@@ -120,25 +132,27 @@ function CustomerCRUD() {
           setFile(null);
 
           setTimeout(() => {
-            // setRefresh((f) => f + 1);
-            refetch();
+            setRefresh((f) => f + 1);
           }, 1000);
           message.success("Created Successfully!!", 1.5);
         }
       })
       .catch((err) => {
         console.log(err);
-        message.error(err.response.data.message);
+        message.error(`${err?.response?.data?.message}`);
       });
   };
   //Delete a Data
   const handleDelete = (record: any) => {
     axiosClient
-      .delete(WEB_URL + "/" + record._id)
+      .delete(API_URL + "/" + record._id, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
       .then((res) => {
         message.success(" Delete item sucessfully!!", 1.5);
-        // setRefresh((f) => f + 1);
-        refetch();
+        setRefresh((f) => f + 1);
       })
       .catch((err) => {
         console.log(err);
@@ -146,6 +160,7 @@ function CustomerCRUD() {
   };
   //Update a Data
   const handleUpdate = (record: any) => {
+    message.loading("Updating, please wait!!", 3);
     record.updatedBy = {
       employeeId: auth.payload._id,
       firstName: auth.payload.firstName,
@@ -154,14 +169,16 @@ function CustomerCRUD() {
     record.updatedDate = new Date().toISOString();
 
     record.birthday = record.birthday.toISOString();
+    if (record.isAdmin === undefined) {
+      record.isAdmin = false;
+    }
     axiosClient
-      .patch(WEB_URL + "/" + updateId, record)
+      .patch(API_URL + "/" + updateId._id, record)
       .then((res) => {
+        console.log(res);
         setOpen(false);
         setOpenCreate(false);
-        // setRefresh((f) => f + 1);
-        refetch();
-
+        setRefresh((f) => f + 1);
         message.success("Updated sucessfully!!", 1.5);
       })
       .catch((err) => {
@@ -172,88 +189,84 @@ function CustomerCRUD() {
   //SEARCH ISDELETE , ACTIVE, UNACTIVE ITEM
 
   const [isLocked, setIsLocked] = useState("");
-
-  const onSearchIsLocked = useMemo(
-    () => (value: any) => {
-      if (value) {
-        setIsLocked(value);
-      } else {
-        setIsLocked("");
-      }
-    },
-    []
-  );
-
-  //SEARCH DEPEN ON NAME
-  const [customerEmail, setCustomerEmail] = useState("");
-
-  const onSearchCustomerEmail = useCallback((value: any) => {
-    console.log(value);
+  const onSearchIsLocked = useCallback((value: any) => {
     if (value) {
-      setCustomerEmail(value);
+      setIsLocked(value);
     } else {
-      setCustomerEmail("");
+      setIsLocked("");
     }
   }, []);
 
   //SEARCH DEPEN ON NAME
-  const [customerFirstName, setCustomerFirstName] = useState("");
+  const [employeesEmail, setEmployeeEmail] = useState("");
 
-  const onSearchCustomerFirstName = useCallback((value: any) => {
+  const onSearchEmployeeEmail = useCallback((value: any) => {
     console.log(value);
     if (value) {
-      setCustomerFirstName(value);
+      setEmployeeEmail(value);
     } else {
-      setCustomerFirstName("");
+      setEmployeeEmail("");
+    }
+  }, []);
+
+  //SEARCH DEPEN ON NAME
+  const [employeesFirstName, setEmployeeFirstName] = useState("");
+
+  const onSearchEmployeeFirstName = useCallback((value: any) => {
+    console.log(value);
+    if (value) {
+      setEmployeeFirstName(value);
+    } else {
+      setEmployeeFirstName("");
     }
   }, []);
 
   //SEARCH DEPEN ON LastName
-  const [customerLastName, setCustomerLastName] = useState("");
+  const [employeesLastName, setEmployeeLastName] = useState("");
 
-  const onSearchCustomerLastName = (record: any) => {
+  const onSearchEmployeeLastName = (record: any) => {
     if (record) {
-      setCustomerLastName(record);
+      setEmployeeLastName(record);
     } else {
-      setCustomerLastName("");
+      setEmployeeLastName("");
     }
   };
 
   //SEARCH DEPEN ON PhoneNumber
-  const [customerPhoneNumber, setCustomerPhoneNumber] = useState("");
+  const [employeesPhoneNumber, setEmployeePhoneNumber] = useState("");
 
-  const onSearchCustomerPhoneNumber = (record: any) => {
+  const onSearchEmployeePhoneNumber = (record: any) => {
     if (record) {
-      setCustomerPhoneNumber(record);
+      setEmployeePhoneNumber(record);
     } else {
-      setCustomerPhoneNumber("");
+      setEmployeePhoneNumber("");
     }
   };
 
   //SEARCH DEPEN ON Address
-  const [customerAddress, setCustomerAddress] = useState("");
+  const [employeesAddress, setEmployeeAddress] = useState("");
 
-  const onSearchCustomerAddress = (record: any) => {
+  const onSearchEmployeeAddress = (record: any) => {
     if (record) {
-      setCustomerAddress(record);
+      setEmployeeAddress(record);
     } else {
-      setCustomerAddress("");
+      setEmployeeAddress("");
     }
   };
   //SEARCH DEPEN ON Birthday
-  const [customerBirthdayFrom, setCustomerBirthdayFrom] = useState("");
-  const [customerBirthdayTo, setCustomerBirthdayTo] = useState("");
+  const [employeesBirthdayFrom, setEmployeeBirthdayFrom] = useState("");
+  const [employeesBirthdayTo, setEmployeeBirthdayTo] = useState("");
 
-  const onSearchCustomerBirthday = (record: any) => {
+  const onSearchEmployeeBirthday = (record: any) => {
     const formattedRecord = record.map((date: any) =>
       dayjs(date).format("YYYY/MM/DD")
     );
     if (formattedRecord) {
-      setCustomerBirthdayFrom(formattedRecord[0]);
-      setCustomerBirthdayTo(formattedRecord[1]);
+      setEmployeeBirthdayFrom(formattedRecord[0]);
+      setEmployeeBirthdayTo(formattedRecord[1]);
     } else {
-      setCustomerBirthdayFrom("");
-      setCustomerBirthdayTo("");
+      setEmployeeBirthdayFrom("");
+      setEmployeeBirthdayTo("");
     }
   };
 
@@ -266,44 +279,26 @@ function CustomerCRUD() {
     setCurrentPage(value);
   };
   //GET DATA ON FILLTER
-  const URL_FILTER = `${WEB_URL}?${[
-    customerFirstName && `&firstName=${customerFirstName}`,
-    customerLastName && `&lastName=${customerLastName}`,
-    customerEmail && `&email=${customerEmail}`,
-    customerPhoneNumber && `&phoneNumber=${customerPhoneNumber}`,
-    customerAddress && `&address=${customerAddress}`,
-    customerBirthdayFrom && `&birthdayFrom=${customerBirthdayFrom}`,
-    customerBirthdayTo && `&birthdayTo=${customerBirthdayTo}`,
+  const URL_FILTER = `${API_URL}?${[
+    employeesFirstName && `&firstName=${employeesFirstName}`,
+    employeesLastName && `&lastName=${employeesLastName}`,
+    employeesEmail && `&email=${employeesEmail}`,
+    employeesPhoneNumber && `&phoneNumber=${employeesPhoneNumber}`,
+    employeesAddress && `&address=${employeesAddress}`,
+    employeesBirthdayFrom && `&birthdayFrom=${employeesBirthdayFrom}`,
+    employeesBirthdayTo && `&birthdayTo=${employeesBirthdayTo}`,
     isLocked && `&Locked=${isLocked}`,
     skip && `&skip=${skip}`,
   ]
     .filter(Boolean)
     .join("")}&limit=10`;
 
-  // useEffect(() => {
-  //   axiosClient
-  //     .get(URL_FILTER)
-  //     .then((res) => {
-  //       setCustomersTEST(res.data.results);
-  //       setPages(res.data.amountResults);
-  //       setisLoading(false);
-  //     })
-  //     .catch((err) => console.log(err));
-  // }, [URL_FILTER, refresh]);
-
-  const handleGetMutipleData = () => {
-    return axiosClient.get(URL_FILTER);
-  };
-
-  const {
-    data: customerData,
-    refetch,
-    isLoading,
-  } = useQuery({
-    queryKey: ["getCustomers", URL_FILTER],
-    queryFn: handleGetMutipleData,
+  const { data: employeesData, isLoading } = useQuery({
+    queryKey: ["getEmployees", URL_FILTER],
+    queryFn: () => {
+      return axiosClient.get(URL_FILTER);
+    },
   });
-
   //Setting column
   const columns = [
     //NO
@@ -351,7 +346,7 @@ function CustomerCRUD() {
                   setIsLocked("");
                 }}
                 style={{ width: "125px" }}
-                placeholder="Select a "
+                placeholder="Select a supplier"
                 optionFilterProp="children"
                 showSearch
                 onChange={onSearchIsLocked}
@@ -386,10 +381,10 @@ function CustomerCRUD() {
       dataIndex: "imageUrl",
       render: (text: any, record: any, index: any) => {
         return (
-          <div>
+          <div className="">
             {record.imageUrl && (
               <img
-                src={`${API_URL}${record.imageUrl}`}
+                src={`${URL_ENV}` + record.imageUrl}
                 style={{ height: 60 }}
                 alt="record.imageUrl"
               />
@@ -403,7 +398,7 @@ function CustomerCRUD() {
       title: () => {
         return (
           <div>
-            {customerEmail ? (
+            {employeesEmail ? (
               <div className="text-danger">Email</div>
             ) : (
               <div className="secondary">Email</div>
@@ -418,8 +413,8 @@ function CustomerCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              onSearch={onSearchCustomerEmail}
-              placeholder="Enter email"
+              onSearch={onSearchEmployeeEmail}
+              placeholder="input search text"
               style={{ width: 200 }}
             />
           </div>
@@ -431,7 +426,7 @@ function CustomerCRUD() {
       title: () => {
         return (
           <div>
-            {customerFirstName ? (
+            {employeesFirstName ? (
               <div className="text-danger">First name</div>
             ) : (
               <div className="secondary">First name</div>
@@ -446,8 +441,8 @@ function CustomerCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              placeholder="Enter first name"
-              onSearch={onSearchCustomerFirstName}
+              placeholder="input search text"
+              onSearch={onSearchEmployeeFirstName}
               style={{ width: 200 }}
             />
           </div>
@@ -459,7 +454,7 @@ function CustomerCRUD() {
       title: () => {
         return (
           <div>
-            {customerLastName ? (
+            {employeesLastName ? (
               <div className="text-danger">Last name</div>
             ) : (
               <div className="secondary">Last name</div>
@@ -474,8 +469,8 @@ function CustomerCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              onSearch={onSearchCustomerLastName}
-              placeholder="Enter last name"
+              onSearch={onSearchEmployeeLastName}
+              placeholder="input search text"
               style={{ width: 200 }}
             />
           </div>
@@ -487,7 +482,7 @@ function CustomerCRUD() {
       title: () => {
         return (
           <div>
-            {customerPhoneNumber ? (
+            {employeesPhoneNumber ? (
               <div className="text-danger">Phone Number</div>
             ) : (
               <div className="secondary">Phone Number</div>
@@ -501,9 +496,9 @@ function CustomerCRUD() {
         return (
           <div style={{ padding: 8 }}>
             <Search
-              onSearch={onSearchCustomerPhoneNumber}
+              onSearch={onSearchEmployeePhoneNumber}
               allowClear
-              placeholder="Enter phone number"
+              placeholder="input search text"
               style={{ width: 200 }}
             />
           </div>
@@ -515,7 +510,7 @@ function CustomerCRUD() {
       title: () => {
         return (
           <div>
-            {customerAddress ? (
+            {employeesAddress ? (
               <div className="text-danger">Address</div>
             ) : (
               <div className="secondary">Address</div>
@@ -530,8 +525,8 @@ function CustomerCRUD() {
           <div style={{ padding: 8 }}>
             <Search
               allowClear
-              onSearch={onSearchCustomerAddress}
-              placeholder="Enter address"
+              onSearch={onSearchEmployeeAddress}
+              placeholder="input search text"
               style={{ width: 200 }}
             />
           </div>
@@ -543,7 +538,7 @@ function CustomerCRUD() {
       title: () => {
         return (
           <div>
-            {customerBirthdayFrom || customerBirthdayTo ? (
+            {employeesBirthdayFrom || employeesBirthdayTo ? (
               <div className="text-danger">Birthday</div>
             ) : (
               <div className="secondary">Birthday</div>
@@ -555,15 +550,15 @@ function CustomerCRUD() {
       key: "birthday",
       render: (birthday: any) => {
         const formattedBirthday = dayjs(birthday).format("DD/MM/YYYY");
-        return <span>{formattedBirthday}</span>;
+        return birthday && <span>{formattedBirthday}</span>;
       },
       filterDropdown: () => {
         return (
           <div style={{ padding: 8 }}>
             <RangePicker
               onCalendarChange={() => {
-                setCustomerBirthdayFrom("");
-                setCustomerBirthdayTo("");
+                setEmployeeBirthdayFrom("");
+                setEmployeeBirthdayTo("");
               }}
               allowClear
               defaultValue={[
@@ -571,7 +566,7 @@ function CustomerCRUD() {
                 dayjs("01/01/2023", dateFormat),
               ]}
               format={dateFormat}
-              onChange={onSearchCustomerBirthday}
+              onChange={onSearchEmployeeBirthday}
             />
           </div>
         );
@@ -592,12 +587,14 @@ function CustomerCRUD() {
             icon={<EditOutlined />}
             onClick={() => {
               setOpen(true);
-              setUpdateId(record._id);
+              setUpdateId(record);
               const birthdayFormat = moment(record.birthday);
+
               record.birthday = birthdayFormat;
+
               updateForm.setFieldsValue(record);
             }}
-          ></Button>
+          />
           <Popconfirm
             okText="Delete"
             okType="danger"
@@ -615,7 +612,7 @@ function CustomerCRUD() {
           <Upload
             showUploadList={false}
             name="file"
-            action={`${API_URL}/upload/customers/${record._id}/image`}
+            action={`${URL_ENV}/upload/employees/${record._id}/image`}
             headers={{ authorization: "authorization-text" }}
             onChange={(info) => {
               if (info.file.status !== "uploading") {
@@ -625,7 +622,7 @@ function CustomerCRUD() {
 
               if (info.file.status === "done") {
                 setTimeout(() => {
-                  refetch();
+                  setRefresh(refresh + 1);
                   message.success(
                     `${info.file.name} file uploaded successfully`
                   );
@@ -646,13 +643,13 @@ function CustomerCRUD() {
               <Button
                 style={{ width: "150px" }}
                 onClick={() => {
-                  setCustomerEmail("");
-                  setCustomerFirstName("");
-                  setCustomerLastName("");
-                  setCustomerPhoneNumber("");
-                  setCustomerAddress("");
-                  setCustomerBirthdayFrom("");
-                  setCustomerBirthdayTo("");
+                  setEmployeeEmail("");
+                  setEmployeeFirstName("");
+                  setEmployeeLastName("");
+                  setEmployeePhoneNumber("");
+                  setEmployeeAddress("");
+                  setEmployeeBirthdayFrom("");
+                  setEmployeeBirthdayTo("");
                   setIsLocked("");
                 }}
                 icon={<ClearOutlined />}
@@ -666,7 +663,7 @@ function CustomerCRUD() {
                 }}
                 icon={<PlusCircleOutlined />}
               >
-                Add Customer
+                Add Employee
               </Button>
             </Space>
           </>
@@ -677,10 +674,10 @@ function CustomerCRUD() {
 
   return (
     <div>
-      {/* Modal Create A Customers */}
+      {/* Modal Create A employees */}
       <Modal
         okType="dashed"
-        title={`Create Customers `}
+        title={`Create employees `}
         open={openCreate}
         onCancel={() => {
           setOpenCreate(false);
@@ -822,7 +819,7 @@ function CustomerCRUD() {
               name="birthday"
               rules={[{ required: true, message: "Please input Birthday!" }]}
             >
-              <DatePicker placement="bottomLeft" format="DD/MM/YYYY" />
+              <DatePicker placement="bottomLeft" format={dateFormat} />
             </Form.Item>
             <Form.Item
               labelCol={{
@@ -864,11 +861,11 @@ function CustomerCRUD() {
 
       <div>
         <Table
-          // loading={!customersTEST ? true : false}
+          // loading={!employeesTEST ? true : false}
           loading={isLoading}
           rowKey="_id"
           columns={columns}
-          dataSource={customerData?.data?.results}
+          dataSource={employeesData?.data?.results}
           pagination={false}
           scroll={{ x: "max-content", y: 610 }}
           rowClassName={(record) => {
@@ -881,7 +878,7 @@ function CustomerCRUD() {
           className="container text-end"
           onChange={(e) => slideCurrent(e)}
           defaultCurrent={1}
-          total={customerData?.data?.amountResults}
+          total={employeesData?.data?.amountResults}
         />
       </div>
 
@@ -891,7 +888,7 @@ function CustomerCRUD() {
       <Modal
         okType="dashed"
         open={open}
-        title="Update Customer"
+        title="Update Employee"
         onCancel={() => {
           setOpen(false);
         }}
@@ -900,11 +897,139 @@ function CustomerCRUD() {
         }}
       >
         <Form form={updateForm} name="updateForm" onFinish={handleUpdate}>
-          <CustomerForm />
+          <div className="row">
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Email"
+              name="email"
+              rules={[{ required: true, message: "Please input Email!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="First name"
+              name="firstName"
+              rules={[{ required: true, message: "Please input First name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Last name"
+              name="lastName"
+              rules={[{ required: true, message: "Please input Last name!" }]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Phone number"
+              name="phoneNumber"
+              rules={[
+                { required: true, message: "Please input Phone number!" },
+              ]}
+            >
+              <Input />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Address"
+              name="address"
+              rules={[{ required: true, message: "Please input Address!" }]}
+            >
+              <Input />
+            </FormItem>
+
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Locked"
+              name="Locked"
+              valuePropName="checked"
+            >
+              <Switch />
+            </FormItem>
+            <FormItem
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="isAdmin"
+              name="isAdmin"
+              valuePropName="checked"
+            >
+              <Switch />
+            </FormItem>
+            <Form.Item
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              hasFeedback
+              label="Note"
+              name="note"
+            >
+              <Input />
+            </Form.Item>
+            <Form.Item
+              labelCol={{
+                span: 8,
+              }}
+              wrapperCol={{
+                span: 16,
+              }}
+              label="Birthday"
+              name="birthday"
+              rules={[{ required: true, message: "Please input Birthday!" }]}
+            >
+              <DatePicker placement="bottomLeft" format={dateFormat} />
+            </Form.Item>
+          </div>
         </Form>
       </Modal>
     </div>
   );
 }
 
-export default CustomerCRUD;
+export default EmployeeCRUD;

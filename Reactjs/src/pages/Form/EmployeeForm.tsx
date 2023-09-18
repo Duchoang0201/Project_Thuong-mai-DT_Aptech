@@ -6,7 +6,8 @@ import { Form, Input, Switch, DatePicker } from "antd";
 // );
 const locale = require(`antd/es/date-picker/locale/en_US`).default;
 
-const CustomerForm = (props: any) => {
+const EmployeeForm = (props: any) => {
+  const { required } = props;
   const formFields = [
     {
       label: "Id",
@@ -41,8 +42,9 @@ const CustomerForm = (props: any) => {
     {
       label: "Password",
       name: "password",
-      rules: [{ required: true, message: "Please input Phone number!" }],
+      rules: [{ required: required, message: "Please input Pass word!" }],
       component: <Input />,
+      // className: classHidden,
     },
     {
       label: "Address",
@@ -99,4 +101,4 @@ const CustomerForm = (props: any) => {
   );
 };
 
-export default CustomerForm;
+export default EmployeeForm;

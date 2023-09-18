@@ -43,6 +43,8 @@ function CustomerCRUD() {
 
   const [file, setFile] = useState<any>(null);
   const [searchParams] = useSearchParams();
+  searchParams.set("limit", "10");
+
   const timeoutSucess = useRef<any>();
   const [createForm] = Form.useForm();
   const [updateForm] = Form.useForm();
@@ -56,13 +58,13 @@ function CustomerCRUD() {
   const [deleteItem, setDeleteItem] = useState<any>();
 
   const onSearchItem = async (record: any) => {
-    searchParams.set("limit", "10");
+    searchParams.set("skip", "0");
     try {
       if (record.type && record.value) {
         searchParams.set(record.type, record.value);
 
         const res = await customeDataValidate({
-          collection: "Customer",
+          collection: "Product",
           searchParams,
         });
 
@@ -83,19 +85,16 @@ function CustomerCRUD() {
         searchParams.delete(record.type);
         await refetch();
       }
+      setCurrentPage(1);
     } catch (error: any) {
-      console.log(`🚀🚀🚀!..error`, error.message);
       message.error(error.message || error.reponse.data.message);
     }
   };
 
   const [currentPage, setCurrentPage] = useState(1);
   const slideCurrent = (value: any) => {
-    // setSkip(value * 10 - 10);
-    const skipValue = (value * 10 - 10).toString();
-    searchParams.set("skip", skipValue);
-    setCurrentPage(value);
-
+    const skipValue = (value - 1) * 10;
+    searchParams.set("skip", skipValue.toString());
     refetch();
   };
 
@@ -123,15 +122,15 @@ function CustomerCRUD() {
         refetch();
       }, 500);
     },
-    onSettled(data: any) {
-      if (data.ok) {
-        message.success("Created Customer Sucessfully!!");
-        refetch();
-      }
-      if (data.response?.data?.message) {
-        message.error(data.response?.data?.message);
-      }
-    },
+    // onSettled(data: any) {
+    //   if (data.ok) {
+    //     message.success("Created Customer Sucessfully!!");
+    //     refetch();
+    //   }
+    //   if (data.response?.data?.message) {
+    //     message.error(data.response?.data?.message);
+    //   }
+    // },
   });
 
   //Create data
@@ -142,19 +141,20 @@ function CustomerCRUD() {
       firstName: auth.payload.firstName,
       lastName: auth.payload.lastName,
     };
-    record.isDeleted = false;
+
     record.createdDate = new Date().toISOString();
-    if (record.active === undefined) {
-      record.active = false;
+    if (record.Locked === undefined) {
+      record.Locked = false;
     }
 
     customizeData.type = "CREATE";
-
+    customizeData.file = file;
     customizeData.data = record;
     mutate(customizeData);
 
     setOpenCreate(false);
     createForm.resetFields();
+    setFile(null);
   };
   //Delete a Data
   const handleDelete = (record: any) => {
@@ -205,7 +205,7 @@ function CustomerCRUD() {
           <div>
             <Space>
               {" "}
-              {currentPage === 1 ? index + 1 : index + currentPage * 10 - 9}
+              {index + 1 + (currentPage - 1) * 10}
               {record.Locked === false && (
                 <span style={{ fontSize: "16px", color: "#08c" }}>
                   <CheckCircleOutlined /> Active
@@ -265,7 +265,7 @@ function CustomerCRUD() {
       dataIndex: "imageUrl",
       render: (text: any, record: any, index: any) => {
         return (
-          <div>
+          <div className="flex justify-center items-center">
             {record.imageUrl && (
               <img
                 src={`${API_URL}${record.imageUrl}`}
@@ -638,14 +638,24 @@ function CustomerCRUD() {
       {/* List and function  */}
 
       <Table
+        bordered
         loading={isLoading || isFetching || isMutating}
         rowKey="_id"
         columns={columns}
         dataSource={customersData?.data?.results}
         pagination={{
-          pageSize: 10,
-          onChange: (e) => slideCurrent(e),
+          // pageSize: 10,
+          onChange: (e) => {
+            slideCurrent(e);
+            setCurrentPage(e);
+          },
           total: customersData?.data?.amountResults,
+
+          showTotal: (total, range) =>
+            `Showing ${range[0]}-${range[1]} of ${total} items`,
+
+          size: "small",
+          current: currentPage,
         }}
         scroll={{ x: "max-content", y: 630 }}
         rowClassName={(record) => {
@@ -670,7 +680,7 @@ function CustomerCRUD() {
         okType="dashed"
       >
         <Form form={updateForm} name="updateForm" onFinish={handleUpdate}>
-          <CustomerForm />
+          <CustomerForm classHidden={"hidden"} />
         </Form>
       </Modal>
     </div>
