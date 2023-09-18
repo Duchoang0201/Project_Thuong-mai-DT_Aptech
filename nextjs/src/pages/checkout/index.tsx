@@ -19,7 +19,7 @@ import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import { useRouter } from "next/router";
 import { useSaveOrderId } from "@/hook/useSaveOrderId";
 import CheckoutPay from "@/compenents/Checkout/CheckoutPay";
-import { axiosClient } from "@/libraries/axiosConfig";
+import { axiosAuth, axiosClient } from "@/libraries/axiosConfig";
 import { useSession } from "next-auth/react";
 const { Option } = Select;
 
@@ -504,7 +504,7 @@ export default CheckoutPayment;
 export async function getStaticProps(content: any) {
   try {
     //METHOD PAY
-    const dataMethod = await axiosClient.get(`/features`);
+    const dataMethod = await axiosAuth.get(`/features`);
     //Slides
 
     return {

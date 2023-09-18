@@ -95,7 +95,7 @@ export default function Home(props: any) {
 export async function getStaticProps(content: any) {
   try {
     //METHOD PAY
-    const dataMethod = await axiosClient.get(`/features`);
+    const dataMethod = await axiosAuth.get(`/features`);
     //Slides
     const dataSlides = await axiosAuth.get(`/slides?active=true`);
     //GET HOTTREND

@@ -6,10 +6,9 @@ import Image from "next/image";
 import dinamontImage from "../Navbar/transparent-jewelry-icon-diamond-icon-60251ec5ca3757.4392206316130454458283.png";
 
 type Props = {};
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 function Footer({}: Props) {
   return (
-    <>
+    <div className="bottom-0">
       <hr />
 
       <footer className="bg-white dark:bg-gray-900">
@@ -64,8 +63,8 @@ function Footer({}: Props) {
           <hr className="my-6 border-gray-200 sm:mx-auto dark:border-gray-700 lg:my-8" />
         </div>
       </footer>
-    </>
+    </div>
   );
 }
 
-export default memo(Footer);
+export default Footer;

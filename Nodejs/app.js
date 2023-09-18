@@ -4,8 +4,6 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 const logger = require("morgan");
 const cors = require("cors"); // cho phép Export API để bên FE get về
-const sql = require("mssql");
-const configSQL = require("./config/sql/sql");
 const passport = require("passport");
 require("dotenv").config();
 
@@ -42,6 +40,7 @@ const {
   passportConfig,
   passportConfigLocal,
 } = require("./middlewares/passport");
+const { job } = require("./helpers/cron");
 
 var app = express();
 
@@ -97,6 +96,9 @@ mongoose.connection.on("error", (err) => {
     });
   }
 });
+
+// CRON KEEP SERVER LIVING
+job.start();
 
 // DKy Passport
 passport.use(passportConfig);
