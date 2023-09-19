@@ -84,35 +84,41 @@ router.get(
 // });
 
 // GET PERSONAL ORDERS
-router.get("/personal/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
+router.get(
+  "/personal/:id",
+  passport.authenticate("jwt", {
+    session: false,
+  }),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
 
-    const objectId = ObjectId.isValid(id) ? new ObjectId(id) : null;
-    if (!objectId) {
-      return res.status(400).send({ message: "Invalid customer ID" });
+      const objectId = ObjectId.isValid(id) ? new ObjectId(id) : null;
+      if (!objectId) {
+        return res.status(400).send({ message: "Invalid customer ID" });
+      }
+      const query = { customerId: objectId };
+      const order = await Order.find(query)
+        .populate({
+          path: "orderDetails.product",
+          populate: { path: "category" },
+        })
+        .populate("customer")
+        .populate("employee");
+
+      if (!order) {
+        return res.status(404).send({ message: "Order not found" });
+      }
+
+      let amountResults = await Order.countDocuments(query);
+
+      res.send({ results: order, amountResults: amountResults });
+    } catch (err) {
+      console.error(err);
+      res.sendStatus(500);
     }
-    const query = { customerId: objectId };
-    const order = await Order.find(query)
-      .populate({
-        path: "orderDetails.product",
-        populate: { path: "category" },
-      })
-      .populate("customer")
-      .populate("employee");
-
-    if (!order) {
-      return res.status(404).send({ message: "Order not found" });
-    }
-
-    let amountResults = await Order.countDocuments(query);
-
-    res.send({ results: order, amountResults: amountResults });
-  } catch (err) {
-    console.error(err);
-    res.sendStatus(500);
   }
-});
+);
 
 // GET/:id
 router.get("/:id", function (req, res, next) {
