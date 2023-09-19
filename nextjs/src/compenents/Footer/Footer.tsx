@@ -15,12 +15,12 @@ function Footer({}: Props) {
         <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
           <div className="md:flex md:justify-between">
             <div className="mb-6 md:mb-0">
-              <a href="https://flowbite.com/" className="flex items-center">
+              <Link href="/" className="flex items-center">
                 <Image width={40} src={dinamontImage} alt={"Dianamont"} />
                 <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
                   Jwelry Shop
                 </span>
-              </a>
+              </Link>
               <div className="text-white">
                 Công ty cổ phần trang sức & đá quý Jewel Thanh Sơn, phường Thanh
                 Bình, quận Hải Châu, TP. Đà Nẵng Điện thoại: 0356057252 Tổng đài
@@ -47,14 +47,10 @@ function Footer({}: Props) {
                 </h2>
                 <ul className="text-gray-500 dark:text-gray-400 font-medium">
                   <li className="mb-4">
-                    <a href="#" className="hover:underline">
-                      MOMO
-                    </a>
+                    <p className="hover:underline">MOMO</p>
                   </li>
                   <li>
-                    <a href="#" className="hover:underline">
-                      VN PAY
-                    </a>
+                    <p className="hover:underline">VN PAY</p>
                   </li>
                 </ul>
               </div>
