@@ -16,6 +16,7 @@ import {
 import React, { useEffect, useState } from "react";
 import { axiosClient } from "@/libraries/axiosConfig";
 import { useSession } from "next-auth/react";
+import useAxiosAuth from "@/libraries/axiosAuth";
 
 type Props = {};
 
@@ -23,9 +24,9 @@ const AccountOrders = (props: Props) => {
   const { data: session } = useSession();
   const user = session?.user;
 
+  const axiosAuth = useAxiosAuth();
   const [userOrders, setUserOrders] = useState<any>();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
-  const [refresh, setRefresh] = useState(0);
   //TableLoading
 
   const [loadingTable, setLoadingTable] = useState(true);
@@ -40,12 +41,12 @@ const AccountOrders = (props: Props) => {
 
   useEffect(() => {
     if (user) {
-      axiosClient.get(`/orders/personal/${user?._id}`).then((res) => {
+      axiosAuth.get(`/orders/personal/${user?._id}`).then((res) => {
         setUserOrders(res.data.results);
         setLoadingTable(false);
       });
     }
-  }, [user, user?._id]);
+  }, [axiosAuth, user, user?._id]);
 
   const ordersColumn = [
     {
@@ -195,12 +196,7 @@ const AccountOrders = (props: Props) => {
                     if (handleCanceled?.data?._id) {
                       await axiosClient
                         .post(`/products/orderm/${record._id}/stock`)
-                        .then((response) => {
-                          setTimeout(() => {
-                            setRefresh((f) => f + 1);
-                            message.success("Hủy đơn hàng thành công !!", 1.5);
-                          }, 2000);
-                        })
+                        .then((response) => {})
                         .catch((error) => {
                           console.error(error);
                         });

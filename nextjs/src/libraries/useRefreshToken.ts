@@ -7,7 +7,7 @@ export const useRefreshToken = () => {
   const { data: session } = useSession();
 
   const refreshToken = async () => {
-    const res = await axiosAuth.post("customers/refreshToken", {
+    const res = await axiosAuth.post("/customers/refreshToken", {
       refreshToken: session?.user.refreshToken,
     });
 

@@ -2,10 +2,11 @@ import { signOut, useSession } from "next-auth/react";
 import { useEffect } from "react";
 import { axiosAuth } from "./axiosConfig"; // Assuming you have your Axios instance configured correctly
 import { useRefreshToken } from "./useRefreshToken";
-
+import { useRouter } from "next/router";
 const useAxiosAuth = () => {
   const { data: session } = useSession();
   const refreshToken = useRefreshToken();
+  const router = useRouter();
   useEffect(() => {
     const requestIntercept = axiosAuth.interceptors.request.use(
       (config) => {
@@ -36,7 +37,11 @@ const useAxiosAuth = () => {
         }
         const prevRequest = error.config;
 
-        if (error?.response?.status === 401 && !prevRequest.sent) {
+        if (
+          error?.response?.status === 401 &&
+          error?.response?.data === "Unauthorized" &&
+          !prevRequest.sent
+        ) {
           console.log("Error 🚀", error);
           prevRequest.sent = true;
           await refreshToken();
