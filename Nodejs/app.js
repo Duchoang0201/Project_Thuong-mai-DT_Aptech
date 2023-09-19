@@ -98,7 +98,8 @@ mongoose.connection.on("error", (err) => {
 });
 
 // CRON KEEP SERVER LIVING
-job.start();
+// USING ON HTTPS
+// job.start();
 
 // DKy Passport
 passport.use(passportConfig);

@@ -8,7 +8,7 @@ import dinamontImage from "../Navbar/transparent-jewelry-icon-diamond-icon-60251
 type Props = {};
 function Footer({}: Props) {
   return (
-    <div className="bottom-0">
+    <div>
       <hr />
 
       <footer className="bg-white dark:bg-gray-900">

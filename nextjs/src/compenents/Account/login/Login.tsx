@@ -10,6 +10,7 @@ import { useRouter } from "next/router";
 const Login = () => {
   const router = useRouter();
   const onLogin = async (values: any) => {
+    const messageLoading = message.loading("Đăng nhập ...");
     const { email, password } = values;
     const res = await signIn("credentials", {
       username: email,
@@ -18,12 +19,13 @@ const Login = () => {
       callbackUrl: "/",
     });
 
-    console.log(`🚀🚀🚀!..res`, res);
     if (res?.ok) {
       router.push("/");
-
+      messageLoading();
       message.success("Đăng nhập thành công !!!");
     } else {
+      messageLoading();
+
       message.error("Đăng nhập không thành công !!!");
     }
   };
