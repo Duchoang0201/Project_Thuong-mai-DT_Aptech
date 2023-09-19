@@ -10,17 +10,14 @@ import "swiper/css/navigation";
 // import required modules
 import { Autoplay, EffectCoverflow, Pagination } from "swiper";
 
-import axios from "axios";
-import { Button, Card, Divider, Rate, Image, Badge } from "antd";
+import { Button, Card, Divider, Rate, Badge } from "antd";
 
-// import Image from "next/image";
+import Image from "next/image";
 
 import router from "next/router";
-
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+import { API_URL } from "@/contants/URLS";
 
 export default function Topmoth({ topMonth }: any) {
-  const [hotDeals, setHotDeals] = useState([]);
   const [windowWidth, setWindowWidth] = useState(0);
   useEffect(() => {
     const handleResize = () => {
@@ -34,19 +31,6 @@ export default function Topmoth({ topMonth }: any) {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(`${URL_ENV}/products?topMonth=true`);
-        const data = response.data.results;
-        setHotDeals(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, [topMonth]);
 
   return (
     <>
@@ -84,8 +68,8 @@ export default function Topmoth({ topMonth }: any) {
             },
           }}
         >
-          {hotDeals.length > 0 &&
-            hotDeals.map((item: any, index: any) => (
+          {topMonth?.length > 0 &&
+            topMonth?.map((item: any, index: any) => (
               <SwiperSlide key={`${item._id}-${index + 1}-${item.name}`}>
                 <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
                   <Card
@@ -95,8 +79,10 @@ export default function Topmoth({ topMonth }: any) {
                   >
                     <Card style={{ backgroundColor: "rgba(0,0,0,0.3)" }}>
                       <Image
+                        width={200}
+                        height={100}
                         alt={item.name}
-                        src={`${URL_ENV}/${item.imageUrl}`}
+                        src={`${API_URL}/${item.imageUrl}`}
                         style={{
                           width: "100%",
                           transition: "0.5s",
@@ -137,7 +123,7 @@ export default function Topmoth({ topMonth }: any) {
                     <Divider>
                       <Button
                         // type="primary"
-                        className="bg-gray-400 text-white hover:bg-slate-800"
+                        className="bg-slate-800 text-white hover:bg-slate-800"
                         onClick={() => {
                           router.push(`/products/${item._id}`);
                         }}

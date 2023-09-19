@@ -20,10 +20,10 @@ export default function CartShoppe() {
   return (
     <>
       <div className="">
-        <Divider orientation="left">Danh sách các đơn hàng</Divider>
+        <Divider orientation="left">Danh sách sản phẩm trong giỏ hàng</Divider>
       </div>
-      <div className="  ">
-        <Card>
+      <div>
+        <Card className=" hidden sm:block">
           <div className="grid grid-cols-6 gap-4 text-center ">
             <div className=" ">
               <Checkbox

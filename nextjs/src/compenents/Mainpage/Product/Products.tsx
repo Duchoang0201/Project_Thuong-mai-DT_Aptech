@@ -1,16 +1,13 @@
 import { StarOutlined } from "@ant-design/icons";
-import { Badge, Button, Card, Col, Divider, Rate, Image, Row } from "antd";
-import axios from "axios";
+import { Badge, Button, Card, Col, Row } from "antd";
+import Image from "next/image";
 import router from "next/router";
 import React, { useEffect, useState } from "react";
 import { SwiperSlide } from "swiper/react";
 
 const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
-type Props = {};
-
-const Products = (props: Props) => {
-  const [hotDeals, setHotDeals] = useState([]);
+const Products = ({ products }: any) => {
   const [windowWidth, setWindowWidth] = useState(0);
   useEffect(() => {
     const handleResize = () => {
@@ -24,27 +21,12 @@ const Products = (props: Props) => {
       window.removeEventListener("resize", handleResize);
     };
   }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `${URL_ENV}/products?active=true&&limit=8&&fromDiscount=3`
-        );
-        const data = response.data.results;
-        setHotDeals(data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   return (
     <div className="container text-center">
       <Row gutter={[24, 24]}>
-        {hotDeals.length > 0 &&
-          hotDeals.map((item: any, index: any) => (
+        {products?.length > 0 &&
+          products?.map((item: any, index: any) => (
             <Col key={`${item._id}-${index + 1}`} sm={24} md={12} lg={6}>
               <SwiperSlide
                 onClick={() => {
@@ -62,7 +44,8 @@ const Products = (props: Props) => {
                       style={{ backgroundColor: "rgba(0,0,0,0.4)" }}
                     >
                       <Image
-                        preview={false}
+                        width={400}
+                        height={400}
                         alt={item.name}
                         src={`${URL_ENV}/${item.imageUrl}`}
                         style={{

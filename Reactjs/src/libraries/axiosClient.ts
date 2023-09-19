@@ -50,11 +50,9 @@ axiosClient.interceptors.response.use(
         error?.response?.data?.message === "refreshToken and id's not match!")
     ) {
       localStorage.clear();
-      setTimeout(() => {
-        message.info("Please login !!!", 1.5);
+      message.info("Please login !!!", 1.5);
 
-        window.location.href = "/";
-      }, 3000);
+      window.location.href = "/";
     }
 
     const originalConfig = error.config;

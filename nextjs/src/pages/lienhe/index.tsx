@@ -1,12 +1,18 @@
 import React from "react";
 import { Collapse } from "antd";
+import useAxiosAuth from "@/libraries/axiosAuth";
 const { Panel } = Collapse;
 type Props = {};
 
 function LienHePage({}: Props) {
+  const axiosAuth = useAxiosAuth();
+
+  const getData = async () => {
+    const res = await axiosAuth.get("");
+  };
   return (
     <>
-      <div className="container">
+      <div className="container mx-auto w-6/12">
         <h2 className="d-flex justify-content-center pt-5 pb-4">
           Liên hệ chúng tôi
         </h2>

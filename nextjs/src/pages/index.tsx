@@ -7,10 +7,8 @@ import { useRouter } from "next/router";
 // import NavBar from "@/compenents/Navbar/Navbar";
 // import "bootstrap/dist/css/bootstrap.min.css";
 
-import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/swiper.min.css";
 import "swiper/css/pagination";
-import { Pagination } from "swiper";
 import Slides from "@/compenents/Mainpage/Slides/Slides";
 import Hotdeal from "@/compenents/Mainpage/Hotdeal/Hotdeal";
 import { Divider } from "antd";
@@ -20,13 +18,20 @@ import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import Products from "@/compenents/Mainpage/Product/Products";
 import FacebookMsg from "@/compenents/Facebook/FacebookMsg";
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+import { useSession } from "next-auth/react";
+import { useCartStore } from "@/hook/useCountStore";
+import { useEffect } from "react";
+import { axiosAuth, axiosClient } from "@/libraries/axiosConfig";
 
 export default function Home(props: any) {
-  const { topMonth } = props;
-  const { hotTrend } = props;
-  const { hotDeal } = props;
+  const { topMonth, hotTrend, hotDeal, slides, productView, dataMethod } =
+    props;
+  const { getDataServer } = useCartStore((state: any) => state);
+  const { data: session } = useSession();
 
+  useEffect(() => {
+    getDataServer(session?.carts, session?.carts.customerId);
+  }, [getDataServer, session?.carts]);
   return (
     <>
       <Head>
@@ -43,11 +48,11 @@ export default function Home(props: any) {
       </Head>
 
       <main className="container mx-auto">
-        <Slides />
+        <Slides slides={slides} />
         <div style={{ backgroundColor: "rgba(246,246,246,0.9)" }}>
           <h3 className=" py-2 text-center">Phương thức thanh toán</h3>
 
-          <CheckoutMethod />
+          <CheckoutMethod dataMethod={dataMethod} />
         </div>
         <Divider>
           <h3>Danh mục yêu thích</h3>
@@ -78,7 +83,7 @@ export default function Home(props: any) {
         </Divider>
         <div className="container mx-auto">
           <div className="p-4 ">
-            <Products />
+            <Products products={productView} />
           </div>
         </div>
         <FacebookMsg />
@@ -89,20 +94,32 @@ export default function Home(props: any) {
 
 export async function getStaticProps(content: any) {
   try {
+    //METHOD PAY
+    const dataMethod = await axiosAuth.get(`/features`);
+    //Slides
+    const dataSlides = await axiosAuth.get(`/slides?active=true`);
     //GET HOTTREND
-    const dataHottrend = await axios.get(`${URL_ENV}/categories?topMonth=true`);
+    const dataHottrend = await axiosAuth.get(`/categories?topMonth=true`);
 
     //GET TOPMONTH
-    const dataTopMonth = await axios.get(`${URL_ENV}/products?topMonth=true`);
+    const dataTopMonth = await axiosAuth.get(`/products?topMonth=true`);
 
     //GET HOTDEAL
-    const dataHotDeal = await axios.get(`${URL_ENV}/products?hotDeal=true`);
+    const dataHotDeal = await axiosAuth.get(`/products?hotDeal=true`);
 
+    //Product view
+
+    const dataProduct = await axiosAuth.get(
+      `/products?active=true&&limit=8&&fromDiscount=3`
+    );
     return {
       props: {
+        slides: dataSlides.data.results,
         topMonth: dataTopMonth.data.results,
         hotTrend: dataHottrend.data.results,
         hotDeal: dataHotDeal.data.results,
+        productView: dataProduct.data.results,
+        dataMethod: dataMethod.data.results,
       },
       revalidate: 24 * 60 * 60,
     };

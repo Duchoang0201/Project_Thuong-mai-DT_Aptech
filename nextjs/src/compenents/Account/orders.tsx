@@ -14,21 +14,14 @@ import {
   message,
 } from "antd";
 import React, { useEffect, useState } from "react";
-import { axiosClient } from "@/libraries/axiosClient";
-// import "bootstrap/dist/css/bootstrap.min.css";
+import { axiosClient } from "@/libraries/axiosConfig";
+import { useSession } from "next-auth/react";
 
 type Props = {};
 
 const AccountOrders = (props: Props) => {
-  const [user, setUser] = useState<any>(null);
-  useEffect(() => {
-    axiosClient
-      .get("/customers/login/profile")
-      .then(async (res) => {
-        setUser(res.data);
-      })
-      .catch((err) => console.log(`⚠️⚠️⚠️!! err `, err));
-  }, []);
+  const { data: session } = useSession();
+  const user = session?.user;
 
   const [userOrders, setUserOrders] = useState<any>();
   const [selectedOrder, setSelectedOrder] = useState<any>(null);

@@ -1,21 +1,19 @@
 import { API_URL } from "@/contants/URLS";
 import { useCartStore } from "@/hook/useCountStore";
-import { axiosClient } from "@/libraries/axiosClient";
-import { Button, Form, Input, Rate, message } from "antd";
-import axios from "axios";
-import { Image } from "antd";
+import { axiosClient } from "@/libraries/axiosConfig";
+import { Button, Form, Input, Rate, message, Avatar } from "antd";
+import Image from "next/image";
 import router from "next/router";
-import React, { useEffect, useState } from "react";
-import TextArea from "antd/es/input/TextArea";
+import React from "react";
+import { useSession } from "next-auth/react";
 
 type Props = {
   product: any;
-  allProduct: any;
-  productParams: any;
 };
-const ProductDetails = (props: Props) => {
-  const [user, setUser] = useState<any>(null);
-  const { product } = props;
+const ProductDetails = ({ product }: Props) => {
+  const { data: session } = useSession();
+
+  const user = session?.user;
   const {
     add,
     items: itemsCart,
@@ -23,29 +21,13 @@ const ProductDetails = (props: Props) => {
   } = useCartStore((state: any) => state);
 
   const [commentForm] = Form.useForm();
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const getUser = await axiosClient.get("/customers/login/profile");
-        if (getUser?.data) {
-          setUser(getUser?.data);
-        } else {
-          setUser(null);
-        }
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, []);
 
   const handlePostComent = async (record: any) => {
     const customer = {
-      imageUrl: user.imageUrl,
-      customerId: user._id,
-      firstName: user.firstName,
-      lastName: user.lastName,
+      imageUrl: user?.imageUrl,
+      customerId: user?._id,
+      firstName: user?.firstName,
+      lastName: user?.lastName,
       comment: record.comment,
     };
     const response = await axiosClient.get(`/products/${product._id}`);
@@ -74,10 +56,9 @@ const ProductDetails = (props: Props) => {
         commentForm.resetFields();
         message.success({
           content: "Cảm ơn quý khách đã đánh giá sản phẩm của chúng tôi",
-          style: { marginTop: 150 },
+          style: { marginTop: 170 },
           duration: 1.5,
         });
-        // setRefresh((f: any) => f + 1);
       })
       .catch((err) => {
         console.log(err);
@@ -95,7 +76,8 @@ const ProductDetails = (props: Props) => {
                     className="object-contain w-full lg:h-full"
                     src={`${API_URL}${product.imageUrl}`}
                     alt="asd"
-                    width={"80%"}
+                    width={"400"}
+                    height={"400"}
                   />
                 </div>
                 <div className="flex-wrap hidden -mx-2 md:flex py-2">
@@ -108,7 +90,9 @@ const ProductDetails = (props: Props) => {
                         <Image
                           className="object-contain w-full lg:h-28"
                           src={`${API_URL}/${item}`}
-                          alt=""
+                          alt={item}
+                          width={"100"}
+                          height={"100"}
                         />
                       </a>
                     </div>
@@ -188,7 +172,7 @@ const ProductDetails = (props: Props) => {
                             {
                               content: "Thêm 1 sản phẩm vào giỏ hàng!",
                               style: {
-                                marginTop: 150,
+                                marginTop: 170,
                               },
                             },
                             1.5
@@ -199,7 +183,7 @@ const ProductDetails = (props: Props) => {
                             {
                               content: "Đã thêm sản phẩm vào giỏ hàng!",
                               style: {
-                                paddingTop: 150,
+                                paddingTop: 170,
                               },
                             },
                             1.5
@@ -280,9 +264,9 @@ const ProductDetails = (props: Props) => {
               <footer className="flex justify-between items-center mb-2">
                 <div className="flex items-center">
                   <p className="inline-flex items-center mr-3 text-sm text-gray-900 dark:text-white">
-                    <Image
+                    <Avatar
                       className="mr-2 w-6 h-6 rounded-full"
-                      // src={`${API_URL}/${item.customer.}`}
+                      src={`${API_URL}/${item.customer.imageUrl}`}
                       alt={item.customer._id}
                     />
                     {item.customer.firstName} {item.customer.lastName}
@@ -311,47 +295,19 @@ const ProductDetails = (props: Props) => {
 export default ProductDetails;
 
 export async function getStaticPaths() {
-  const products = await axios
-    .get(`${API_URL}/products?active=true`)
-    .then((response) => {
-      return response.data;
-    });
-
-  // console.log(products);
-
-  const paths = products?.results?.map((items: any) => ({
-    params: { id: `${items._id}` },
+  const results = await axiosClient.get(`/products?active=true`);
+  const products = results.data.results;
+  const paths = products.map((item: any) => ({
+    params: { id: item._id },
   }));
 
-  // { fallback: false } means other routes should 404
-  // console.log("listpaths:", paths);
   return { paths, fallback: false };
 }
 
 // This also gets called at build time
 export async function getStaticProps({ params }: any) {
-  // params contains the post `id`.
-  // If the route is like /posts/1, then params.id is 1
-
-  const productParams = params;
-  const product = await axios
-    .get(`${API_URL}/products/${params.id}`)
-    .then((response) => {
-      return response.data;
-    });
-
-  const allProduct = await axios
-    .get(`${API_URL}/products?active=true`)
-    .then((response) => {
-      return response.data;
-    });
-
+  const results = await axiosClient.get(`/products/${params.id}`);
+  const product = results.data;
   // Pass post data to the page via props
-  return {
-    props: {
-      product: product,
-      allProduct: allProduct,
-      productParams: productParams,
-    },
-  };
+  return { props: { product } };
 }

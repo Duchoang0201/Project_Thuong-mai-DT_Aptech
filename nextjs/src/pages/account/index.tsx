@@ -1,23 +1,14 @@
 import NavbarAccount from "@/compenents/Account/NavbarAccount";
 import { useAuthStore } from "@/hook/useAuthStore";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosClient } from "@/libraries/axiosConfig";
+import { useSession } from "next-auth/react";
 import React, { useEffect, useState } from "react";
 
 type Props = {};
 
 const AccountInfor = (props: Props) => {
-  const [user, setUser] = useState<any>(null);
-
-  useEffect(() => {
-    const res: any = axiosClient
-      .get("/customers/login/profile")
-      .then((res) => {
-        setUser(res.data);
-      })
-      .catch((err) => {
-        setUser(null);
-      });
-  }, []);
+  const { data: session } = useSession();
+  const user = session?.user;
 
   return (
     <>

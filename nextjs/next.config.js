@@ -12,6 +12,10 @@ const nextConfig = {
     ],
     loader: "default",
   },
+  env: {
+    NEXT_PUBLIC_SERVER_URL: process.env.NEXT_PUBLIC_SERVER_URL,
+    NEXT_PUBLIC_SECRET: process.env.NEXT_PUBLIC_SECRET,
+  },
 };
 
 module.exports = nextConfig;

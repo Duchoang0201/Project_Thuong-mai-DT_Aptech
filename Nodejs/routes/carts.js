@@ -34,11 +34,17 @@ router.get("/:id", async (req, res, next) => {
 
 router.get("/customer/:customerId", async (req, res, next) => {
   try {
-    const customerId = req.params.customerId;
-    const cart = await Cart.findOne({ customerId });
+    const { customerId } = req.params;
+    let cart = await Cart.findOne({ customerId });
 
     if (!cart) {
-      return res.status(200).json({ ok: false, cart: [] });
+      cart = [];
+      const newCart = new Cart({ customerId, cart });
+      const savedCart = await newCart.save();
+
+      return res
+        .status(200)
+        .json({ ok: true, type: "New Cart's Created", cart: savedCart });
     }
 
     return res.status(200).json({ ok: true, cart });

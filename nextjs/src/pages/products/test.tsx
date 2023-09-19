@@ -109,7 +109,7 @@ function Products({ products, categories, supplier }: Props) {
       setData(respones.data.results);
       setPages(respones.data.amountResults);
     });
-  }, [fetchData]);
+  }, [fetchData, queryParams]);
 
   const showDrawer = () => {
     setOpen(true);

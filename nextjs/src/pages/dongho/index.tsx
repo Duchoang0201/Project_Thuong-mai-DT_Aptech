@@ -92,7 +92,7 @@ function DongHo({ products, categories, supplier }: Props) {
         setData(respones.data.results);
       });
     }
-  }, [fetchData]);
+  }, [fetchData, queryParams]);
 
   const showDrawer = () => {
     setOpen(true);

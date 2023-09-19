@@ -1,10 +1,11 @@
-import { message } from "antd";
+import { create } from "zustand";
+
 import axios from "axios";
-import create from "zustand";
+
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
+import { API_URL } from "@/contants/URLS";
 
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 export const useCartStore = create(
   devtools(
     persist(
@@ -40,12 +41,12 @@ export const useCartStore = create(
           );
           if (found) {
             found.quantity += 1;
-            const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
+            const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
               products: items,
             });
           } else {
             items?.push({ product, quantity });
-            const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
+            const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
               products: items,
             });
           }
@@ -58,7 +59,7 @@ export const useCartStore = create(
           const cartId = get().cartId;
 
           const newItems = items.filter((x: any) => x.product._id !== id);
-          const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
+          const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
             products: newItems,
           });
           return set({ items: [...newItems] }, false, {
@@ -76,7 +77,7 @@ export const useCartStore = create(
           if (found) {
             found.quantity += 1;
 
-            const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
+            const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
               products: items,
             });
             return set({ items: [...items] }, false, {
@@ -102,7 +103,7 @@ export const useCartStore = create(
               const newItemsCheckout = itemsCheckout.filter(
                 (x: any) => x.product._id !== found.product._id
               );
-              const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
+              const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
                 products: newItems,
               });
               return set(
@@ -114,7 +115,7 @@ export const useCartStore = create(
               );
             } else {
               found.quantity--;
-              const result = await axios.patch(`${URL_ENV}/carts/${cartId}`, {
+              const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
                 products: items,
               });
               return set({ items: [...items] }, false, {

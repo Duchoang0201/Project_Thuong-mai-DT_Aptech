@@ -1,15 +1,18 @@
-import axios from "axios";
-import router from "next/router";
 import { create } from "zustand";
 
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
+import axios from "axios";
+
+import router from "next/router";
+import useAxiosAuth from "@/libraries/axiosAuth";
+import { axiosAuth } from "@/libraries/axiosConfig";
+
 export const PropsSearch = create((set) => {
   return {
     dataSearch: [],
-    search: async (data: any) => {
+    productSearch: async (data: any) => {
       try {
-        const search = await axios.get(
-          `${URL_ENV}/products?productName=${data}&isActive=true`
+        const search = await axiosAuth.get(
+          `/products?productName=${data}&isActive=true`
         );
         set({ dataSearch: search.data?.results });
       } catch {
@@ -18,8 +21,8 @@ export const PropsSearch = create((set) => {
     },
     searchCategory: async (data: any) => {
       try {
-        const search = await axios.get(
-          `${URL_ENV}/products?categoryId=${data}&isActive=true`
+        const search = await axiosAuth.get(
+          `/products?categoryId=${data}&isActive=true`
         );
         router.push(`/searchpage`);
 

@@ -108,13 +108,12 @@ router.delete(
 );
 router.patch(
   "/:id",
-  validateSchema(supplierBodySchema),
   validateSchema(supplierIdSchema),
   async (req, res, next) => {
     const itemId = req.params.id;
     const itemBody = req.body;
     await Supplier.findByIdAndUpdate(itemId, itemBody);
-    let found = await Supplier.findById(itemId);
+    const found = await Supplier.findById(itemId);
     if (found) {
       return res.status(200).json({
         oke: true,

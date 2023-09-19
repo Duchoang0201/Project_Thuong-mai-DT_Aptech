@@ -13,19 +13,20 @@ import {
   Space,
   message,
 } from "antd";
-// import "bootstrap/dist/css/bootstrap.min.css";
 import { useCartStore } from "@/hook/useCountStore";
 import Image from "next/image";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import { useRouter } from "next/router";
 import { useSaveOrderId } from "@/hook/useSaveOrderId";
 import CheckoutPay from "@/compenents/Checkout/CheckoutPay";
-import { axiosClient } from "@/libraries/axiosClient";
+import { axiosAuth, axiosClient } from "@/libraries/axiosConfig";
+import { useSession } from "next-auth/react";
 const { Option } = Select;
 
-const CheckoutPayment = () => {
+const CheckoutPayment = ({ dataMethod }: any) => {
   const router = useRouter();
-
+  const { data: session } = useSession();
+  const user = session?.user;
   const { saveOrderId } = useSaveOrderId((state: any) => state);
   const [cities, setCities] = useState<any>([]);
   const [districts, setDistricts] = useState<any>([]);
@@ -33,8 +34,6 @@ const CheckoutPayment = () => {
 
   const [payMethod, setPayMethod] = useState<any>("shipCod");
   const [position, setPosition] = useState<any>();
-
-  const [user, setUser] = useState<any>();
 
   const { itemsCheckout } = useCartStore((state: any) => state);
 
@@ -60,20 +59,6 @@ const CheckoutPayment = () => {
       try {
         const response = await axios.get("http://ip-api.com/json");
         setPosition(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
-
-    fetchData();
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const res = await axiosClient.get("/customers/login/profile");
-        if (res.data) {
-          setUser(res?.data);
-        } else setUser(null);
       } catch (error) {
         console.log(error);
       }
@@ -275,62 +260,6 @@ const CheckoutPayment = () => {
     console.log("Failed:", errorInfo);
   };
 
-  // const [isHydrated, setIsHydrated] = useState(false);
-  // useEffect(() => {
-  //   setIsHydrated(true);
-  // }, []);
-  // const renderOrders = (): React.ReactNode => {
-  //   if (!isHydrated) {
-  //     // Server-side rendering
-  //     return null;
-  //   }
-
-  //   if (itemsCheckout) {
-  //     return (
-  //       <>
-  //         {itemsCheckout.map((i: any, index: any) => {
-  //           return (
-  //             <React.Fragment key={i.product._id}>
-  //               <div className="d-flex justify-content-between">
-  //                 <div className="w-75">
-  //                   <span>{i.product.name}</span> x{" "}
-  //                   <span className="text-danger">{i.quantity}</span>
-  //                 </div>
-  //                 <span>
-  //                   {(i.product.price * i.quantity).toLocaleString("vi-VN", {
-  //                     style: "currency",
-  //                     currency: "VND",
-  //                   })}
-  //                 </span>
-  //               </div>
-  //               <Divider></Divider>
-  //             </React.Fragment>
-  //           );
-  //         })}
-
-  //         <div className="d-flex justify-content-between">
-  //           <strong>Tổng</strong>
-  //           <strong>
-  //             {itemsCheckout.length > 0
-  //               ? itemsCheckout
-  //                   .map((item: any) => item.product.price * item.quantity)
-  //                   .reduce(
-  //                     (accumulator: any, subtotal: any) =>
-  //                       accumulator + subtotal,
-  //                     0
-  //                   )
-  //                   .toLocaleString("vi-VN", {
-  //                     style: "currency",
-  //                     currency: "VND",
-  //                   })
-  //               : 0}
-  //           </strong>
-  //         </div>
-  //       </>
-  //     );
-  //   }
-  // };
-
   return (
     <div className="bg-gray-300">
       <div style={{ background: "rgb(245,245,245)" }}>
@@ -343,7 +272,7 @@ const CheckoutPayment = () => {
           <Divider orientation="left"> Phương thức thanh toán cho phép</Divider>
         </div>
 
-        <CheckoutMethod />
+        <CheckoutMethod dataMethod={dataMethod} />
       </div>
 
       {user?._id ? (
@@ -571,3 +500,22 @@ const CheckoutPayment = () => {
 };
 
 export default CheckoutPayment;
+
+export async function getStaticProps(content: any) {
+  try {
+    //METHOD PAY
+    const dataMethod = await axiosAuth.get(`/features`);
+    //Slides
+
+    return {
+      props: {
+        dataMethod: dataMethod.data.results,
+      },
+      revalidate: 24 * 60 * 60,
+    };
+  } catch (error) {
+    return {
+      notFound: true,
+    };
+  }
+}
