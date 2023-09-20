@@ -8,6 +8,7 @@ import Image from "next/image";
 import "./style.module.css";
 import router from "next/router";
 import { API_URL } from "@/contants/URLS";
+import Aos from "aos";
 
 const Slides = ({ slides }: any) => {
   const [windowWidth, setWindowWidth] = useState<number>(0);
@@ -27,21 +28,29 @@ const Slides = ({ slides }: any) => {
   }, []);
 
   useEffect(() => {
-    const autoplayTimeout = setTimeout(() => {
-      if (swiperRef.current) {
-        swiperRef.current.autoplay.start();
-      }
-    }, 2000);
-
-    return () => {
-      clearTimeout(autoplayTimeout);
-    };
+    Aos.init();
   }, []);
+
+  // useEffect(() => {
+  //   const autoplayTimeout = setTimeout(() => {
+  //     if (swiperRef.current) {
+  //       swiperRef.current.autoplay.start();
+  //     }
+  //   }, 2000);
+
+  //   return () => {
+  //     clearTimeout(autoplayTimeout);
+  //   };
+  // }, []);
 
   return (
     <div>
       <div className="flex py-4 gap-2">
-        <div className="flex-auto w-2/3  ">
+        <div
+          data-aos="zoom-out"
+          data-aos-duration={1000}
+          className="flex-auto w-2/3  "
+        >
           <Swiper
             loop={true}
             pagination={true}
@@ -84,7 +93,12 @@ const Slides = ({ slides }: any) => {
         <div className="flex-auto w-1/3 md:flex md:flex-col md:w-auto hidden">
           {slides.length > 0 &&
             slides.map((item: any, index: any) => (
-              <div className="" key={`${item._id}-${index + 1}`}>
+              <div
+                data-aos="fade-left"
+                data-aos-duration={1000 + index * 500}
+                className=""
+                key={`${item._id}-${index + 1}`}
+              >
                 <Image
                   width={0}
                   height={0}

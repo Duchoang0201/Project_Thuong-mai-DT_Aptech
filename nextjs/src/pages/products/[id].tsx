@@ -154,7 +154,7 @@ const ProductDetails = ({ product }: Props) => {
                 <div className="flex flex-wrap items-center mb-6">
                   <button
                     onClick={() => {
-                      if (user === null) {
+                      if (user === undefined) {
                         router.push("/login");
                         message.warning(
                           "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
@@ -171,9 +171,6 @@ const ProductDetails = ({ product }: Props) => {
                           message.success(
                             {
                               content: "Thêm 1 sản phẩm vào giỏ hàng!",
-                              style: {
-                                marginTop: 170,
-                              },
                             },
                             1.5
                           );
@@ -182,9 +179,6 @@ const ProductDetails = ({ product }: Props) => {
                           message.success(
                             {
                               content: "Đã thêm sản phẩm vào giỏ hàng!",
-                              style: {
-                                paddingTop: 170,
-                              },
                             },
                             1.5
                           );

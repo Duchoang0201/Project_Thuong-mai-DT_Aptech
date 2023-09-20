@@ -6,11 +6,12 @@ import { useAuthStore } from "@/hook/useAuthStore";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/router";
+import { asyncMessage } from "@/hook/Functionmessage";
 
 const Login = () => {
   const router = useRouter();
   const onLogin = async (values: any) => {
-    const messageLoading = message.loading("Đăng nhập ...");
+    const { messWating } = asyncMessage("Đăng nhập...");
     const { email, password } = values;
     const res = await signIn("credentials", {
       username: email,
@@ -21,10 +22,10 @@ const Login = () => {
 
     if (res?.ok) {
       router.push("/");
-      messageLoading();
+      messWating();
       message.success("Đăng nhập thành công !!!");
     } else {
-      messageLoading();
+      messWating;
 
       message.error("Đăng nhập không thành công !!!");
     }

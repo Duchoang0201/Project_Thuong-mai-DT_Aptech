@@ -3,7 +3,7 @@ import type { AppProps } from "next/app";
 import NavabarTailwind from "@/compenents/Navbar/NavabarTailwind";
 import { SessionProvider } from "next-auth/react";
 import Footer from "@/compenents/Footer/Footer";
-
+import "aos/dist/aos.css";
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <SessionProvider session={pageProps.session}>

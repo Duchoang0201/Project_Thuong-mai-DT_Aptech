@@ -11,6 +11,7 @@ import ProductFilter from "@/compenents/Products/filter";
 import { useAuthStore } from "@/hook/useAuthStore";
 import { useFilterProduct } from "@/hook/useFilterProduct";
 import SuppliersFilter from "@/compenents/Products/SuppliersFilter";
+import Aos from "aos";
 
 type Props = {
   data: any[];
@@ -47,6 +48,9 @@ const Products = ({ data }: any) => {
     };
   }, []);
 
+  useEffect(() => {
+    Aos.init();
+  }, []);
   return (
     <div className="container mx-auto">
       <div className="flex flex-row justify-center">
@@ -71,7 +75,12 @@ const Products = ({ data }: any) => {
       <div className="grid lg:grid-cols-4 gap-10 md:grid-cols-3  sm:grid-cols-2">
         {filterValue.length > 0 &&
           filterValue.map((item: any, index: any) => (
-            <div key={`${item._id}-${index + 1}`}>
+            <div
+              data-aos={index % 2 ? "fade-up-right" : "fade-up-left"}
+              data-aos-duration="2300"
+              data-aos-offset="300"
+              key={`${item._id}-${index + 1}`}
+            >
               <div>
                 <Badge.Ribbon text={item.discount > 5 ? "Giảm giá " : ""}>
                   <Card
@@ -137,34 +146,7 @@ const Products = ({ data }: any) => {
                                 1.5
                               );
                             } else {
-                              const productId = item._id;
-                              const productExists = itemsCart.some(
-                                (item: any) => item.product._id === productId
-                              );
-
-                              if (productExists === true) {
-                                increase(productId);
-                                message.success(
-                                  {
-                                    content: "Thêm 1 sản phẩm vào giỏ hàng!",
-                                    style: {
-                                      marginTop: 170,
-                                    },
-                                  },
-                                  1.5
-                                );
-                              } else {
-                                add({ product: item, quantity: 1 });
-                                message.success(
-                                  {
-                                    content: "Đã thêm sản phẩm vào giỏ hàng!",
-                                    style: {
-                                      paddingTop: 170,
-                                    },
-                                  },
-                                  1.5
-                                );
-                              }
+                              add({ product: item });
                             }
                           }}
                         >

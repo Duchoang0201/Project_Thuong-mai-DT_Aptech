@@ -6,6 +6,11 @@ import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
 import { API_URL } from "@/contants/URLS";
 
+import { useSession } from "next-auth/react";
+import { asyncMessage } from "./Functionmessage";
+import { message } from "antd";
+import { axiosClient } from "@/libraries/axiosConfig";
+
 export const useCartStore = create(
   devtools(
     persist(
@@ -27,10 +32,10 @@ export const useCartStore = create(
             }
           );
         },
-        add: async ({ product, quantity }: any) => {
+        add: async ({ product }: any) => {
           const cartId = get().cartId;
           const items = get().items;
-
+          const { messWating } = asyncMessage("Thêm sản phẩm");
           // Thêm trường productId để đưa lên cart
           for (let i = 0; i < items.length; i++) {
             items[i].product.productId = items[i].product._id;
@@ -41,33 +46,43 @@ export const useCartStore = create(
           );
           if (found) {
             found.quantity += 1;
-            const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
+            await axiosClient.patch(`/carts/${cartId}`, {
               products: items,
             });
+            messWating();
+            message.success("Thêm 1 sản phẩm thành công");
           } else {
-            items?.push({ product, quantity });
-            const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
+            items?.push({ product, quantity: 1 });
+            await axiosClient.patch(`/carts/${cartId}`, {
               products: items,
             });
+            messWating();
+            message.success("Thêm sản phẩm vào giỏ thành công");
           }
 
           return set({ items: [...items] }, false, { type: "carts/addToCart" });
         },
 
         remove: async (id: any) => {
+          const { messWating } = asyncMessage("Xóa sản phẩm khỏi giỏ hàng");
+
           const items = get().items;
           const cartId = get().cartId;
 
           const newItems = items.filter((x: any) => x.product._id !== id);
-          const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
+          const result = await axiosClient.patch(`/carts/${cartId}`, {
             products: newItems,
           });
+          messWating();
+          message.success("Xóa sản phẩm khỏi giỏ hàng thành công");
           return set({ items: [...newItems] }, false, {
             type: "carts/removeFromCart",
           });
         },
 
         increase: async (id: any) => {
+          const { messWating } = asyncMessage("Thêm 1 sản phẩm");
+
           const items = get().items;
           const cartId = get().cartId;
           for (let i = 0; i < items.length; i++) {
@@ -77,9 +92,12 @@ export const useCartStore = create(
           if (found) {
             found.quantity += 1;
 
-            const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
+            await axiosClient.patch(`/carts/${cartId}`, {
               products: items,
             });
+            messWating();
+            message.success("Thêm 1 sản phẩm thành công");
+
             return set({ items: [...items] }, false, {
               type: "carts/increase",
             });
@@ -88,6 +106,8 @@ export const useCartStore = create(
         },
 
         decrease: async (id: any) => {
+          const { messWating } = asyncMessage("Giảm 1 sản phẩm");
+
           const items = get().items;
           const itemsCheckout = get().itemsCheckout;
           const cartId = get().cartId;
@@ -103,9 +123,11 @@ export const useCartStore = create(
               const newItemsCheckout = itemsCheckout.filter(
                 (x: any) => x.product._id !== found.product._id
               );
-              const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
+              const result = await axiosClient.patch(`/carts/${cartId}`, {
                 products: newItems,
               });
+              messWating();
+              message.success("Xóa sản phẩm khỏi giỏ hàng thành công");
               return set(
                 { items: [...newItems], itemsCheckout: [...newItemsCheckout] },
                 false,
@@ -115,9 +137,13 @@ export const useCartStore = create(
               );
             } else {
               found.quantity--;
-              const result = await axios.patch(`${API_URL}/carts/${cartId}`, {
+              const result = await axiosClient.patch(`/carts/${cartId}`, {
                 products: items,
               });
+              messWating();
+
+              message.success("Giảm 1 sản phẩm khỏi giỏ hàng thành công");
+
               return set({ items: [...items] }, false, {
                 type: "carts/decrease",
               });
