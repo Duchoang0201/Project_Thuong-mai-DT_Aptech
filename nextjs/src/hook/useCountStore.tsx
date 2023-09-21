@@ -1,12 +1,8 @@
 import { create } from "zustand";
 
-import axios from "axios";
-
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { API_URL } from "@/contants/URLS";
 
-import { useSession } from "next-auth/react";
 import { asyncMessage } from "./Functionmessage";
 import { message } from "antd";
 import { axiosClient } from "@/libraries/axiosConfig";

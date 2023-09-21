@@ -39,7 +39,6 @@ function DongHo({}: Props) {
     increase,
   } = useCartStore((state: any) => state);
 
-  console.log(`🚀🚀🚀!..dataSearch`, dataSearch);
   return (
     <div>
       <div className="container mx-auto">
@@ -105,43 +104,16 @@ function DongHo({}: Props) {
                         <div className="">
                           <button
                             type="button"
-                            className="text-black text-center border rounded-lg px-1 py-1 hover:text-white hover:bg-slate-400 "
+                            className="bg-slate-600 text-white px-2 text-center border rounded-lg px-1 py-1 hover:text-white hover:bg-slate-400 "
                             onClick={() => {
-                              if (user === null) {
+                              if (user === undefined) {
                                 router.push("/login");
                                 message.warning(
                                   "Vui lòng đăng nhập để thêm vào giỏ hàng!!",
                                   1.5
                                 );
                               } else {
-                                const productId = item._id;
-                                const productExists = itemsCart.some(
-                                  (item: any) => item.product._id === productId
-                                );
-
-                                if (productExists === true) {
-                                  increase(productId);
-                                  message.success(
-                                    {
-                                      content: "Thêm 1 sản phẩm vào giỏ hàng!",
-                                      style: {
-                                        marginTop: 170,
-                                      },
-                                    },
-                                    1.5
-                                  );
-                                } else {
-                                  add({ product: item, quantity: 1 });
-                                  message.success(
-                                    {
-                                      content: "Đã thêm sản phẩm vào giỏ hàng!",
-                                      style: {
-                                        paddingTop: 170,
-                                      },
-                                    },
-                                    1.5
-                                  );
-                                }
+                                add({ product: item });
                               }
                             }}
                           >

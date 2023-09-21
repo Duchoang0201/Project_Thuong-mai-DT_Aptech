@@ -1,12 +1,10 @@
+import { API_URL } from "@/contants/URLS";
 import { StarOutlined } from "@ant-design/icons";
 import { Badge, Button, Card, Col, Row } from "antd";
 import Aos from "aos";
 import Image from "next/image";
 import router from "next/router";
 import React, { useEffect, useState } from "react";
-import { SwiperSlide } from "swiper/react";
-
-const URL_ENV = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:9000";
 
 const Products = ({ products }: any) => {
   const [windowWidth, setWindowWidth] = useState(0);
@@ -31,7 +29,6 @@ const Products = ({ products }: any) => {
       <Row gutter={[24, 24]}>
         {products?.length > 0 &&
           products?.map((item: any, index: any) => {
-            console.log(`🚀🚀🚀!..index`, index);
             return (
               <Col
                 data-aos="fade-up"
@@ -60,7 +57,7 @@ const Products = ({ products }: any) => {
                           width={400}
                           height={400}
                           alt={item.name}
-                          src={`${URL_ENV}/${item.imageUrl}`}
+                          src={`${API_URL}/${item.imageUrl}`}
                           style={{
                             width: "100%",
                             transition: " 0.5s ",

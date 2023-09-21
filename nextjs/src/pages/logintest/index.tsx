@@ -1,6 +1,5 @@
 import { useAuthStore } from "@/hook/useAuthStore";
 import useAxiosAuth from "@/libraries/axiosAuth";
-import { axiosAuth } from "@/libraries/axiosConfig";
 import { signIn, signOut, useSession } from "next-auth/react";
 import React, { useState } from "react";
 
@@ -13,7 +12,6 @@ const LoginTest = (props: Props) => {
   const [email, setEmail] = useState("");
   const [password, setPass] = useState("");
 
-  console.log(`🚀🚀🚀!..session`, session);
   const handleSubmit = async () => {
     const res = await signIn("credentials", {
       username: "Blaise45@hotmail.com",

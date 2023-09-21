@@ -1,7 +1,6 @@
 import React from "react";
 import { Collapse } from "antd";
 const { Panel } = Collapse;
-import Style from "./index.module.css";
 type Props = {};
 
 function AboutUs({}: Props) {

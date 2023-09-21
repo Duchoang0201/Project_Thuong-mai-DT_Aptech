@@ -3,16 +3,13 @@ import { useCartStore } from "@/hook/useCountStore";
 import { axiosClient } from "@/libraries/axiosConfig";
 import { Button, Form, Input, Rate, message, Avatar } from "antd";
 import Image from "next/image";
-import router from "next/router";
+import router, { useRouter } from "next/router";
 import React from "react";
 import { useSession } from "next-auth/react";
 
-type Props = {
-  product: any;
-};
-const ProductDetails = ({ product }: Props) => {
+const ProductDetails = ({ product }: any) => {
   const { data: session } = useSession();
-
+  const router = useRouter();
   const user = session?.user;
   const {
     add,
@@ -30,7 +27,7 @@ const ProductDetails = ({ product }: Props) => {
       lastName: user?.lastName,
       comment: record.comment,
     };
-    const response = await axiosClient.get(`/products/${product._id}`);
+    const response = await axiosClient.get(`/products/${product?._id}`);
     const updateData = response.data;
 
     if (response.data.rateInfo) {
@@ -49,7 +46,7 @@ const ProductDetails = ({ product }: Props) => {
     }
 
     axiosClient
-      .patch(`/products/${product._id}`, {
+      .patch(`/products/${product?._id}`, {
         rateInfo: updateData.rateInfo,
       })
       .then((res) => {
@@ -64,6 +61,9 @@ const ProductDetails = ({ product }: Props) => {
         console.log(err);
       });
   };
+  if (router.isFallback) {
+    <h1>Data is loading</h1>;
+  }
   return (
     <>
       <section className="py-10 font-poppins ">
@@ -74,7 +74,7 @@ const ProductDetails = ({ product }: Props) => {
                 <div className="relative mb-6 lg:mb-10 lg:h-96 ">
                   <Image
                     className="object-contain w-full lg:h-full"
-                    src={`${API_URL}${product.imageUrl}`}
+                    src={`${API_URL}${product?.imageUrl}`}
                     alt="asd"
                     width={"400"}
                     height={"400"}
@@ -107,10 +107,10 @@ const ProductDetails = ({ product }: Props) => {
                     Thông tin sản phẩm:
                   </span>
                   <h2 className="max-w-xl mt-6 mb-6 text-xl font-semibold leading-loose tracking-wide text-gray-950 md:text-2xl ">
-                    {product.name}
+                    {product?.name}
                   </h2>
                   <div className="flex flex-wrap items-center ">
-                    Mã sản phẩm: {product._id}
+                    Mã sản phẩm: {product?._id}
                   </div>
                   <div className="flex flex-wrap items-center mb-6">
                     <Rate disabled value={product?.averageRate} />
@@ -139,7 +139,7 @@ const ProductDetails = ({ product }: Props) => {
                     Thông tin:
                   </h2>
                   <p className="mt-2 text-sm text-red-500 dark:text-red-200">
-                    {product.description}
+                    {product?.description}
                     <p className="text-gray-600 dark:text-gray-400">
                       Most customers receive within 3-31 days.
                     </p>
@@ -147,7 +147,7 @@ const ProductDetails = ({ product }: Props) => {
                 </div>
                 <div className="py-6 mb-6 border-t border-b border-gray-200 dark:border-gray-700">
                   <span className="text-base text-gray-600 dark:text-gray-400">
-                    {product.stock} items In Stock
+                    {product?.stock} items In Stock
                   </span>
                 </div>
                 <div className="mb-6 "></div>
@@ -161,28 +161,7 @@ const ProductDetails = ({ product }: Props) => {
                           1.5
                         );
                       } else {
-                        const productId = product._id;
-                        const productExists = itemsCart.some(
-                          (item: any) => item.product._id === productId
-                        );
-
-                        if (productExists === true) {
-                          increase(productId);
-                          message.success(
-                            {
-                              content: "Thêm 1 sản phẩm vào giỏ hàng!",
-                            },
-                            1.5
-                          );
-                        } else {
-                          add({ product: product, quantity: 1 });
-                          message.success(
-                            {
-                              content: "Đã thêm sản phẩm vào giỏ hàng!",
-                            },
-                            1.5
-                          );
-                        }
+                        add({ product: product });
                       }
                     }}
                     type="button"
@@ -294,14 +273,12 @@ export async function getStaticPaths() {
   const paths = products.map((item: any) => ({
     params: { id: item._id },
   }));
-
-  return { paths, fallback: false };
+  return { paths: paths, fallback: false };
 }
 
 // This also gets called at build time
 export async function getStaticProps({ params }: any) {
   const results = await axiosClient.get(`/products/${params.id}`);
   const product = results.data;
-  // Pass post data to the page via props
   return { props: { product } };
 }

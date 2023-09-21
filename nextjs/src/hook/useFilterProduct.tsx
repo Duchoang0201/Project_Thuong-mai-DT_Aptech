@@ -2,7 +2,6 @@ import { create } from "zustand";
 
 import { devtools } from "zustand/middleware";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { message } from "antd";
 
 export const useFilterProduct = create(
   devtools(
@@ -16,7 +15,6 @@ export const useFilterProduct = create(
             const valueFilter = get().valueFilter;
             const newData = { ...valueFilter, ...data };
 
-            console.log(`🚀🚀🚀!..newData`, newData);
             set({ valueFilter: newData }, false, {
               type: "data-from-server",
             });
