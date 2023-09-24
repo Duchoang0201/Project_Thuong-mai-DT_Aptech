@@ -104,7 +104,7 @@ function DongHo({}: Props) {
                         <div className="">
                           <button
                             type="button"
-                            className="bg-slate-600 text-white px-2 text-center border rounded-lg px-1 py-1 hover:text-white hover:bg-slate-400 "
+                            className="bg-slate-600 text-white px-2 text-center border rounded-lg  py-1 hover:text-white hover:bg-slate-400 "
                             onClick={() => {
                               if (user === undefined) {
                                 router.push("/login");
