@@ -1,5 +1,5 @@
 import { Html, Head, Main, NextScript } from "next/document";
-import Proivers from "./Proivers";
+import Provider from "./Provider";
 import Footer from "@/compenents/Footer/Footer";
 
 export default function Document() {
@@ -8,10 +8,10 @@ export default function Document() {
       <title>Jewelry Shop</title>
       <Head />
       <body>
-        <Proivers>
+        <Provider>
           <Main />
           <NextScript />
-        </Proivers>
+        </Provider>
       </body>
     </Html>
   );

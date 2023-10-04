@@ -6,6 +6,7 @@ import { persist, createJSONStorage } from "zustand/middleware";
 import { asyncMessage } from "./Functionmessage";
 import { message } from "antd";
 import { axiosClient } from "@/libraries/axiosConfig";
+import { useSession } from "next-auth/react";
 
 export const useCartStore = create(
   devtools(

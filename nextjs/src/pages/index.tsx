@@ -18,20 +18,12 @@ import Searchtrend from "@/compenents/Mainpage/Searchtrend/Searchtrend";
 import CheckoutMethod from "@/compenents/Checkout/CheckoutMethod";
 import Products from "@/compenents/Mainpage/Product/Products";
 import FacebookMsg from "@/compenents/Facebook/FacebookMsg";
-import { useSession } from "next-auth/react";
-import { useCartStore } from "@/hook/useCountStore";
-import { useEffect } from "react";
-import { axiosAuth, axiosClient } from "@/libraries/axiosConfig";
+import { axiosAuth } from "@/libraries/axiosConfig";
 
 export default function Home(props: any) {
   const { topMonth, hotTrend, hotDeal, slides, productView, dataMethod } =
     props;
-  const { getDataServer } = useCartStore((state: any) => state);
-  const { data: session } = useSession();
 
-  useEffect(() => {
-    getDataServer(session?.carts, session?.carts.customerId);
-  }, [getDataServer, session?.carts]);
   return (
     <>
       <Head>
@@ -121,7 +113,7 @@ export async function getStaticProps(content: any) {
         productView: dataProduct.data.results,
         dataMethod: dataMethod.data.results,
       },
-      revalidate: 24 * 60 * 60,
+      revalidate: 30 * 24 * 60 * 60,
     };
   } catch (error) {
     return {

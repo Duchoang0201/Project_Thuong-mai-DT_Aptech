@@ -1,4 +1,5 @@
 import { API_URL } from "@/contants/URLS";
+import { useCartStore } from "@/hook/useCountStore";
 import NextAuth, { AuthOptions, User } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
@@ -12,7 +13,7 @@ async function fetchUserCart(userId: any, token: any) {
   });
 
   const cart = await cartString.json();
-
+  useCartStore.getState().getDataServer(cart, userId);
   return cart;
 }
 
@@ -68,14 +69,16 @@ export const authOptions: AuthOptions = {
     error: "/login",
   },
   callbacks: {
-    async jwt({ token, user, trigger, session, account, profile }) {
+    async jwt({ token, user, trigger, session }) {
       if (trigger === "update") {
+        console.log(`🎶🎶🎶.. 123`);
         // Note, that `session` can be any arbitrary object, remember to validate it!
         token = { ...token, ...session };
       }
       return { ...token, ...user };
     },
     async session({ session, token }) {
+      console.log(`🎶🎶🎶.. 123`);
       const carts = await fetchUserCart(token?._id, token?.token);
       session.carts = carts.cart;
       session.user = token as any;
